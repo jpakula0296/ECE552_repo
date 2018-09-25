@@ -16,10 +16,10 @@ wire Bout0;
 wire Bout1;
 wire Bout2;
 wire Bout3;
-full_adder_1bit FA4 (.A(1'b1), .B(B[0]), .Cin(1'b0), .S(B_negated[0]), .Cout(Bout0));
-full_adder_1bit FA5 (.A(1'b0), .B(B[1]), .Cin(Bout0), .S(B_negated[1]), .Cout(Bout1));
-full_adder_1bit FA6 (.A(1'b0), .B(B[2]), .Cin(Bout1), .S(B_negated[2]), .Cout(Bout2));
-full_adder_1bit FA7 (.A(1'b0), .B(B[3]), .Cin(Bout2), .S(B_negated[3]), .Cout(Bout3));
+full_adder_1bit FA4 (.A(1'b1), .B(B_not[0]), .Cin(1'b0), .S(B_negated[0]), .Cout(Bout0));
+full_adder_1bit FA5 (.A(1'b0), .B(B_not[1]), .Cin(Bout0), .S(B_negated[1]), .Cout(Bout1));
+full_adder_1bit FA6 (.A(1'b0), .B(B_not[2]), .Cin(Bout1), .S(B_negated[2]), .Cout(Bout2));
+full_adder_1bit FA7 (.A(1'b0), .B(B_not[3]), .Cin(Bout2), .S(B_negated[3]), .Cout(Bout3));
 
 // mux B input depending on sub control signal
 wire [3:0] B_input;
