@@ -1,4 +1,4 @@
-/* BitCell to make up registers in Register File.
+/* BitCell to make up registers in Register File.s
  * Made up of DFF and tristate buffers so they can be read from
  * both read data lines.
  */
@@ -13,8 +13,10 @@ module BitCell(
 // instantiate DFF
 dff DFF(.clk(clk), .rst(rst), .d(D), .wen(WriteEnable), .q(Q));
 
-// tristate output to the bitlines
-assign Bitline1 = (ReadEnable1) ? Q : 1'bz;
-assign Bitline2 = (ReadEnable2) ? Q : 1'bz;
+// tristate output to the bitlines, implement bypass
+assign Bitline1 = (WriteEnable & ReadEnable1) ? D :
+                  (ReadEnable1) ? Q : 1'bz;
+assign Bitline2 = (WriteEnable & ReadEnable2) ? D :
+                  (ReadEnable2) ? Q : 1'bz;
 
 endmodule
