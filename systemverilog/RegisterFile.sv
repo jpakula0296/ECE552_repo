@@ -1,8 +1,20 @@
+/* 16 registers each holding 16 bits of data
+ * ACTIVE HIGH RESET
+ * two read ports, one right. possible to write and read from written port same
+ * cycle. Three bit Flag Register with zero, overflow, and negative flags
+ */
+
 module RegisterFile(
   input clk, rst, WriteReg,
   input [3:0] SrcReg1, SrcReg2, DstReg,
   input [15:0] DstData,
-  output [15:0] SrcData1, SrcData2
+  output [15:0] SrcData1, SrcData2,
+
+  // flag register inputs/outputs
+  input Z_in, O_in, N_in, // inputs to each flag bit FFs
+  input Z_en, O_en, N_en, // write enable signals for each FF
+  output Z_out, O_out, N_out // flag FF outputs
+
   );
 
   // Read/Write Enable signals derived from respective Decoders
@@ -65,6 +77,10 @@ Register reg14(.clk(clk), .rst(rst), .WriteReg(WriteEnable[14]),
 Register reg15(.clk(clk), .rst(rst), .WriteReg(WriteEnable[15]),
 .ReadEnable1(ReadEnable1[15]), .ReadEnable2(ReadEnable2[15]), .D(DstData), .Bitline1(SrcData1),
 .Bitline2(SrcData2));
+
+// Flag Register
+Flag_Register flag_reg(.clk(clk), .rst(rst), .Z_in(Z_in), .Z_en(Z_en), .Zout(Z_out),
+  .O_in(O_in), .O_en(O_en), .O_out(O_out), .N_in(N_in), .N_en(N_en), .N_out(N_out));
 
 
 endmodule
