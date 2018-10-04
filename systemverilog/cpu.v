@@ -9,8 +9,6 @@ wire [15:0] pc_data_in, pc_data_out, pc_addr;
 wire pc_enable, pc_wr;
 
 // control module (opcode directly connected to pc_data_out)
-wire DstReg_sel;
-
 
 // Register File wires
 wire WriteReg;
@@ -24,9 +22,7 @@ memory1c prog_mem(.data_in(pc_data_in), .data_out(pc_data_out), .addr(pc_addr),
   .enable(pc_enable), .wr(pc_wr));
 
 // control module
-control cntrl(.clk(clk), .rst_n(rst_n), .opcode(pc_data_out[15:12]);
-
-  // DstReg mux
+control cntrl(.clk(clk), .rst_n(rst_n), .opcode(pc_data_out[15:12]));
 
 
 // Instantiate Register File:
