@@ -29,9 +29,10 @@ ReadDecoder_4_16 read_decode2(.RegId(SrcReg2), .Wordline(ReadEnable2));
 WriteDecoder_4_16 write_decode(.RegId(DstReg), .WriteReg(WriteReg), .Wordline(WriteEnable));
 
 // Instantiate 16 registers assigning enable signals
-Register reg0(.clk(clk), .rst(rst), .WriteReg(WriteEnable[0]),
-.ReadEnable1(ReadEnable1[0]), .ReadEnable2(ReadEnable2[0]), .D(DstData), .Bitline1(SrcData1),
-.Bitline2(SrcData2));
+// register $0 is hardwired to 0x0000: WriteReg and data input strapped low so
+// not present in instantiation
+Register_zero reg0(.clk(clk), .rst(rst), .ReadEnable1(ReadEnable1[0]),
+.ReadEnable2(ReadEnable2[0]), .Bitline1(SrcData1), .Bitline2(SrcData2));
 Register reg1(.clk(clk), .rst(rst), .WriteReg(WriteEnable[1]),
 .ReadEnable1(ReadEnable1[1]), .ReadEnable2(ReadEnable2[1]), .D(DstData), .Bitline1(SrcData1),
 .Bitline2(SrcData2));
@@ -79,7 +80,7 @@ Register reg15(.clk(clk), .rst(rst), .WriteReg(WriteEnable[15]),
 .Bitline2(SrcData2));
 
 // Flag Register
-Flag_Register flag_reg(.clk(clk), .rst(rst), .Z_in(Z_in), .Z_en(Z_en), .Zout(Z_out),
+Flag_Register flag_reg(.clk(clk), .rst(rst), .Z_in(Z_in), .Z_en(Z_en), .Z_out(Z_out),
   .O_in(O_in), .O_en(O_en), .O_out(O_out), .N_in(N_in), .N_en(N_en), .N_out(N_out));
 
 
