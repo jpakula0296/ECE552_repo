@@ -2,6 +2,7 @@
  * ACTIVE HIGH RESET
  * two read ports, one right. possible to write and read from written port same
  * cycle. Three bit Flag Register with zero, overflow, and negative flags
+ * Register 0 is hardwired to 0x0000 and cannot be written to.
  */
 
 module RegisterFile(
