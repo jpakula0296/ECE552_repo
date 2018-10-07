@@ -1,3 +1,8 @@
 work
 ModelSim
 .swp
+
+# Icarus verilog files
+iverilog/
+*.vcd
+*.vvp
