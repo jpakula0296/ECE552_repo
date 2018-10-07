@@ -16,7 +16,7 @@ wire Z_in, O_in, N_in, Z_en, O_en, N_en, Z_out, O_out, N_out;
 wire [3:0] SrcReg1, SrcReg2, DstReg;
 wire [15:0] SrcData1, SrcData2, DstData;
 
-assign rst = rst_n; // keep active high/low resets straight
+assign rst = ~rst_n; // keep active high/low resets straight
 
 memory1c prog_mem(.data_in(pc_data_in), .data_out(pc_data_out), .addr(pc_addr),
   .enable(pc_enable), .wr(pc_wr));
