@@ -1,17 +1,20 @@
 module PC (
-    output [15:0] addr_out,
-    input [15:0] addr_in,
+    output [15:0] pc_addr,
+    input [15:0] pc_data_in,
     input clk,
     input hlt,
     input rst);
 
-    reg inst_no;
+    reg [15:0] pc_addr;
+
+    //adder_16_bit adder(pc_addr, 2, pc_data_in, cin, cout) ?
 
     initial begin
-        inst_no = 0;
+        pc_addr = 0;
     end
+
     always@(posedge clk) begin
-        inst_no = rst ? 0 : inst_no;
+        pc_addr = pc_data_in;
     end
 
 endmodule
