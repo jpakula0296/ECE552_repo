@@ -31,9 +31,9 @@ module adder_cla_4bit_tb();
         $display("Starting simulation");
 
         // try every single combination of a, b, and cin
-        for (a_test = 0; a_test < 16; a_test = a_test + 1) begin
-        for (b_test = 0; b_test < 16; b_test = b_test + 1) begin
-        for (cin_test = 0; cin_test < 2; cin_test = cin_test + 1) begin
+        for (a_test = -8; a_test <= 7; a_test = a_test + 1) begin
+        for (b_test = -8; b_test <= 7; b_test = b_test + 1) begin
+        for (cin_test = 0; cin_test <= 1; cin_test = cin_test + 1) begin
             a = a_test;
             b = b_test;
             cin = cin_test;
