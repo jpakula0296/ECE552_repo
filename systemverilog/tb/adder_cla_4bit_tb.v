@@ -37,7 +37,7 @@ module adder_cla_4bit_tb();
             a = a_test;
             b = b_test;
             cin = cin_test;
-            result = a_test + b_test + cin_test;
+            result = a + b + cin;
             #1;
 
             // first check that the sum matches what's expected
@@ -68,7 +68,7 @@ module adder_cla_4bit_tb();
             end
 
             // finally check if the overflow bit was generated correctly
-            if ( result[4:0] > 7 || result[4:0] < -8 ) begin
+            if ( ((a > 0) && (b > 0) && (s <= 0)) || ((a < 0) && (b < 0) && (s >= 0)) || ((a+b)==7 && cin==1) ) begin
                 // ovfl should be set
                 if (!ovfl) begin
                     no_errors = 0;
