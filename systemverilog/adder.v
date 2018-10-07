@@ -211,15 +211,3 @@ module adder_cla_4bit(
     assign cout = carry[3];
     assign ovfl = carry[3] ^ carry[2];
 endmodule
-
-module adder_16bit(
-    input [15:0] a,
-    input [15:0] b,
-    input cin,
-    output [15:0] s,
-    output cout,
-    output ovfl
-);
-
-    
-endmodule

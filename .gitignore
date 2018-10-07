@@ -1,3 +1,4 @@
+# Modelsim files
 work
 ModelSim
 
@@ -6,6 +7,7 @@ iverilog/
 *.vcd
 *.vvp
 
+# Vim files
 *.swp
 *.swo
 *.vim
