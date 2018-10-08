@@ -5,16 +5,12 @@ module PC (
     input hlt,
     input rst);
 
-    reg [15:0] pc_addr;
 
-    //adder_16_bit adder(pc_addr, 2, pc_data_in, cin, cout) ?
 
-    initial begin
-        pc_addr = 0;
-    end
-
-    always@(posedge clk) begin
-        pc_addr = pc_data_in;
-    end
+// State Flip-flop
+// feeds program memory address, changes every posedge clk
+// input calculated from PC+4 or branch instruction
+// write enable not needed, keep high 
+dff DFF0(.q(pc_addr), .d(pc_data_in), .wen(1'b1), .clk(clk), .rst(rst));
 
 endmodule
