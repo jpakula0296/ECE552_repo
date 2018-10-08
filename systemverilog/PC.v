@@ -6,9 +6,10 @@ module PC (
     input [2:0] flags,
     input [15:0] instruction, // need full instr for conditional branch
     input [15:0] branch_reg_addr, // connected to rs data
+    input [15:0] pc_data_in,
     input rst);
 
-wire [15:0] plus_four, branch_imm;
+wire [15:0] plus_four, branch_imm, plus_imm;
 wire [3:0] opcode;
 assign opcode = instruction[15:11]; // used to decide final pc_data_in
 
@@ -17,7 +18,7 @@ assign Z_flag = flags[0];
 wire N_flag;
 assign N_flag = flags[1];
 wire V_flag;
-assign V_flags = flags[2];
+assign V_flag = flags[2];
 
 wire [2:0] condition_flags; // from instruction \
 assign condition_flags = instruction[10:8];
@@ -45,9 +46,30 @@ assign immediate = instruction[7:0];
 // write enable not needed, keep high
 dff DFF0(.q(pc_addr), .d(pc_data_in), .wen(1'b1), .clk(clk), .rst(rst));
 
-// TODO: Replace this with Add 4 module
-assign plus_four = pc_addr + 4;
-assign branch_imm = pc_addr + 2 + immediate;
+// Adder modules
+rca_16bit plus4 (
+    .a(pc_addr),
+    .b(16'b0100),
+    .cin(1'b0),
+    .s(plus_four),
+    .cout()
+);
+rca_16bit plusimm (
+    .a(pc_addr),
+    .b({{8{1'b0}}, immediate}),
+    .cin(1'b0),
+    .s(plus_imm),
+    .cout()
+);
+rca_16bit plus2 (
+    .a(plus_imm),
+    .b(16'b0010),
+    .cin(1'b0),
+    .s(branch_imm),
+    .cout()
+);
+//assign plus_four = pc_addr + 4;
+//assign branch_imm = pc_addr + 2 + immediate;
 
 
 
