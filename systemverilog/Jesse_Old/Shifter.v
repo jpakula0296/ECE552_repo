@@ -8,10 +8,11 @@ module Shifter(
   output [15:0] Shift_Out
   );
 
-// two potential outputs for SLL and SRA
+// three potential outputs for SLL, SRA and ROR
 // these are registers since we need to assign in case statement
 reg [15:0] shift_left_o;
 reg [15:0] shift_right_o;
+reg [15:0] rotate_right;
 
 // shifting left, hardcode shifts based on Shift_Val
 always @* case (Shift_Val)
@@ -34,7 +35,7 @@ always @* case (Shift_Val)
   default : $error("default case statement taken");
 endcase
 
-// shifting right
+// shifting right arithmetic
 always @* case (Shift_Val)
   4'b0000 : shift_right_o = Shift_In >>> 4'b0000;
   4'b0001 : shift_right_o = Shift_In >>> 4'b0001;
@@ -54,6 +55,12 @@ always @* case (Shift_Val)
   4'b1111 : shift_right_o = Shift_In >>> 4'b1111;
   default : $error("default case statement taken");
 endcase
+
+// Rotate right operation
+always @* case (Shift_Val)
+  4'b0000 : rotate_right = Shift_In;
+  4'b0001 : rotate_right = {Shift_In[0], Shift_In[15:1]};
+
 
 // assign overall output based on mode
 assign Shift_Out = (Mode) ? shift_right_o : shift_left_o;

@@ -44,7 +44,7 @@ memory1c prog_mem(.clk(clk), .rst(rst), .data_in(pc_data_in), .data_out(instr),
 // rt is either instr[11:8] on store instrs and [3:0] otherwise
 // WriteReg on all compute and LW instrs
 // DstData is either ALU or memory depending on instruction
-// load half byte operations require reading from dest reg to build full word
+// load half byte operations require reading from dest reg to build full ?
 assign load_instr = opcode[3] & ~opcode[2];
 assign load_half_instr = load_instr & ~opcode[1];
 assign rd = instr[11:8];
