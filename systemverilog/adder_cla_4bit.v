@@ -8,11 +8,11 @@ module adder_cla_4bit(
     input cin,
     output [3:0] s,
     output cout,
-    output ovfl
+    output ovfl,
+    output prop_group,
+    output gen_group
 );
     wire [3:0] carry;
-    wire prop_group;
-    wire gen_group;
 
     /*
      * Spec calls for a CLA adder, so use a CLA module.
