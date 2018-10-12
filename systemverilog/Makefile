@@ -5,17 +5,19 @@ TBDIR = ./tb
 FLAGS = -Wall
 
 TESTBENCHES = $(wildcard $(TBDIR)/*.v)
+TESTBENCH_OBJECTS = $(addprefix $(OUTDIR)/,$(notdir $(TESTBENCHES:.v=.vvp)))
+#MODULES = $(wildcard ./*.v)
+MODULES = half_adder.v full_adder.v cla_4bit.v adder_cla_4bit.v addsub_16bit.v
 
-$(OUTDIR)/PC_tb.vvp: $(TBDIR)/PC_tb.v PC.v adder.v | $(OUTDIR)
-	iverilog -o $@ $^ $(FLAGS)
+# compile and run every testbench in the tb directory
+all: $(TESTBENCH_OBJECTS)
+	for tb in $^ ; do \
+		./$$tb;\
+	done
 
-$(OUTDIR)/adder_cla_4bit_tb.vvp:\
-		$(TBDIR)/adder_cla_4bit_tb.v\
-		adder_cla_4bit.v\
-		cla_4bit.v\
-		full_adder.v\
-		half_adder.v | $(OUTDIR)
-	iverilog -o $@ $^ $(FLAGS)
+# assumes the test bench module's name matches the file name before the file extension
+$(OUTDIR)/%.vvp: $(TBDIR)/%.v $(MODULES) | $(OUTDIR)
+	iverilog -o $@ -s $* $^ $(FLAGS)
 
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
