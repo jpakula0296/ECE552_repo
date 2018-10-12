@@ -14,11 +14,11 @@ module addsub_16bit(
     output cout         // carry-out
 );
     wire [3:0] ovfl;
-    wire [3:0] cout;
+    wire [3:0] cla_cout;
     wire [3:0] prop, gen;
     wire [15:0] s_unsat;
+    wire [15:0] b_flip;
     wire cin;
-    wire b_flip;
 
     // if subtracting, do 2's complement on b
     assign b_flip = sub? ~b : b;
@@ -36,7 +36,7 @@ module addsub_16bit(
     adder_cla_4bit adder1(
         .a(a[7:4]),
         .b(b_flip[7:4]),
-        .cin(cout[0]),
+        .cin(cla_cout[0]),
         .s(s_unsat[7:4]),
         .ovfl(ovfl[1]),
         .prop_group(prop[1]),
@@ -45,7 +45,7 @@ module addsub_16bit(
     adder_cla_4bit adder2(
         .a(a[11:8]),
         .b(b_flip[11:8]),
-        .cin(cout[1]),
+        .cin(cla_cout[1]),
         .s(s_unsat[11:8]),
         .ovfl(ovfl[2]),
         .prop_group(prop[2]),
@@ -54,7 +54,7 @@ module addsub_16bit(
     adder_cla_4bit adder3(
         .a(a[15:12]),
         .b(b_flip[15:12]),
-        .cin(cout[2]),
+        .cin(cla_cout[2]),
         .s(s_unsat[15:12]),
         .ovfl(ovfl[3]),
         .prop_group(prop[3]),
@@ -79,8 +79,9 @@ module addsub_16bit(
 
 
     // do carry lookahead logic, but only when in 16 bit mode
-    assign cout[0] = padd ? 1'b0 : gen[0] | (prop[0] & cin);
-    assign cout[1] = padd ? 1'b0 : gen[1] | (prop[1] & cout[0]);
-    assign cout[2] = padd ? 1'b0 : gen[2] | (prop[2] & cout[1]);
-    assign cout[3] = padd ? 1'b0 : gen[3] | (prop[3] & cout[2]);
+    assign cla_cout[0] = padd ? 1'b0 : gen[0] | (prop[0] & cin);
+    assign cla_cout[1] = padd ? 1'b0 : gen[1] | (prop[1] & cla_cout[0]);
+    assign cla_cout[2] = padd ? 1'b0 : gen[2] | (prop[2] & cla_cout[1]);
+    assign cla_cout[3] = padd ? 1'b0 : gen[3] | (prop[3] & cla_cout[2]);
+
 endmodule
