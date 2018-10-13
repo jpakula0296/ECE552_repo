@@ -7,7 +7,7 @@ FLAGS = -Wall
 TESTBENCHES = $(wildcard $(TBDIR)/*.v)
 TESTBENCH_OBJECTS = $(addprefix $(OUTDIR)/,$(notdir $(TESTBENCHES:.v=.vvp)))
 #MODULES = $(wildcard ./*.v)
-MODULES = half_adder.v full_adder.v cla_4bit.v adder_cla_4bit.v adder_multifunc_16bit.v
+MODULES = half_adder.v full_adder.v rca_4bit.v rca_16bit.v cla_4bit.v adder_cla_4bit.v adder_multifunc_16bit.v
 
 # compile and run every testbench in the tb directory
 all: $(TESTBENCH_OBJECTS)
