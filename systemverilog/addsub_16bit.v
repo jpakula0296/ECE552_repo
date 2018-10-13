@@ -12,7 +12,6 @@ module addsub_16bit(
     input [15:0] a,     // src 1
     input [15:0] b,     // src 2, negated during subtraction
     output [15:0] s,    // result
-    output cout         // carry-out
 );
     wire [5:0] ovfl;
     wire [5:0] cla_cout;
