@@ -92,7 +92,8 @@ module addsub_16bit(
      */
 
     // Adders 0-3 can be bifurcated into four 4-bit adders, two 8-bit adders,
-    // or one 16-bit adder depending on the control signals.
+    // or one 16-bit adder depending on the control signals. How the
+    // carry-outs and ins are assigned determintes the connections.
     assign cla_cout[0] = padd ?         1'b0 : gen[0] | (prop[0] & cin);
     assign cla_cout[1] = padd | red ?   1'b0 : gen[1] | (prop[1] & cla_cout[0]);
     assign cla_cout[2] = padd ?         1'b0 : gen[2] | (prop[2] & cla_cout[1]);

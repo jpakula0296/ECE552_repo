@@ -23,7 +23,7 @@ module addsub_16bit_tb();
     initial begin
         // generate vcd file for waveform viewing in gtkwave
         $dumpfile("addsub_16bit_tb.vcd");
-        $dumpvars(2, addsub_16bit_tb);
+        $dumpvars(4, addsub_16bit_tb);
 
         // start simulation
         $display("Starting simulation");
