@@ -89,42 +89,42 @@ module addsub_16bit_tb();
             func_result = 0;
 
             // do first 4 bits
-            if ( (a[3:0] > 0) && (b[3:0] > 0) && (a[3:0]+b[3:0] > 5'sh7) && (s[3:0] != 4'sh7) ) begin
+            if ( (!a[3]) && (!b[3]) && (a[3:0]+b[3:0] > 5'sh7) ) begin
                 func_result[3:0] = 4'sh7; // positive saturation expected
-            end else if ( (a[3:0] < 0) && (b[3:0] < 0) && (a[3:0]+b[3:0] < 5'sh18) && (s[3:0] != 4'sh8) ) begin
+            end else if ( (a[3]) && (b[3]) && (a[3:0]+b[3:0] < 5'sh18) ) begin
                 func_result[3:0] = 4'sh8; // negative saturation expected
             end else begin
                 func_result[3:0] = a[3:0] + b[3:0];
             end
 
             // do second 4 bits
-            if ( (a[7:4] > 0) && (b[7:4] > 0) && (a[7:4]+b[7:4] > 5'sh7) && (s[7:4] != 4'sh7) ) begin
+            if ( (!a[7]) && (!b[7]) && (a[7:4]+b[7:4] > 5'sh7) ) begin
                 func_result[7:4] = 4'sh7; // positive saturation expected
-            end else if ( (a[7:4] < 0) && (b[7:4] < 0) && (a[7:4]+b[7:4] < 5'sh18) && (s[7:4] != 4'sh8) ) begin
+            end else if ( (a[7]) && (b[7]) && (a[7:4]+b[7:4] < 5'sh18) ) begin
                 func_result[7:4] = 4'sh8; // negative saturation expected
             end else begin
                 func_result[7:4] = a[7:4] + b[7:4];
             end
 
             // do third 4 bits
-            if ( (a[11:8] > 0) && (b[11:8] > 0) && (a[11:8]+b[11:8] > 5'sh7) && (s[11:8] != 4'sh7) ) begin
+            if ( (!a[11]) && (!b[11]) && (a[11:8]+b[11:8] > 5'sh7) ) begin
                 func_result[11:8] = 4'sh7; // positive saturation expected
-            end else if ( (a[11:8] < 0) && (b[11:8] < 0) && (a[11:8]+b[11:8] < 5'sh18) && (s[11:8] != 4'sh8) ) begin
+            end else if ( (a[11]) && (b[11]) && (a[11:8]+b[11:8] < 5'sh18) ) begin
                 func_result[11:8] = 4'sh8; // negative saturation expected
             end else begin
                 func_result[11:8] = a[11:8] + b[11:8];
             end
 
             // do final 4 bits
-            if ( (a[15:12] > 0) && (b[15:12] > 0) && (a[15:12]+b[15:12] > 5'sh7) && (s[15:12] != 4'sh7) ) begin
+            if ( (!a[15]) && (!b[15]) && (a[15:12]+b[15:12] > 5'sh7) ) begin
                 func_result[15:12] = 4'sh7; // positive saturation expected
-            end else if ( (a[15:12] < 0) && (b[15:12] < 0) && (a[15:12]+b[15:12] < 5'sh18) && (s[15:12] != 4'sh8) ) begin
+            end else if ( (a[15]) && (b[15]) && (a[15:12]+b[15:12] < 5'sh18) ) begin
                 func_result[15:12] = 4'sh8; // negative saturation expected
             end else begin
                 func_result[15:12] = a[15:12] + b[15:12];
             end
 
-            if (func_result != s) begin
+            if (func_result[15:0] != s) begin
                 validate_inputs = 0;
                 $display(
                     "ERROR @ %0d: (0x%4h padd 0x%4h) should equal 0x%4h not 0x%4h",
