@@ -18,6 +18,7 @@ module adder_multifunc_16bit_tb();
 
     integer i, j;
     integer no_errors = 1;
+    reg [15:0] swap;
     initial begin
         // generate vcd file for waveform viewing in gtkwave
         $dumpfile("adder_multifunc_16bit_tb.vcd");
@@ -67,8 +68,47 @@ module adder_multifunc_16bit_tb();
         end
 
 
-        // Test edge cases by doing operations around the very minimum and
-        // maximum values, and around 0.
+        /*
+         * Test edge cases by doing operations around the very minimum and
+         * maximum values, and around 0.
+         */
+
+        // addition and subtraction
+        padd = 0;
+        red = 0;
+        for (i = 0; i < 32; i = i + 1) begin
+        for (j = 0; j < 32; j = j + 1) begin
+
+            a = -16 + i;
+            b = 15'h7FF0 + j;
+
+            sub = 0;
+            #1;
+            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            #1;
+
+            sub = 1;
+            #1
+            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            #1;
+
+            swap = a;
+            a = b;
+            b = swap;
+
+            sub = 0;
+            #1;
+            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            #1;
+
+            sub = 1;
+            #1;
+            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            #1;
+
+        end
+        end
+
 
         $display("Simulation complete");
         if (no_errors)
@@ -178,6 +218,12 @@ module adder_multifunc_16bit_tb();
                 if (s != 16'h8000) begin
                     validate_inputs = 0;
                     $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, 16'sh8000, s);
+                end
+            end else if (func_result == 17'sh8000) begin
+                // handle one edge case where you do 0 - -32768
+                if (s != 16'h7FFF) begin
+                    validate_inputs = 0;
+                    $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, 16'sh7FFF, s);
                 end
             end else if (func_result != s) begin
                 // regular subtraction
