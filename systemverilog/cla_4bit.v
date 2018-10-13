@@ -25,6 +25,6 @@ module cla_4bit(
         gen[3] |
         (gen[2] & prop[3]) |
         (gen[1] & prop[3] & prop[2]) |
-        (gen[0] & prop[3] & prop[2] & prop[3]);
+        (gen[0] & prop[3] & prop[2] & prop[1]);
 
 endmodule
