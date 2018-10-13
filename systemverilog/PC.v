@@ -61,7 +61,7 @@ rca_16bit plusimm (
     .s(plus_imm),
     .cout()
 );
-rca_16bit plus2 (
+rca_16bit DESCRIPTIVE_NAME (
     .a(plus_imm),
     .b(16'b0010),
     .cin(1'b0),

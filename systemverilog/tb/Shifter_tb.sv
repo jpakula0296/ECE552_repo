@@ -4,7 +4,7 @@ parameter TEST_COUNT = 10000; // number of random tests to run
 
 reg [15:0] Shift_In;
 reg [3:0] Shift_Val;
-reg Mode;
+reg [1:0] Mode;
 wire [15:0] Shift_Out;
 
 reg [15:0] Expected;
@@ -22,7 +22,7 @@ initial begin
   Shift_In = $random();
   Shift_Val = $random();
 
-  Mode = 0; // start with shift left
+  Mode = 2'b00; // start with shift left
 
   Expected = Shift_In << Shift_Val;
   #5 $display("LEFT SHIFT: INPUT=%b SHIFT_VAL=%b OUTPUT=%b", Shift_In, Shift_Val, Shift_Out);
@@ -34,7 +34,7 @@ initial begin
     $stop();
   end
 
-  Mode = 1; // go to arithmetic right shift
+  Mode = 2'b01; // go to arithmetic right shift
 
   Expected = Shift_In >>> Shift_Val;
   #5 $display ("RIGHT SHIFT: INPUT=%b SHIFT_VAL=%b OUTPUT=%b", Shift_In, Shift_Val, Shift_Out);
@@ -43,6 +43,16 @@ initial begin
     $display("RIGHT SHIFT SUCCESSFUL");
   else begin
     $display("FAILURE: RIGHT SHIFT, EXPECTED %b", Expected);
+    $stop();
+  end
+
+  Mode = 2'b10; // rotate right
+  Expected = (Shift_In >> Shift_Val) | (Shift_In << (16-Shift_Val));
+  #5 $display ("ROR: INPUT=%b SHIFT_VAL=%b OUTPUT=%b", Shift_In, Shift_Val, Shift_Out);
+  if (Shift_Out == Expected)
+    $display("ROR SUCCESSFUL");
+  else begin
+    $display("FAILURE: ROR, EXPECTED %b", Expected);
     $stop();
   end
 
