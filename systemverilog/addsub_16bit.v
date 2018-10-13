@@ -116,17 +116,17 @@ module addsub_16bit(
             // In parallel mode, saturate each adder output individually and
             // then concatenate.
             {
-                ovfl[3] ? s_unsat[15] ? 4'h8 : 4'h7 : s_unsat[15:12],
-                ovfl[2] ? s_unsat[11] ? 4'h8 : 4'h7 : s_unsat[11:8],
-                ovfl[1] ? s_unsat[7]  ? 4'h8 : 4'h7 : s_unsat[7:4],
-                ovfl[0] ? s_unsat[3]  ? 4'h8 : 4'h7 : s_unsat[3:0]
+                ovfl[3] ? a[15] ? 4'h8 : 4'h7 : s_unsat[15:12],
+                ovfl[2] ? a[11] ? 4'h8 : 4'h7 : s_unsat[11:8],
+                ovfl[1] ? a[7]  ? 4'h8 : 4'h7 : s_unsat[7:4],
+                ovfl[0] ? a[3]  ? 4'h8 : 4'h7 : s_unsat[3:0]
             }
         : red?
             // In 8-bit reduction mode, sign extend the output from adders 4 and 5.
             { {8{s_red[7]}}, s_red }
         :
             // In 16 bit mode, saturate based on the final overflow bit.
-            ovfl[3]? s_unsat[15]? 16'h8000 : 16'h7FFF : s_unsat[15:0]
+            ovfl[3]? a[15]? 16'h8000 : 16'h7FFF : s_unsat[15:0]
         ;
 
 

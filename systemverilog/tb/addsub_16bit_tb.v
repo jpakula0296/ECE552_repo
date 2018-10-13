@@ -64,7 +64,7 @@ module addsub_16bit_tb();
         input red,
         input sub
     ); begin
-        validate_inputs = 1;
+        validate_inputs = 1; // set to 0 if errors encountered
         if (padd) begin
             // check 4 bit parallel add
         end else if (red) begin
@@ -75,14 +75,14 @@ module addsub_16bit_tb();
             // check 16 bit addition
 
             // first check addition output
-            if ( ((a > 0) && (b > 0) && (s <= 0)) || ((a < 0) && (b < 0) && (s >= 0))) begin
+            if ( ((a > 0) && (b > 0) && (a+b > 17'sh7FFF)) || ((a < 0) && (b < 0) && (a+b < 17'sh18000))) begin
                 // overflow
                 if (a > 0 && s != 16'h7FFF) begin
                     validate_inputs = 0;
-                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, 16'h7FFF, s);
+                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, 16'sh7FFF, s);
                 end else if(a < 0 && s != 16'h8000) begin
-                    no_errors = 0;
-                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, 16'h8000, s);
+                    validate_inputs = 0;
+                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, 16'sh8000, s);
                 end
             end else begin
                 // no overflow
