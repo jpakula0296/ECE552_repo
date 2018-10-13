@@ -4,30 +4,16 @@
  */
 module addsub_16bit_tb();
     // instantiate the DUT
-    // reg signed [3:0] a, b;
-    // reg cin;
-    // wire signed [3:0] s;
-    // wire cout, ovfl;
-    // adder_cla_4bit adder(
-    //     .a(a),
-    //     .b(b),
-    //     .cin(cin),
-    //     .s(s),
-    //     .cout(cout),
-    //     .ovfl(ovfl)
-    // );
-    // instantiate the DUT
-    reg padd, sub;
+    reg padd, sub, red;
     reg [15:0] a, b;
     wire [15:0] s;
-    wire cout;
     addsub_16bit adder(
         .padd(padd),
+        .red(red),
         .sub(sub),
         .a(a),
         .b(b),
-        .s(s),
-        .cout(cout)
+        .s(s)
     );
 
 
@@ -47,6 +33,7 @@ module addsub_16bit_tb();
         b = 0;
         padd = 0;
         sub = 0;
+        red = 0;
 
         // Start by doing 500 random 16 bit additions.
         padd = 0;
@@ -54,6 +41,9 @@ module addsub_16bit_tb();
         for (i = 0; i < 500; i = i + 1) begin
             a = $random;
             b = $random;
+            #1;
+            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            #1;
 
         end
 
@@ -66,10 +56,41 @@ module addsub_16bit_tb();
         $finish;
     end
 
-    task validate_inputs;
-        input [15:0] a, b, s;
-        input padd, sub, cout;
-        begin
+    function validate_inputs(
+        input signed [15:0] a,
+        input signed [15:0] b,
+        input signed [15:0] s,
+        input padd,
+        input red,
+        input sub
+    ); begin
+        validate_inputs = 1;
+        if (padd) begin
+            // check 4 bit parallel add
+        end else if (red) begin
+            // check 8 bit reduction
+        end else if (sub) begin
+            // check 16 bit subtraction
+        end else begin
+            // check 16 bit addition
+
+            // first check addition output
+            if ( ((a > 0) && (b > 0) && (s <= 0)) || ((a < 0) && (b < 0) && (s >= 0))) begin
+                // overflow
+                if (a > 0 && s != 16'h7FFF) begin
+                    validate_inputs = 0;
+                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, 16'h7FFF, s);
+                end else if(a < 0 && s != 16'h8000) begin
+                    no_errors = 0;
+                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, 16'h8000, s);
+                end
+            end else begin
+                // no overflow
+                if (a+b != s) begin
+                    validate_inputs = 0;
+                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, a+b, s);
+                end
+            end
         end
-    endtask
+    end endfunction
 endmodule
