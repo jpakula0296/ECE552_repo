@@ -9,7 +9,7 @@ module PC (
     input [15:0] pc_data_in,
     input rst);
 
-wire [15:0] plus_four, branch_imm, plus_imm;
+wire [15:0] plus_two, branch_imm, plus_imm;
 wire [3:0] opcode;
 assign opcode = instruction[15:11]; // used to decide final pc_data_in
 
@@ -47,11 +47,11 @@ assign immediate = instruction[7:0];
 dff DFF0(.q(pc_addr), .d(pc_data_in), .wen(1'b1), .clk(clk), .rst(rst));
 
 // Adder modules
-rca_16bit plus4 (
+rca_16bit plus2 (
     .a(pc_addr),
-    .b(16'b0100),
+    .b(16'h2),
     .cin(1'b0),
-    .s(plus_four),
+    .s(plus_two),
     .cout()
 );
 rca_16bit plusimm (
@@ -68,15 +68,15 @@ rca_16bit plus2 (
     .s(branch_imm),
     .cout()
 );
-//assign plus_four = pc_addr + 4;
+//assign plus_two = pc_addr + 2;
 //assign branch_imm = pc_addr + 2 + immediate;
 
 
 
 
 assign pc_data_in = (opcode == 4'b1111) ? pc_addr : // halt
-  (~condition_passed) ?  plus_four : (opcode == 4'b1100) ? branch_imm :
-  (opcode == 4'b1101) ? branch_reg_addr : plus_four;
+  (~condition_passed) ?  plus_two : (opcode == 4'b1100) ? branch_imm :
+  (opcode == 4'b1101) ? branch_reg_addr : plus_two;
 
 
 
