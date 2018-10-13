@@ -35,17 +35,21 @@ module addsub_16bit_tb();
         sub = 0;
         red = 0;
 
-        // Start by doing 500 random 16 bit additions.
+        // Start by doing 500 random 16 bit additions and subtractions.
         padd = 0;
-        sub = 0;
+        red = 0;
         for (i = 0; i < 500; i = i + 1) begin
             a = $random;
             b = $random;
+            sub = 0;
             #1;
             no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
             #1;
-
+            sub = 1;
+            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            #1;
         end
+
 
         // Test edge cases by doing operations around the very minimum and
         // maximum values, and around 0.
