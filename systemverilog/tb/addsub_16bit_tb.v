@@ -18,7 +18,6 @@ module addsub_16bit_tb();
 
 
     integer i, j;
-    reg signed [16:0] result; // 17 bits so that expected carry out is captured
     integer no_errors = 1;
     initial begin
         // generate vcd file for waveform viewing in gtkwave
@@ -35,7 +34,8 @@ module addsub_16bit_tb();
         sub = 0;
         red = 0;
 
-        // Start by doing 500 random 16 bit additions and subtractions.
+        // Start by doing 500 random 16 bit additions, subtractions, parallel
+        // adds, and reductions.
         padd = 0;
         red = 0;
         for (i = 0; i < 500; i = i + 1) begin
@@ -60,6 +60,7 @@ module addsub_16bit_tb();
         $finish;
     end
 
+    reg signed [16:0] func_result; // used to capture addition result if the output was 1 bit wider
     function validate_inputs(
         input signed [15:0] a,
         input signed [15:0] b,
@@ -75,25 +76,43 @@ module addsub_16bit_tb();
             // check 8 bit reduction
         end else if (sub) begin
             // check 16 bit subtraction
+            func_result = a-b;
+            if ( (a > 0) && (-b > 0) && (func_result > 17'sh7FFF) ) begin
+                // output should be saturated to highest positive number
+                if (s != 16'h7FFF) begin
+                    validate_inputs = 0;
+                    $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, 16'sh7FFF, s);
+                end
+            end else if ( (a < 0) && (-b < 0) && (func_result < 17'sh18000) ) begin
+                // output should be saturated to lowest negative number
+                if (s != 16'h8000) begin
+                    validate_inputs = 0;
+                    $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, 16'sh8000, s);
+                end
+            end else if (func_result != s) begin
+                // regular subtraction
+                validate_inputs = 0;
+                $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, func_result, s);
+            end
         end else begin
             // check 16 bit addition
-
-            // first check addition output
-            if ( ((a > 0) && (b > 0) && (a+b > 17'sh7FFF)) || ((a < 0) && (b < 0) && (a+b < 17'sh18000))) begin
-                // overflow
-                if (a > 0 && s != 16'h7FFF) begin
+            func_result = a+b;
+            if ( (a > 0) && (b > 0) && (func_result > 17'sh7FFF) ) begin
+                // output should be saturated to highest positive number
+                if (s != 16'h7FFF) begin
                     validate_inputs = 0;
-                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, 16'sh7FFF, s);
-                end else if(a < 0 && s != 16'h8000) begin
-                    validate_inputs = 0;
-                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, 16'sh8000, s);
+                    $display( "ERROR @ %0d: %0d + %0d should equal %0d not %0d", $time, a, b, 16'sh7FFF, s);
                 end
-            end else begin
-                // no overflow
-                if (a+b != s) begin
+            end else if ( (a < 0) && (b < 0) && (func_result < 17'sh18000) ) begin
+                // output should be saturated to lowest negative number
+                if (s != 16'h8000) begin
                     validate_inputs = 0;
-                    $display( "ERROR @ %0d: %0d+%0d should equal %0d not %0d", $time, a, b, a+b, s);
+                    $display( "ERROR @ %0d: %0d + %0d should equal %0d not %0d", $time, a, b, 16'sh8000, s);
                 end
+            end else if (func_result != s) begin
+                // output should just be the result of regular addition
+                validate_inputs = 0;
+                $display( "ERROR @ %0d: %0d + %0d should equal %0d not %0d", $time, a, b, func_result, s);
             end
         end
     end endfunction
