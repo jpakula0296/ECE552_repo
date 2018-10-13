@@ -11,7 +11,7 @@ module addsub_16bit(
     input sub,          // setting to 1 does a subtraction instead of an addition
     input [15:0] a,     // src 1
     input [15:0] b,     // src 2, negated during subtraction
-    output [15:0] s,    // result
+    output [15:0] s     // result
 );
     wire [5:0] ovfl;
     wire [5:0] cla_cout;
