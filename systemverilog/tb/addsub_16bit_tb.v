@@ -46,6 +46,7 @@ module addsub_16bit_tb();
             no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
             #1;
             sub = 1;
+            #1;
             no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
             #1;
         end
@@ -72,8 +73,12 @@ module addsub_16bit_tb();
         validate_inputs = 1; // set to 0 if errors encountered
         if (padd) begin
             // check 4 bit parallel add
+
+
         end else if (red) begin
             // check 8 bit reduction
+
+
         end else if (sub) begin
             // check 16 bit subtraction
             func_result = a-b;
@@ -94,6 +99,9 @@ module addsub_16bit_tb();
                 validate_inputs = 0;
                 $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, func_result, s);
             end
+
+
+
         end else begin
             // check 16 bit addition
             func_result = a+b;
@@ -115,5 +123,6 @@ module addsub_16bit_tb();
                 $display( "ERROR @ %0d: %0d + %0d should equal %0d not %0d", $time, a, b, func_result, s);
             end
         end
+
     end endfunction
 endmodule
