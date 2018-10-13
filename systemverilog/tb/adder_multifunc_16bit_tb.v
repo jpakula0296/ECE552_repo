@@ -1,13 +1,12 @@
 /*
- * Tests the 4 bit cla adder, and by extension the 4 bit cla module, the full
- * adder, and the half adder.
+ * Tests the adder_multifunc_16bit module.
  */
-module addsub_16bit_tb();
+module adder_multifunc_16bit_tb();
     // instantiate the DUT
     reg padd, sub, red;
     reg [15:0] a, b;
     wire [15:0] s;
-    addsub_16bit adder(
+    adder_multifunc_16bit adder(
         .padd(padd),
         .red(red),
         .sub(sub),
@@ -21,8 +20,8 @@ module addsub_16bit_tb();
     integer no_errors = 1;
     initial begin
         // generate vcd file for waveform viewing in gtkwave
-        $dumpfile("addsub_16bit_tb.vcd");
-        $dumpvars(4, addsub_16bit_tb);
+        $dumpfile("adder_multifunc_16bit_tb.vcd");
+        $dumpvars(4, adder_multifunc_16bit_tb);
 
         // start simulation
         $display("Starting simulation");

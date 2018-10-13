@@ -1,11 +1,16 @@
 /*
- * The 16 bit adder. It is created from four 4-bit cla adders.
- * The overflow output on the adders is used to detect when the output
- * should be saturated. Additionally, if the parallel_add wire is high,
- * the adders are separated to perform parallel addition. If the sub wire
- * is high, the carry-in input is set to 1, and the b input is inverted.
+ * A 16 bit multifunction adder, capable of doing the following operations:
+ *      16 bit add with saturation
+ *      16 bit subtract with saturation
+ *      4 bit parallel add with saturation
+ *      8 bit reduction
+ *
+ * Implementation:
+ *      The adder is made from six 4-bit carry lookahead adders. All
+ *      operations are done by modifying how the carry ins and carry outs are
+ *      connected to each 4-bit adder.
  */
-module addsub_16bit(
+module adder_multifunc_16bit(
     input padd,         // setting to 1 does 4 half-byte parallel additions
     input red,          // setting to 1 does an 8 bit reduction
     input sub,          // setting to 1 does a subtraction instead of an addition
