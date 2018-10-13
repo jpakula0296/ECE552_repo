@@ -57,6 +57,14 @@ module addsub_16bit_tb();
             #1;
             no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
             #1;
+
+            // reduction
+            sub = 0;
+            padd = 0;
+            red = 1;
+            #1;
+            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            #1;
         end
 
 
@@ -142,11 +150,20 @@ module addsub_16bit_tb();
 
         // check 8 bit reduction
         else if (red) begin
+            func_result[7:0] = (a[15:8] + a[7:0]) + (b[15:8] + b[7:0]);
+            func_result[15:8] = {8{func_result[7]}};
+            if (s != func_result[15:0]) begin
+                validate_inputs = 0;
+                $display(
+                    "ERROR @ %0d: (0x%4h red 0x%4h) should equal 0x%4h not 0x%4h",
+                    $time,
+                    a,
+                    b,
+                    func_result[15:0],
+                    s
+                );
+            end
         end
-
-
-
-
 
         // check 16 bit subtraction
         else if (sub) begin
