@@ -51,7 +51,7 @@ assign load_half_instr = load_instr & ~opcode[1];
 assign rd = instr[11:8];
 assign rs = (load_half_instr) ? instr[11:8] : instr[7:4];
 assign rt = (opcode[3]) ? instr[11:8] : instr[3:0];
-// UNCOMMENT WHEN ALU DONE assign DstData = (load_instr) ? data_out : ALU_out;
+assign DstData = (load_instr) ? data_out : ALU_out;
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
   .DstData(DstData));

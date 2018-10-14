@@ -47,38 +47,23 @@ assign immediate = instruction[7:0];
 dff_16bit DFF0(.q(pc_addr), .d(pc_data_in), .wen(1'b1), .clk(clk), .rst(rst));
 
 // Adder modules
-rca_16bit plus2 (
+rca_16bit plus2 ( // PC + 2
     .a(pc_addr),
     .b(16'h2),
     .cin(1'b0),
     .s(plus_two),
     .cout()
 );
-rca_16bit plusimm (
-    .a(pc_addr),
+rca_16bit plusimm ( // PC + 2 + (I << 1)
+    .a(plus_two),
     .b({{8{1'b0}}, immediate}),
-    .cin(1'b0),
-    .s(plus_imm),
-    .cout()
-);
-rca_16bit DESCRIPTIVE_NAME (
-    .a(plus_imm),
-    .b(16'b0010),
     .cin(1'b0),
     .s(branch_imm),
     .cout()
 );
-//assign plus_two = pc_addr + 2;
-//assign branch_imm = pc_addr + 2 + immediate;
-
-
-
 
 assign pc_data_in = (opcode == 4'b1111) ? pc_addr : // halt
   (~condition_passed) ?  plus_two : (opcode == 4'b1100) ? branch_imm :
   (opcode == 4'b1101) ? branch_reg_addr : plus_two;
-
-
-
 
 endmodule
