@@ -19,7 +19,10 @@ wire Z_in, O_in, N_in, Z_en, O_en, N_en, Z_out, O_out, N_out;
 wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData;
 wire load_instr; // for assigning regwrite enable
+wire PCS_instr; // for assiging DstData
 wire load_half_instr;
+wire ALU_instr;
+wire reg_write_instr; // if not high 'write' to $0 since we can't anyway
 
 wire [15:0] ALU_out; // ALU output
 
@@ -53,13 +56,16 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(pc_data_in), .data_out(instr),
 // rt is either instr[11:8] on store instrs and [3:0] otherwise
 // WriteReg on all compute and LW instrs
 // DstData is either ALU or memory depending on instruction
-// load half byte operations require reading from dest reg to build full?
+// rd = 0 when not write instruction, can't write to this register
 assign load_instr = opcode[3] & ~opcode[2];
+assign PCS_instr = (opcode == 4'b1110);
 assign load_half_instr = load_instr & ~opcode[1];
+assign ALU_instr = ~opcode[3];
+assign WriteReg = ALU_instr | load_instr | PCS_instr;
 assign rd = instr[11:8];
 assign rs = (load_half_instr) ? instr[11:8] : instr[7:4];
 assign rt = (opcode[3]) ? instr[11:8] : instr[3:0];
-assign DstData = (load_instr) ? data_out : ALU_out;
+assign DstData = (load_instr) ? data_out : (PCS_instr) ? pc_new : ALU_out;
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
   .DstData(DstData));
