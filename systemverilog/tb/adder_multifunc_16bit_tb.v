@@ -17,7 +17,7 @@ module adder_multifunc_16bit_tb();
 
 
     integer i, j;
-    integer no_errors = 1;
+    integer num_errors = 0;
     reg [15:0] swap;
     initial begin
         // generate vcd file for waveform viewing in gtkwave
@@ -39,7 +39,7 @@ module adder_multifunc_16bit_tb();
             padd = 0;
             red = 0;
             #1;
-            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            num_errors = num_errors + validate_inputs(a, b, s, padd, red, sub);
             #1;
 
             // subtraction
@@ -47,7 +47,7 @@ module adder_multifunc_16bit_tb();
             padd = 0;
             red = 0;
             #1;
-            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            num_errors = num_errors + validate_inputs(a, b, s, padd, red, sub);
             #1;
 
             // parallel add
@@ -55,7 +55,7 @@ module adder_multifunc_16bit_tb();
             padd = 1;
             red = 0;
             #1;
-            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            num_errors = num_errors + validate_inputs(a, b, s, padd, red, sub);
             #1;
 
             // reduction
@@ -63,7 +63,7 @@ module adder_multifunc_16bit_tb();
             padd = 0;
             red = 1;
             #1;
-            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            num_errors = num_errors + validate_inputs(a, b, s, padd, red, sub);
             #1;
         end
 
@@ -84,12 +84,12 @@ module adder_multifunc_16bit_tb();
 
             sub = 0;
             #1;
-            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            num_errors = num_errors + validate_inputs(a, b, s, padd, red, sub);
             #1;
 
             sub = 1;
             #1
-            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            num_errors = num_errors + validate_inputs(a, b, s, padd, red, sub);
             #1;
 
             swap = a;
@@ -98,12 +98,12 @@ module adder_multifunc_16bit_tb();
 
             sub = 0;
             #1;
-            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            num_errors = num_errors + validate_inputs(a, b, s, padd, red, sub);
             #1;
 
             sub = 1;
             #1;
-            no_errors = no_errors & validate_inputs(a, b, s, padd, red, sub);
+            num_errors = num_errors + validate_inputs(a, b, s, padd, red, sub);
             #1;
 
         end
@@ -111,7 +111,9 @@ module adder_multifunc_16bit_tb();
 
 
         $display("Simulation complete");
-        if (no_errors)
+        if (num_errors)
+            $display("%0d errors!", num_errors);
+        else
             $display("No errors :)");
         $finish;
     end
@@ -125,7 +127,7 @@ module adder_multifunc_16bit_tb();
         input red,
         input sub
     ); begin
-        validate_inputs = 1; // set to 0 if errors encountered
+        validate_inputs = 0; // set to 1 if errors encountered
 
 
 
@@ -172,7 +174,7 @@ module adder_multifunc_16bit_tb();
             end
 
             if (func_result[15:0] != s) begin
-                validate_inputs = 0;
+                validate_inputs = 1;
                 $display(
                     "ERROR @ %0d: (0x%4h padd 0x%4h) should equal 0x%4h not 0x%4h",
                     $time,
@@ -189,10 +191,10 @@ module adder_multifunc_16bit_tb();
 
         // check 8 bit reduction
         else if (red) begin
-            func_result[7:0] = (a[15:8] + a[7:0]) + (b[15:8] + b[7:0]);
-            func_result[15:8] = {8{func_result[7]}};
+            func_result[9:0] = (a[15:8] + b[15:8]) + (a[7:0] + b[7:0]);
+            func_result[15:10] = {6{func_result[9]}};
             if (s != func_result[15:0]) begin
-                validate_inputs = 0;
+                validate_inputs = 1;
                 $display(
                     "ERROR @ %0d: (0x%4h red 0x%4h) should equal 0x%4h not 0x%4h",
                     $time,
@@ -210,24 +212,24 @@ module adder_multifunc_16bit_tb();
             if ( (a > 0) && (-b > 0) && (func_result > 17'sh7FFF) ) begin
                 // output should be saturated to highest positive number
                 if (s != 16'h7FFF) begin
-                    validate_inputs = 0;
+                    validate_inputs = 1;
                     $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, 16'sh7FFF, s);
                 end
             end else if ( (a < 0) && (-b < 0) && (func_result < 17'sh18000) ) begin
                 // output should be saturated to lowest negative number
                 if (s != 16'h8000) begin
-                    validate_inputs = 0;
+                    validate_inputs = 1;
                     $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, 16'sh8000, s);
                 end
             end else if (func_result == 17'sh8000) begin
                 // handle one edge case where you do 0 - -32768
                 if (s != 16'h7FFF) begin
-                    validate_inputs = 0;
+                    validate_inputs = 1;
                     $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, 16'sh7FFF, s);
                 end
             end else if (func_result != s) begin
                 // regular subtraction
-                validate_inputs = 0;
+                validate_inputs = 1;
                 $display( "ERROR @ %0d: %0d - %0d should equal %0d not %0d", $time, a, b, func_result, s);
             end
         end
@@ -243,18 +245,18 @@ module adder_multifunc_16bit_tb();
             if ( (a > 0) && (b > 0) && (func_result > 17'sh7FFF) ) begin
                 // output should be saturated to highest positive number
                 if (s != 16'h7FFF) begin
-                    validate_inputs = 0;
+                    validate_inputs = 1;
                     $display( "ERROR @ %0d: %0d + %0d should equal %0d not %0d", $time, a, b, 16'sh7FFF, s);
                 end
             end else if ( (a < 0) && (b < 0) && (func_result < 17'sh18000) ) begin
                 // output should be saturated to lowest negative number
                 if (s != 16'h8000) begin
-                    validate_inputs = 0;
+                    validate_inputs = 1;
                     $display( "ERROR @ %0d: %0d + %0d should equal %0d not %0d", $time, a, b, 16'sh8000, s);
                 end
             end else if (func_result != s) begin
                 // output should just be the result of regular addition
-                validate_inputs = 0;
+                validate_inputs = 1;
                 $display( "ERROR @ %0d: %0d + %0d should equal %0d not %0d", $time, a, b, func_result, s);
             end
         end

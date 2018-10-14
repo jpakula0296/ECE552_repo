@@ -6,7 +6,7 @@
  *      8 bit reduction
  *
  * Implementation:
- *      The adder is made from six 4-bit carry lookahead adders. All
+ *      The adder is made from seven 4-bit carry lookahead adders. All
  *      operations are done by modifying how the carry ins and carry outs are
  *      connected to each 4-bit adder.
  */
@@ -19,17 +19,13 @@ module adder_multifunc_16bit(
     output [15:0] s,    // result
     output ovfl         // signals if overflow occured
 );
-    wire [5:0] all_ovfl;
-    wire [5:0] cla_cout;
-    wire [5:0] prop, gen;
-    wire [15:0] s_unsat;
-    wire [7:0] s_red;
-    wire [15:0] b_flip;
-    wire cin;
-
-    // if subtracting, do 2's complement on b
-    assign b_flip = sub? ~b : b;
-    assign cin = sub;
+    wire [6:0] all_ovfl;    // the ovfl output of each adder
+    wire [6:0] cla_cout;    // the calculated cout for each adder
+    wire [6:0] all_cin;     // the cin signal to each adder
+    wire [6:0] prop, gen;   // the group propogate and generate for each adder
+    wire [15:0] s_unsat;    // the adder output before saturation is applied
+    wire [11:0] s_red;      // the reduction output
+    wire [15:0] b_flip;     // the b operand with optionally applied inversion
 
     /*
      * Adder instantiation
@@ -39,7 +35,7 @@ module adder_multifunc_16bit(
     adder_cla_4bit adder0(
         .a(a[3:0]),
         .b(b_flip[3:0]),
-        .cin(cin),
+        .cin(all_cin[0]),
         .s(s_unsat[3:0]),
         .ovfl(all_ovfl[0]),
         .prop_group(prop[0]),
@@ -48,7 +44,7 @@ module adder_multifunc_16bit(
     adder_cla_4bit adder1(
         .a(a[7:4]),
         .b(b_flip[7:4]),
-        .cin(cla_cout[0]),
+        .cin(all_cin[1]),
         .s(s_unsat[7:4]),
         .ovfl(all_ovfl[1]),
         .prop_group(prop[1]),
@@ -57,7 +53,7 @@ module adder_multifunc_16bit(
     adder_cla_4bit adder2(
         .a(a[11:8]),
         .b(b_flip[11:8]),
-        .cin(cla_cout[1]),
+        .cin(all_cin[2]),
         .s(s_unsat[11:8]),
         .ovfl(all_ovfl[2]),
         .prop_group(prop[2]),
@@ -66,7 +62,7 @@ module adder_multifunc_16bit(
     adder_cla_4bit adder3(
         .a(a[15:12]),
         .b(b_flip[15:12]),
-        .cin(cla_cout[2]),
+        .cin(all_cin[3]),
         .s(s_unsat[15:12]),
         .ovfl(all_ovfl[3]),
         .prop_group(prop[3]),
@@ -77,7 +73,7 @@ module adder_multifunc_16bit(
     adder_cla_4bit adder4(
         .a(s_unsat[3:0]),
         .b(s_unsat[11:8]),
-        .cin(1'b0),
+        .cin(all_cin[4]),
         .s(s_red[3:0]),
         .ovfl(all_ovfl[4]),
         .prop_group(prop[4]),
@@ -86,29 +82,56 @@ module adder_multifunc_16bit(
     adder_cla_4bit adder5(
         .a(s_unsat[7:4]),
         .b(s_unsat[15:12]),
-        .cin(cla_cout[4]),
+        .cin(all_cin[5]),
         .s(s_red[7:4]),
         .ovfl(all_ovfl[5]),
         .prop_group(prop[5]),
         .gen_group(gen[5])
     );
+    adder_cla_4bit adder6(
+        .a({3'b0,cla_cout[1]}),
+        .b({3'b0,cla_cout[3]}),
+        .cin(all_cin[6]),
+        .s(s_red[11:8]),
+        .ovfl(all_ovfl[6]),
+        .prop_group(prop[6]),
+        .gen_group(gen[6])
+    );
 
     /*
      * CLA lookahead logic
      */
+    assign cla_cout[0] = gen[0] | (prop[0] & all_cin[0]);
+    assign cla_cout[1] = gen[1] | (prop[1] & all_cin[1]);
+    assign cla_cout[2] = gen[2] | (prop[2] & all_cin[2]);
+    assign cla_cout[3] = gen[3] | (prop[3] & all_cin[3]);
+    assign cla_cout[4] = gen[4] | (prop[4] & all_cin[4]);
+    assign cla_cout[5] = gen[5] | (prop[5] & all_cin[5]);
+    assign cla_cout[6] = gen[6] | (prop[6] & all_cin[6]);
 
-    // Adders 0-3 can be bifurcated into four 4-bit adders, two 8-bit adders,
-    // or one 16-bit adder depending on the control signals. How the
-    // carry-outs and ins are assigned determintes the connections.
-    assign cla_cout[0] = padd ?         1'b0 : gen[0] | (prop[0] & cin);
-    assign cla_cout[1] = padd | red ?   1'b0 : gen[1] | (prop[1] & cla_cout[0]);
-    assign cla_cout[2] = padd ?         1'b0 : gen[2] | (prop[2] & cla_cout[1]);
-    assign cla_cout[3] = padd ?         1'b0 : gen[3] | (prop[3] & cla_cout[2]);
+    /*
+     * Adders 0-3 can be bifurcated into four 4-bit adders, two 8-bit adders,
+     * or one 16-bit adder depending on the control signals. How the
+     * carry-ins are assigned determintes the connections.
+     */
+    assign all_cin[0] = sub; // do 2's complement if subtracting
+    assign all_cin[1] = padd ?          1'b0 : cla_cout[0];
+    assign all_cin[2] = padd | red ?    1'b0 : cla_cout[1];
+    assign all_cin[3] = padd ?          1'b0 : cla_cout[2];
 
-    // Adder 4 and adder 5 are only used for reductions, so don't do any
-    // special logic.
-    assign cla_cout[4] = gen[4];
-    assign cla_cout[5] = gen[5] | (prop[5] & cla_cout[4]);
+
+    /*
+     * Adders 4-6 comprise their own 12 bit adder used for reductions
+     */
+    assign all_cin[4] = 1'b0;
+    assign all_cin[5] = cla_cout[4];
+    assign all_cin[6] = cla_cout[5];
+
+    /*
+     * Do 2's complement on subtraction. all_cin[0] is the +1 part of 2's
+     * complement.
+     */
+    assign b_flip = sub? ~b : b;
 
 
     /*
@@ -129,7 +152,7 @@ module adder_multifunc_16bit(
             }
         :red?
             // In 8-bit reduction mode, sign extend the output from adders 4 and 5.
-            { {8{s_red[7]}}, s_red }
+            { {6{s_red[9]}}, s_red[9:0] }
         :
             // In 16 bit mode, saturate based on the final overflow bit.
             all_ovfl[3]? a[15]? 16'h8000 : 16'h7FFF : s_unsat[15:0]
