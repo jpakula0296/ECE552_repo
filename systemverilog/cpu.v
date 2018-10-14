@@ -15,7 +15,7 @@ wire data_wr;
 
 // Register File wires
 wire WriteReg;
-wire Z_in, O_in, N_in, Z_en, O_en, N_en, Z_out, O_out, N_out;
+wire Z_in, O_in, N_in, Z_out, O_out, N_out;
 wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData;
 wire load_instr; // for assigning regwrite enable
@@ -31,6 +31,7 @@ assign rst = ~rst_n; // keep active high/low resets straight
 assign hlt = (opcode == 4'b1111);
 
 // PC Control - determines next instruction fetched from PC memory
+//PC_control pc_cntrl(pc_new(pc_new), .flags())
 
 // PC Address Flip-Flop
 // feeds program memory address, changes every posedge clk
@@ -69,7 +70,8 @@ assign rt = (opcode[3]) ? instr[11:8] : instr[3:0];
 assign DstData = (load_instr) ? data_out : (PCS_instr) ? pc_new : ALU_out;
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
-  .DstData(DstData));
+  .DstData(DstData), .Z_in(Zin), .O_in(O_in), .N_in(N_in), .Z_out(Z_out),
+  .N_out(N_out), .O_out(O_out));
 
 // ALU
 alu ALU(.rs(rs), .rt(rt), .control(opcode), .rd(ALU_out), .N(N_in), .Z(Z_in), .V(O_in));

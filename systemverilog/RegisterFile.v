@@ -13,7 +13,6 @@ module RegisterFile(
 
   // flag register inputs/outputs
   input Z_in, O_in, N_in, // inputs to each flag bit FFs
-  input Z_en, O_en, N_en, // write enable signals for each FF
   output Z_out, O_out, N_out // flag FF outputs
 
   );
@@ -81,8 +80,8 @@ Register reg15(.clk(clk), .rst(rst), .WriteReg(WriteEnable[15]),
 .Bitline2(SrcData2));
 
 // Flag Register
-Flag_Register flag_reg(.clk(clk), .rst(rst), .Z_in(Z_in), .Z_en(Z_en), .Z_out(Z_out),
-  .O_in(O_in), .O_en(O_en), .O_out(O_out), .N_in(N_in), .N_en(N_en), .N_out(N_out));
+Flag_Register flag_reg(.clk(clk), .rst(rst), .Z_in(Z_in), .Z_en(1'b1), .Z_out(Z_out),
+  .O_in(O_in), .O_en(1'b1), .O_out(O_out), .N_in(N_in), .N_en(1'b1), .N_out(N_out));
 
 
 endmodule
