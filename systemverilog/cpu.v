@@ -37,7 +37,7 @@ assign hlt = (opcode == 4'b1111);
 // write enable strapped low, always reading
 // output is instr
 assign opcode = instr[15:12];
-memory1c prog_mem(.clk(clk), .rst(rst), .data_in(pc_data_in), .data_out(instr),
+pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(pc_data_in), .data_out(instr),
   .addr(pc_addr), .enable(1'b1), .wr(1'b0));
 
 // Register File
@@ -54,7 +54,7 @@ assign load_half_instr = load_instr & ~opcode[1];
 assign rd = instr[11:8];
 assign rs = (load_half_instr) ? instr[11:8] : instr[7:4];
 assign rt = (opcode[3]) ? instr[11:8] : instr[3:0];
-assign DstData = (load_instr) ? data_out : ALU_out; 
+assign DstData = (load_instr) ? data_out : ALU_out;
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
   .DstData(DstData));
@@ -74,7 +74,7 @@ data_mem_control data_control(.rsData(rsData), .rtData(rtData),
 // write enable assigned to store opcode
 // data_out to DstData
 assign data_wr = (opcode == 4'b1001); // only write on store instrs
-memory1c data_mem(.data_in(rtData), .data_out(data_out), .data_addr(data_addr),
+data_mem data_memory(.data_in(rtData), .data_out(data_out), .data_addr(data_addr),
   .enable(1'b1), .wr(data_wr), .clk(clk), .rst(rst));
 
 
