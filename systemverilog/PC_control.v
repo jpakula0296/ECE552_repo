@@ -1,6 +1,6 @@
 // PC encompasses all logic in deciding how to calculate pc_addr
 // including necessary computations
-module PC (
+module PC_control (
     output [15:0] pc_addr,
     input clk,
     input [2:0] flags,
