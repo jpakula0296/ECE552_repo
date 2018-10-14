@@ -9,38 +9,44 @@ module PC_control_tb();
     reg rst;
 
     PC_control DUT(
-        .pc_addr(pc_addr),
+        .pc_addr_out(pc_addr),
         .clk(clk),
         .flags(flags),
         .instruction(instruction),
         .branch_reg_addr(branch_reg_addr),
-        .pc_data_in(pc_data_in),
+        .pc_addr_in(pc_data_in),
         .rst(rst)
     );
 
     initial begin
         clk = 1'b1;
-        rst = 1'b0;
+        rst = 1'b1;
         flags = 3'b000;
-        instruction = 4'h0101;
-        branch_reg_addr = 4'h0000;
-        pc_data_in = 4'h0600;
+        instruction = 16'h0000;
+        branch_reg_addr = 16'h0000;
+        pc_data_in = 16'h0000;
 
         @(negedge clk);
-        $display("INPUTS:\n flags=%b  instruction=%h  branch_reg_addr=%h  pc_data_in=%h  pc_addr=%h  rst=%b",
-                            flags,    instruction,    branch_reg_addr,    pc_data_in,    pc_addr,    rst);
+        #1; $display("INPUTS:\n flags=%b  instruction=%h  branch_reg_addr=%h  pc_data_in=%h  pc_addr=%h  rst=%b",
+                                flags,    instruction,    branch_reg_addr,    pc_data_in,    pc_addr,    rst);
         @(posedge clk);
-        //rst=1'b0;
-        $display("OUTPUTS:\n pc_addr=%h",
-                             pc_addr);
+        #1; $display("OUTPUTS:\n pc_addr=%h", pc_addr);
 
 
         @(negedge clk);
-        $display("INPUTS:\n flags=%b  instruction=%h  branch_reg_addr=%h  pc_data_in=%h  pc_addr=%h  rst=%b",
-                            flags,    instruction,    branch_reg_addr,    pc_data_in,    pc_addr,    rst);
+        rst = 1'b0;
+        #1; $display("INPUTS:\n flags=%b  instruction=%h  branch_reg_addr=%h  pc_data_in=%h  pc_addr=%h  rst=%b",
+                                flags,    instruction,    branch_reg_addr,    pc_data_in,    pc_addr,    rst);
         @(posedge clk);
-        $display("OUTPUTS:\n pc_addr=%h",
-                             pc_addr);
+        #1; $display("OUTPUTS:\n pc_addr=%h", pc_addr);
+
+        @(negedge clk);
+        #1; $display("INPUTS:\n flags=%b  instruction=%h  branch_reg_addr=%h  pc_data_in=%h  pc_addr=%h  rst=%b",
+                                flags,    instruction,    branch_reg_addr,    pc_data_in,    pc_addr,    rst);
+        @(posedge clk);
+        #1; $display("OUTPUTS:\n pc_addr=%h", pc_addr);
+
+
 
 
 
