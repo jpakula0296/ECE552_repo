@@ -16,9 +16,10 @@ module adder_multifunc_16bit(
     input sub,          // setting to 1 does a subtraction instead of an addition
     input [15:0] a,     // src 1
     input [15:0] b,     // src 2, negated during subtraction
-    output [15:0] s     // result
+    output [15:0] s,    // result
+    output ovfl         // signals if overflow occured
 );
-    wire [5:0] ovfl;
+    wire [5:0] all_ovfl;
     wire [5:0] cla_cout;
     wire [5:0] prop, gen;
     wire [15:0] s_unsat;
@@ -40,7 +41,7 @@ module adder_multifunc_16bit(
         .b(b_flip[3:0]),
         .cin(cin),
         .s(s_unsat[3:0]),
-        .ovfl(ovfl[0]),
+        .ovfl(all_ovfl[0]),
         .prop_group(prop[0]),
         .gen_group(gen[0])
     );
@@ -49,7 +50,7 @@ module adder_multifunc_16bit(
         .b(b_flip[7:4]),
         .cin(cla_cout[0]),
         .s(s_unsat[7:4]),
-        .ovfl(ovfl[1]),
+        .ovfl(all_ovfl[1]),
         .prop_group(prop[1]),
         .gen_group(gen[1])
     );
@@ -58,7 +59,7 @@ module adder_multifunc_16bit(
         .b(b_flip[11:8]),
         .cin(cla_cout[1]),
         .s(s_unsat[11:8]),
-        .ovfl(ovfl[2]),
+        .ovfl(all_ovfl[2]),
         .prop_group(prop[2]),
         .gen_group(gen[2])
     );
@@ -67,7 +68,7 @@ module adder_multifunc_16bit(
         .b(b_flip[15:12]),
         .cin(cla_cout[2]),
         .s(s_unsat[15:12]),
-        .ovfl(ovfl[3]),
+        .ovfl(all_ovfl[3]),
         .prop_group(prop[3]),
         .gen_group(gen[3])
     );
@@ -78,7 +79,7 @@ module adder_multifunc_16bit(
         .b(s_unsat[11:8]),
         .cin(1'b0),
         .s(s_red[3:0]),
-        .ovfl(ovfl[4]),
+        .ovfl(all_ovfl[4]),
         .prop_group(prop[4]),
         .gen_group(gen[4])
     );
@@ -87,7 +88,7 @@ module adder_multifunc_16bit(
         .b(s_unsat[15:12]),
         .cin(cla_cout[4]),
         .s(s_red[7:4]),
-        .ovfl(ovfl[5]),
+        .ovfl(all_ovfl[5]),
         .prop_group(prop[5]),
         .gen_group(gen[5])
     );
@@ -121,18 +122,26 @@ module adder_multifunc_16bit(
             // In parallel mode, saturate each adder output individually and
             // then concatenate.
             {
-                ovfl[3] ? a[15] ? 4'h8 : 4'h7 : s_unsat[15:12],
-                ovfl[2] ? a[11] ? 4'h8 : 4'h7 : s_unsat[11:8],
-                ovfl[1] ? a[7]  ? 4'h8 : 4'h7 : s_unsat[7:4],
-                ovfl[0] ? a[3]  ? 4'h8 : 4'h7 : s_unsat[3:0]
+                all_ovfl[3] ? a[15] ? 4'h8 : 4'h7 : s_unsat[15:12],
+                all_ovfl[2] ? a[11] ? 4'h8 : 4'h7 : s_unsat[11:8],
+                all_ovfl[1] ? a[7]  ? 4'h8 : 4'h7 : s_unsat[7:4],
+                all_ovfl[0] ? a[3]  ? 4'h8 : 4'h7 : s_unsat[3:0]
             }
-        : red?
+        :red?
             // In 8-bit reduction mode, sign extend the output from adders 4 and 5.
             { {8{s_red[7]}}, s_red }
         :
             // In 16 bit mode, saturate based on the final overflow bit.
-            ovfl[3]? a[15]? 16'h8000 : 16'h7FFF : s_unsat[15:0]
+            all_ovfl[3]? a[15]? 16'h8000 : 16'h7FFF : s_unsat[15:0]
         ;
 
+    assign ovfl = 
+        padd?
+            |all_ovfl[3:0]
+        :red?
+            0
+        :
+            all_ovfl[3]
+        ;
 
 endmodule

@@ -19,3 +19,5 @@ assign offset_ext = {{11{offset_shift[4]}}, offset_shift[4:0]};
 
 // add rs and processed immedate to get target address
 rca_16bit add0(.a(rsData), .b(offset_ext), .cin(1'b0), .s(target_addr), .cout());
+
+endmodule
