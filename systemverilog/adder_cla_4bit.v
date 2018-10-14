@@ -13,6 +13,7 @@ module adder_cla_4bit(
     output gen_group
 );
     wire [3:0] carry;
+    wire [3:0] dummy_cout; // needed to suppress warning
 
     /*
      * Spec calls for a CLA adder, so use a CLA module.
@@ -33,25 +34,29 @@ module adder_cla_4bit(
         .a(a[0]),
         .b(b[0]),
         .cin(cin),
-        .s(s[0])
+        .s(s[0]),
+        .cout(dummy_cout[0])
     );
     full_adder fa1(
         .a(a[1]),
         .b(b[1]),
         .cin(carry[0]),
-        .s(s[1])
+        .s(s[1]),
+        .cout(dummy_cout[1])
     );
     full_adder fa2(
         .a(a[2]),
         .b(b[2]),
         .cin(carry[1]),
-        .s(s[2])
+        .s(s[2]),
+        .cout(dummy_cout[2])
     );
     full_adder fa3(
         .a(a[3]),
         .b(b[3]),
         .cin(carry[2]),
-        .s(s[3])
+        .s(s[3]),
+        .cout(dummy_cout[3])
     );
 
     assign cout = carry[3];
