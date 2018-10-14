@@ -10,6 +10,7 @@ module alu(
     output          V,
     output          Z
 );
+
     wire [15:0] add_multifunc_out;
     reg [2:0] adder_control;
     wire ovfl;
@@ -23,6 +24,13 @@ module alu(
 
     wire [15:0] read_modify_low_byte;
 
+    reg rd_reg;
+    assign rd = rd_reg;
+
+    reg N_reg, V_reg, Z_reg;
+    assign N = N_reg;
+    assign V = V_reg;
+    assign Z = Z_reg;
 
     /*
      * Set up each of the output modes
@@ -42,7 +50,7 @@ module alu(
         .Shift_In(rs),
         .Shift_Val(rt[3:0]),
         .Shift_Out(shift_out),
-        .Shift_Mode(shift_mode)
+        .Mode(shift_mode)
     );
 
     assign xor_out = rs ^ rt;
@@ -77,46 +85,46 @@ module alu(
 
     // rd mux
     always @(*) case(control)
-        4'h0 : rd = add_multifunc_out;      // ADD
-        4'h1 : rd = add_multifunc_out;      // SUB
-        4'h2 : rd = xor_out;                // XOR
-        4'h3 : rd = add_multifunc_out;      // RED
-        4'h4 : rd = shift_out;              // SLL
-        4'h5 : rd = shift_out;              // SRA
-        4'h6 : rd = shift_out;              // ROR
-        4'h7 : rd = add_multifunc_out;      // PADDSB
-        4'h8 : rd = add_multifunc_out;      // LW
-        4'h9 : rd = add_multifunc_out;      // SW
-        4'hA : rd = read_modify_low_byte;   // LLB
-        4'hB : rd = read_modify_high_byte;  // LHB
-        default : rd = 16'hDEAD;
+        4'h0 : rd_reg = add_multifunc_out;      // ADD
+        4'h1 : rd_reg = add_multifunc_out;      // SUB
+        4'h2 : rd_reg = xor_out;                // XOR
+        4'h3 : rd_reg = add_multifunc_out;      // RED
+        4'h4 : rd_reg = shift_out;              // SLL
+        4'h5 : rd_reg = shift_out;              // SRA
+        4'h6 : rd_reg = shift_out;              // ROR
+        4'h7 : rd_reg = add_multifunc_out;      // PADDSB
+        4'h8 : rd_reg = add_multifunc_out;      // LW
+        4'h9 : rd_reg = add_multifunc_out;      // SW
+        4'hA : rd_reg = read_modify_low_byte;   // LLB
+        4'hB : rd_reg = read_modify_high_byte;  // LHB
+        default : rd_reg = 16'hDEAD;
     endcase
 
     // N flag
     always @(*) case(control)
-        4'h0 : N = rd[15]; // ADD
-        4'h1 : N = rd[15]; // SUB
-        default : N = 1'b0;
+        4'h0 : N_reg = rd[15]; // ADD
+        4'h1 : N_reg = rd[15]; // SUB
+        default : N_reg = 1'b0;
     endcase
 
     // Z flag
     wire z;
     assign z = rd==16'h0;
     always @(*) case(control)
-        4'h0 : Z = z; // ADD
-        4'h1 : Z = z; // SUB
-        4'h2 : Z = z; // XOR
-        4'h4 : Z = z; // SLL
-        4'h5 : Z = z; // SRA
-        4'h6 : Z = z; // ROR
-        default : Z = 1'b0;
+        4'h0 : Z_reg = z; // ADD
+        4'h1 : Z_reg = z; // SUB
+        4'h2 : Z_reg = z; // XOR
+        4'h4 : Z_reg = z; // SLL
+        4'h5 : Z_reg = z; // SRA
+        4'h6 : Z_reg = z; // ROR
+        default : Z_reg = 1'b0;
     endcase
 
     // V flag
     always @(*) case(control)
-        4'h0 : V = ovfl; // ADD
-        4'h1 : V = ovfl; // SUB
-        default : V = 1'b0;
+        4'h0 : V_reg = ovfl; // ADD
+        4'h1 : V_reg = ovfl; // SUB
+        default : V_reg = 1'b0;
     endcase
 
 endmodule

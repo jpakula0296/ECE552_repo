@@ -19,8 +19,8 @@ initial begin
   while (i > 0) begin
 
   // set random inputs
-  Shift_In = $random();
-  Shift_Val = $random();
+  Shift_In = $random;
+  Shift_Val = $random;
 
   Mode = 2'b00; // start with shift left
 
