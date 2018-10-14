@@ -1,4 +1,4 @@
-.PHONY: all clean
+.PHONY: all clean cpu
 
 OUTDIR = ./iverilog
 TBDIR = ./tb
@@ -20,6 +20,8 @@ all: $(TESTBENCH_OBJECTS)
 	for tb in $^ ; do \
 		./$$tb;\
 	done
+
+cpu: $(OUTDIR)/cpu_tb.vvp
 
 # assumes the test bench module's name matches the file name before the file extension
 $(OUTDIR)/%.vvp: $(TBDIR)/%.v $(MODULES) | $(OUTDIR)
