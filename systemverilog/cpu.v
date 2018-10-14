@@ -23,6 +23,7 @@ wire load_half_instr;
 
 wire [15:0] ALU_out; // ALU output
 
+wire rst;
 assign rst = ~rst_n; // keep active high/low resets straight
 assign hlt = (opcode == 4'b1111);
 
