@@ -60,7 +60,7 @@ RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .DstData(DstData));
 
 // ALU
-alu ALU(.rs(rs), .rt(rt), .control(instr[14:12]), .rd(ALU_out));
+alu ALU(.rs(rs), .rt(rt), .control(opcode), .rd(ALU_out), .N(N_in), .Z(Z_in), .V(O_in));
 
 // Data Memory Control - Computes Data Memory address based on instruction
 // read data registers from register file, offset from instruction

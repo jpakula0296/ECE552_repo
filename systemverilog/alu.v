@@ -100,13 +100,15 @@ module alu(
     endcase
 
     // Z flag
+    wire z;
+    assign z = rd==16'h0;
     always @(*) case(control)
-        4'h0 : Z = rd==16'h0; // ADD
-        4'h1 : Z = rd==16'h0; // SUB
-        4'h2 : Z = rd==16'h0; // XOR
-        4'h4 : Z = rd==16'h0; // SLL
-        4'h5 : Z = rd==16'h0; // SRA
-        4'h6 : Z = rd==16'h0; // ROR
+        4'h0 : Z = z; // ADD
+        4'h1 : Z = z; // SUB
+        4'h2 : Z = z; // XOR
+        4'h4 : Z = z; // SLL
+        4'h5 : Z = z; // SRA
+        4'h6 : Z = z; // ROR
         default : Z = 1'b0;
     endcase
 
