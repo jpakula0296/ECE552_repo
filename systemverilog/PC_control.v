@@ -2,12 +2,11 @@
 // including necessary computations
 module PC_control (
     output [15:0] pc_new,
-    input clk,
     input [2:0] flags,
     input [15:0] instruction, // need full instr for conditional branch
     input [15:0] branch_reg_addr, // connected to rs data
-    input [15:0] pc_current,
-    input rst);
+    input [15:0] pc_current
+    );
 
 wire [15:0] plus_two, branch_imm, plus_imm;
 wire [3:0] opcode;
@@ -47,7 +46,7 @@ rca_16bit plus2 ( // PC + 2
 );
 rca_16bit plusimm ( // PC + 2 + (I << 1)
     .a(plus_two),
-    .b({{8{1'b0}}, immediate}),
+    .b({{8{1'b0}}, (immediate << 1)}),
     .cin(1'b0),
     .s(branch_imm),
     .cout()
