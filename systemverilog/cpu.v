@@ -86,7 +86,7 @@ data_mem_control data_control(.rsData(rsData), .rtData(rtData),
 // write enable assigned to store opcode
 // data_out to DstData
 assign data_wr = (opcode == 4'b1001); // only write on store instrs
-data_mem data_memory(.data_in(rtData), .data_out(data_out), .data_addr(data_addr),
+data_mem data_memory(.data_in(rtData), .data_out(data_out), .addr(data_addr),
   .enable(1'b1), .wr(data_wr), .clk(clk), .rst(rst));
 
 
