@@ -4,8 +4,7 @@ module cpu(
   output [15:0] pc
   );
 
-// control module (opcode directly connected to instr)
-wire [3:0] opcode;
+wire [3:0] opcode; // pulled from instruction
 
 // PC Memory
 wire [15:0] pc_data_in, instr, pc_addr;
@@ -21,6 +20,8 @@ wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData;
 wire load_instr; // for assigning regwrite enable
 wire load_half_instr;
+
+wire [15:0] ALU_out; // ALU output
 
 assign rst = ~rst_n; // keep active high/low resets straight
 assign hlt = (opcode == 4'b1111);
@@ -56,6 +57,7 @@ RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .DstData(DstData));
 
 // ALU
+alu ALU(.rs(rs), .rt(rt), .control(instr[14:12]), .rd(ALU_out));
 
 // Data Memory
 // data_in from register rt, data_out to DstReg multiplexer, address from ALU,
