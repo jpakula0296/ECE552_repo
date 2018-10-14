@@ -34,11 +34,8 @@ always @* case (condition_flags)
   3'b111 : condition_passed = 1'b1; // unconditional
 endcase
 
-
-
 wire [7:0] immediate;
 assign immediate = instruction[7:0];
-
 
 // State Flip-flop
 // feeds program memory address, changes every posedge clk
