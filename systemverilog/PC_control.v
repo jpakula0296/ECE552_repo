@@ -1,17 +1,17 @@
-// PC encompasses all logic in deciding how to calculate pc_addr
+// PC encompasses all logic in deciding how to calculate pc_addr_out
 // including necessary computations
 module PC_control (
-    output [15:0] pc_addr,
+    output [15:0] pc_new,
     input clk,
     input [2:0] flags,
     input [15:0] instruction, // need full instr for conditional branch
     input [15:0] branch_reg_addr, // connected to rs data
-    input [15:0] pc_data_in,
+    input [15:0] pc_current,
     input rst);
 
 wire [15:0] plus_two, branch_imm, plus_imm;
 wire [3:0] opcode;
-assign opcode = instruction[15:11]; // used to decide final pc_data_in
+assign opcode = instruction[15:11]; // used to decide final pc_addr_in
 
 wire Z_flag;
 assign Z_flag = flags[0];
@@ -37,15 +37,9 @@ endcase
 wire [7:0] immediate;
 assign immediate = instruction[7:0];
 
-// State Flip-flop
-// feeds program memory address, changes every posedge clk
-// input calculated from PC+4 or branch instruction
-// write enable not needed, keep high
-dff_16bit DFF0(.q(pc_addr), .d(pc_data_in), .wen(1'b1), .clk(clk), .rst(rst));
-
 // Adder modules
 rca_16bit plus2 ( // PC + 2
-    .a(pc_addr),
+    .a(pc_current),
     .b(16'h2),
     .cin(1'b0),
     .s(plus_two),
@@ -59,7 +53,7 @@ rca_16bit plusimm ( // PC + 2 + (I << 1)
     .cout()
 );
 
-assign pc_data_in = (opcode == 4'b1111) ? pc_addr : // halt
+assign pc_new = (opcode == 4'b1111) ? pc_current : // halt
   (~condition_passed) ?  plus_two : (opcode == 4'b1100) ? branch_imm :
   (opcode == 4'b1101) ? branch_reg_addr : plus_two;
 

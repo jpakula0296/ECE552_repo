@@ -7,7 +7,7 @@ module cpu(
 wire [3:0] opcode; // pulled from instruction
 
 // PC Memory
-wire [15:0] pc_data_in, instr, pc_addr;
+wire [15:0] pc_current, instr, pc_new;
 
 // Data Memory
 wire [15:0] data_out, data_addr;
@@ -28,6 +28,11 @@ assign hlt = (opcode == 4'b1111);
 
 // PC Control - determines next instruction fetched from PC memory
 
+// PC Address Flip-Flop
+// feeds program memory address, changes every posedge clk
+// input calculated from PC+2 or branch instruction
+// write enable not needed, keep high
+dff_16bit DFF0(.q(pc_current), .d(pc_new), .wen(1'b1), .clk(clk), .rst(rst));
 
 // PC Memory, read only
 // data_in doesn't need connection, never write data after initial loading
@@ -38,7 +43,7 @@ assign hlt = (opcode == 4'b1111);
 // output is instr
 assign opcode = instr[15:12];
 pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(pc_data_in), .data_out(instr),
-  .addr(pc_addr), .enable(1'b1), .wr(1'b0));
+  .addr(pc_current), .enable(1'b1), .wr(1'b0));
 
 // Register File
 // DstReg, SrcRegs from instr, WriteReg from opcode
