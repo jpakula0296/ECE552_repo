@@ -28,6 +28,11 @@ assign hlt = (opcode == 4'b1111);
 
 // PC Control - determines next instruction fetched from PC memory
 
+// PC Address Flip-Flop
+// feeds program memory address, changes every posedge clk
+// input calculated from PC+2 or branch instruction
+// write enable not needed, keep high
+dff_16bit DFF0(.q(pc_current), .d(pc_new), .wen(1'b1), .clk(clk), .rst(rst));
 
 // PC Memory, read only
 // data_in doesn't need connection, never write data after initial loading

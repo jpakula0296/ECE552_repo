@@ -37,12 +37,6 @@ endcase
 wire [7:0] immediate;
 assign immediate = instruction[7:0];
 
-// State Flip-flop
-// feeds program memory address, changes every posedge clk
-// input calculated from PC+4 or branch instruction
-// write enable not needed, keep high
-dff_16bit DFF0(.q(pc_current), .d(pc_new), .wen(1'b1), .clk(clk), .rst(rst));
-
 // Adder modules
 rca_16bit plus2 ( // PC + 2
     .a(pc_current),
