@@ -22,6 +22,7 @@ all: $(TESTBENCH_OBJECTS)
 	done
 
 cpu: $(OUTDIR)/cpu_tb.vvp
+	./$^
 
 # assumes the test bench module's name matches the file name before the file extension
 $(OUTDIR)/%.vvp: $(TBDIR)/%.v $(MODULES) | $(OUTDIR)
