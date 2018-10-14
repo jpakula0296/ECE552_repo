@@ -7,7 +7,7 @@ module cpu(
 wire [3:0] opcode; // pulled from instruction
 
 // PC Memory
-wire [15:0] pc_data_in, instr, pc_addr;
+wire [15:0] pc_current, instr, pc_new;
 
 // Data Memory
 wire [15:0] data_out, data_addr;
@@ -38,7 +38,7 @@ assign hlt = (opcode == 4'b1111);
 // output is instr
 assign opcode = instr[15:12];
 pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(pc_data_in), .data_out(instr),
-  .addr(pc_addr), .enable(1'b1), .wr(1'b0));
+  .addr(pc_current), .enable(1'b1), .wr(1'b0));
 
 // Register File
 // DstReg, SrcRegs from instr, WriteReg from opcode
