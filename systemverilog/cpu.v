@@ -28,7 +28,7 @@ assign hlt = (opcode == 4'b1111);
 
 // PC Memory, read only
 // data_in doesn't need connection, never write data after initial loading
-// address multiplexed from PC+4 and branch/jump logic
+// address multiplexed from PC+2 and branch/jump logic
 // on hlt instruction pc_addr holds its value
 // enable strapped high since we are always reading from this memor
 // write enable strapped low, always reading
