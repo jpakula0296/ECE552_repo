@@ -26,6 +26,7 @@ module adder_multifunc_16bit(
     wire [15:0] s_unsat;    // the adder output before saturation is applied
     wire [11:0] s_red;      // the reduction output
     wire [15:0] b_flip;     // the b operand with optionally applied inversion
+    wire [6:0] dummy_cout;  // suppresses warnings in Modelsim
 
     /*
      * Adder instantiation
@@ -39,7 +40,8 @@ module adder_multifunc_16bit(
         .s(s_unsat[3:0]),
         .ovfl(all_ovfl[0]),
         .prop_group(prop[0]),
-        .gen_group(gen[0])
+        .gen_group(gen[0]),
+        .cout(dummy_cout[0])
     );
     adder_cla_4bit adder1(
         .a(a[7:4]),
@@ -48,7 +50,8 @@ module adder_multifunc_16bit(
         .s(s_unsat[7:4]),
         .ovfl(all_ovfl[1]),
         .prop_group(prop[1]),
-        .gen_group(gen[1])
+        .gen_group(gen[1]),
+        .cout(dummy_cout[1])
     );
     adder_cla_4bit adder2(
         .a(a[11:8]),
@@ -57,7 +60,8 @@ module adder_multifunc_16bit(
         .s(s_unsat[11:8]),
         .ovfl(all_ovfl[2]),
         .prop_group(prop[2]),
-        .gen_group(gen[2])
+        .gen_group(gen[2]),
+        .cout(dummy_cout[2])
     );
     adder_cla_4bit adder3(
         .a(a[15:12]),
@@ -66,7 +70,8 @@ module adder_multifunc_16bit(
         .s(s_unsat[15:12]),
         .ovfl(all_ovfl[3]),
         .prop_group(prop[3]),
-        .gen_group(gen[3])
+        .gen_group(gen[3]),
+        .cout(dummy_cout[3])
     );
 
     // additional adders needed for 8 bit reductions
@@ -77,7 +82,8 @@ module adder_multifunc_16bit(
         .s(s_red[3:0]),
         .ovfl(all_ovfl[4]),
         .prop_group(prop[4]),
-        .gen_group(gen[4])
+        .gen_group(gen[4]),
+        .cout(dummy_cout[4])
     );
     adder_cla_4bit adder5(
         .a(s_unsat[7:4]),
@@ -86,7 +92,8 @@ module adder_multifunc_16bit(
         .s(s_red[7:4]),
         .ovfl(all_ovfl[5]),
         .prop_group(prop[5]),
-        .gen_group(gen[5])
+        .gen_group(gen[5]),
+        .cout(dummy_cout[5])
     );
     adder_cla_4bit adder6(
         .a({3'b0,cla_cout[1]}),
@@ -95,7 +102,8 @@ module adder_multifunc_16bit(
         .s(s_red[11:8]),
         .ovfl(all_ovfl[6]),
         .prop_group(prop[6]),
-        .gen_group(gen[6])
+        .gen_group(gen[6]),
+        .cout(dummy_cout[6])
     );
 
     /*
