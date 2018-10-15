@@ -52,7 +52,7 @@ rca_16bit plusimm ( // PC + 2 + (I << 1)
     .cout()
 );
 
-assign pc_new = (opcode == 4'b1111) ? pc_current : // halt
+assign pc_new = (opcode == 4'b1111) ? pc_new : // halt
   (~condition_passed) ?  plus_two : (opcode == 4'b1100) ? branch_imm :
   (opcode == 4'b1101) ? branch_reg_addr : plus_two;
 
