@@ -8,6 +8,7 @@ wire [3:0] opcode; // pulled from instruction
 
 // PC Memory
 wire [15:0] pc_current, instr, pc_new;
+wire [2:0] flags;
 
 // Data Memory
 wire [15:0] data_out, data_addr;
@@ -15,7 +16,7 @@ wire data_wr;
 
 // Register File wires
 wire WriteReg;
-wire Z_in, O_in, N_in, Z_out, O_out, N_out;
+wire Z_in, V_in, N_in, Z_out, V_out, N_out;
 wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData;
 wire load_instr; // for assigning regwrite enable
@@ -31,7 +32,11 @@ assign rst = ~rst_n; // keep active high/low resets straight
 assign hlt = (opcode == 4'b1111);
 
 // PC Control - determines next instruction fetched from PC memory
-//PC_control pc_cntrl(pc_new(pc_new), .flags())
+// flags based on output of flag register, flops ALU flag outputs
+// branch_reg_addr acts on register RS
+assign flags = {V_out, N_out, Z_out};
+PC_control pc_cntrl(.pc_new(pc_new), .flags(flags), .instruction(instr),
+  .branch_reg_addr(rsData), .pc_current(pc_current));
 
 // PC Address Flip-Flop
 // feeds program memory address, changes every posedge clk
@@ -47,7 +52,7 @@ dff_16bit DFF0(.q(pc_current), .d(pc_new), .wen(1'b1), .clk(clk), .rst(rst));
 // write enable strapped low, always reading
 // output is instr
 assign opcode = instr[15:12];
-pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(pc_data_in), .data_out(instr),
+pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
   .addr(pc_current), .enable(1'b1), .wr(1'b0));
 
 // Register File
@@ -70,11 +75,11 @@ assign rt = (opcode[3]) ? instr[11:8] : instr[3:0];
 assign DstData = (load_instr) ? data_out : (PCS_instr) ? pc_new : ALU_out;
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
-  .DstData(DstData), .Z_in(Zin), .O_in(O_in), .N_in(N_in), .Z_out(Z_out),
-  .N_out(N_out), .O_out(O_out));
+  .DstData(DstData), .Z_in(Zin), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
+  .N_out(N_out), .V_out(V_out));
 
 // ALU
-alu ALU(.rs(rs), .rt(rt), .control(opcode), .rd(ALU_out), .N(N_in), .Z(Z_in), .V(O_in));
+alu ALU(.rs(rs), .rt(rt), .control(opcode), .rd(ALU_out), .N(N_in), .Z(Z_in), .V(V_in));
 
 // Data Memory Control - Computes Data Memory address based on instruction
 // read data registers from register file, offset from instruction
@@ -91,5 +96,6 @@ assign data_wr = (opcode == 4'b1001); // only write on store instrs
 data_mem data_memory(.data_in(rtData), .data_out(data_out), .addr(data_addr),
   .enable(1'b1), .wr(data_wr), .clk(clk), .rst(rst));
 
-
+// assign output pc
+assign pc = pc_current;
 endmodule

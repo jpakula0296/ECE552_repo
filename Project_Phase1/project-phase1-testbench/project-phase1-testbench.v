@@ -26,7 +26,7 @@ module cpu_tb();
 
 
 
-   cpu DUT(.clk(clk), .rst_n(rst_n), .pc_current(PC), .hlt(Halt)); /* Instantiate your processor */
+   cpu DUT(.clk(clk), .rst_n(rst_n), .pc(PC), .hlt(Halt)); /* Instantiate your processor */
 
 
 
@@ -174,7 +174,7 @@ module cpu_tb();
    assign MemAddress = DUT.data_memory.addr;
    // Address to access memory with (for both reads and writes to memory, 16 bits)
 
-   assign MemData = DUT.memory0.data_memory.data_out;
+   assign MemData = DUT.data_memory.data_out;
    // Data to be written to memory for memory writes (16 bits)
 
 //   assign Halt = DUT.memory0.halt; //You won't need this because it's part of the main cpu interface
