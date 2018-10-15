@@ -66,9 +66,10 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
 // WriteReg on all compute and LW instrs
 // DstData is either ALU or memory depending on instruction
 // rd = 0 when not write instruction, can't write to this register
+//TODO // load_half_instr isn't going high when it should
 assign load_instr = opcode[3] & ~opcode[2];
 assign PCS_instr = (opcode == 4'b1110);
-assign load_half_instr = load_instr & ~opcode[1];
+assign load_half_instr = load_instr & opcode[1];
 assign ALU_instr = ~opcode[3];
 assign WriteReg = ALU_instr | load_instr | PCS_instr;
 assign rd = instr[11:8];
@@ -83,13 +84,14 @@ assign DstData =
         ALU_out
     ;
 
+// TODO: Registers are not initializing to zero.
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
   .DstData(DstData), .Z_in(Zin), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
   .N_out(N_out), .V_out(V_out));
 
 // ALU
-assign ALU_rt_data = load_half_instr? {8'h0, instr[7:0]} : rtData;
+assign ALU_rt_data = load_half_instr ? {8'h0, instr[7:0]} : rtData;
 alu ALU(.rs(rsData), .rt(ALU_rt_data), .control(opcode), .rd(ALU_out), .N(N_in), .Z(Z_in), .V(V_in));
 
 // Data Memory Control - Computes Data Memory address based on instruction
