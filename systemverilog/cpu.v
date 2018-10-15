@@ -24,7 +24,9 @@ wire load_half_instr;
 wire ALU_instr;
 wire reg_write_instr; // if not high 'write' to $0 since we can't anyway
 
+// ALU wires
 wire [15:0] ALU_out; // ALU output
+wire [15:0] ALU_rt_data; // data fed into rt of ALU
 
 wire rst;
 assign rst = ~rst_n; // keep active high/low resets straight
@@ -65,16 +67,25 @@ assign load_half_instr = load_instr & ~opcode[1];
 assign ALU_instr = ~opcode[3];
 assign WriteReg = ALU_instr | load_instr | PCS_instr;
 assign rd = instr[11:8];
-assign rs = (load_half_instr) ? instr[11:8] : instr[7:4];
+assign rs = (load_half_instr) ? rd : instr[7:4];
 assign rt = (opcode[3]) ? instr[11:8] : instr[3:0];
-assign DstData = (load_instr) ? data_out : (PCS_instr) ? pc_new : ALU_out;
+assign DstData =
+    (load_instr)?
+        data_out
+    :(PCS_instr)?
+        pc_new
+    :
+        ALU_out
+    ;
+
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
   .DstData(DstData), .Z_in(Zin), .O_in(O_in), .N_in(N_in), .Z_out(Z_out),
   .N_out(N_out), .O_out(O_out));
 
 // ALU
-alu ALU(.rs(rs), .rt(rt), .control(opcode), .rd(ALU_out), .N(N_in), .Z(Z_in), .V(O_in));
+assign ALU_rt_data = load_half_instr? {8'h0, instr[7:0]} : rtData;
+alu ALU(.rs(rsData), .rt(ALU_rt_data), .control(opcode), .rd(ALU_out), .N(N_in), .Z(Z_in), .V(O_in));
 
 // Data Memory Control - Computes Data Memory address based on instruction
 // read data registers from register file, offset from instruction
