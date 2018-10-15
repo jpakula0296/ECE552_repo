@@ -52,7 +52,7 @@ module pc_mem (data_out, data_in, addr, enable, wr, clk, rst);
       if (rst) begin
          //load loadfile_all.img
          if (!loaded) begin
-            $readmemh("loadfile_all.img", mem);
+            $readmemh("test1.txt", mem);
             loaded = 1;
          end
 
@@ -88,20 +88,20 @@ module data_mem (data_out, data_in, addr, enable, wr, clk, rst);
    end
 
    always @(posedge clk) begin
-      if (rst) begin
-         //load loadfile_all.img
-         if (!loaded) begin
-            $readmemh("data_mem.txt", mem);
-            loaded = 1;
-         end
-
-      end
-      else begin
+      // if (rst) begin
+      //    //load loadfile_all.img
+      //    if (!loaded) begin
+      //       $readmemh("data_mem.txt", mem);
+      //       loaded = 1;
+      //    end
+      //
+      // end
+      // else begin
          if (enable & wr) begin
 	        mem[addr[ADDR_WIDTH-1 :1]] = data_in[15:0];       // The actual write
          end
-      end
-   end
+   //    end
+    end
 
 
 endmodule
