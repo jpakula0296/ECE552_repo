@@ -58,7 +58,7 @@ endcase
 
 // Rotate right operation
 always @* case (Shift_Val)
-  4'b0000 : rotate_right = Shift_In;
+  4'b0000 : rotate_right = Shift_In[15:0];
   4'b0001 : rotate_right = {Shift_In[0], Shift_In[15:1]};
   4'b0010 : rotate_right = {Shift_In[1:0], Shift_In[15:2]};
   4'b0011 : rotate_right = {Shift_In[2:0], Shift_In[15:3]};

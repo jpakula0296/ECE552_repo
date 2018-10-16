@@ -8,7 +8,7 @@ module alu(
     input [3:0]     control,
     output          N,
     output          V,
-    output          Z
+    output          Z_flag
 );
 
     wire [15:0] add_multifunc_out;
@@ -30,7 +30,7 @@ module alu(
     reg N_reg, V_reg, Z_reg;
     assign N = N_reg;
     assign V = V_reg;
-    assign Z = Z_reg;
+    assign Z_flag = Z_reg;
 
     /*
      * Set up each of the output modes
@@ -108,15 +108,15 @@ module alu(
     endcase
 
     // Z flag
-    wire z;
-    assign z = rd==16'h0;
+    wire z_flag;
+    assign z_flag = rd==16'h0;
     always @(*) case(control)
-        4'h0 : Z_reg = z; // ADD
-        4'h1 : Z_reg = z; // SUB
-        4'h2 : Z_reg = z; // XOR
-        4'h4 : Z_reg = z; // SLL
-        4'h5 : Z_reg = z; // SRA
-        4'h6 : Z_reg = z; // ROR
+        4'h0 : Z_reg = z_flag; // ADD
+        4'h1 : Z_reg = z_flag; // SUB
+        4'h2 : Z_reg = z_flag; // XOR
+        4'h4 : Z_reg = z_flag; // SLL
+        4'h5 : Z_reg = z_flag; // SRA
+        4'h6 : Z_reg = z_flag; // ROR
         default : Z_reg = 1'b0;
     endcase
 

@@ -91,7 +91,7 @@ RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
 
 // ALU
 assign ALU_rt_data = load_half_instr ? {8'h0, instr[7:0]} : rtData;
-alu ALU(.rs(rsData), .rt(ALU_rt_data), .control(opcode), .rd(ALU_out), .N(N_in), .Z(Z_in), .V(V_in));
+alu ALU(.rs(rsData), .rt(ALU_rt_data), .control(opcode), .rd(ALU_out), .N(N_in), .Z_flag(Z_in), .V(V_in));
 
 // Data Memory Control - Computes Data Memory address based on instruction
 // read data registers from register file, offset from instruction
