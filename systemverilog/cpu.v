@@ -87,7 +87,7 @@ assign DstData =
 
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
-  .DstData(DstData), .Z_in(Zin), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
+  .DstData(DstData), .Z_in(Z_in), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
   .N_out(N_out), .V_out(V_out), .load_half_instr(load_half_instr));
 
 // ALU
