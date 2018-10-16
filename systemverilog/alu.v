@@ -24,7 +24,7 @@ module alu(
 
     wire [15:0] read_modify_low_byte;
 
-    reg rd_reg;
+    reg [15:0] rd_reg;
     assign rd = rd_reg;
 
     reg N_reg, V_reg, Z_reg;
