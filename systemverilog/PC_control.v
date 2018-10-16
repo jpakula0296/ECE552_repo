@@ -10,7 +10,7 @@ module PC_control (
 
 wire [15:0] plus_two, branch_imm, plus_imm;
 wire [3:0] opcode;
-assign opcode = instruction[15:11]; // used to decide final pc_addr_in
+assign opcode = instruction[15:12]; // used to decide final pc_addr_in
 
 wire Z_flag;
 assign Z_flag = flags[0];
