@@ -76,7 +76,7 @@ assign rd = instr[11:8];
 assign rs = (load_half_instr) ? rd : instr[7:4];
 assign rt = (opcode[3]) ? instr[11:8] : instr[3:0];
 assign DstData =
-    (load_instr)?
+    (load_instr & ~load_half_instr)?
         data_out
     :(PCS_instr)?
         pc_new
