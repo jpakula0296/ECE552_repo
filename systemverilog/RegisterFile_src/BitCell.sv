@@ -4,7 +4,7 @@
  */
 
 module BitCell(
-  input clk, rst, D, WriteEnable, ReadEnable1, ReadEnable2, load_half_instr,
+  input clk, rst, D, WriteEnable, ReadEnable1, ReadEnable2,
   inout Bitline1, Bitline2
   );
 
@@ -14,9 +14,7 @@ module BitCell(
 dff DFF(.clk(clk), .rst(rst), .d(D), .wen(WriteEnable), .q(Q));
 
 // tristate output to the bitlines, implement bypass
-assign Bitline1 = (WriteEnable & ReadEnable1 & ~load_half_instr) ? D :
-                  (ReadEnable1) ? Q : 1'bz;
-assign Bitline2 = (WriteEnable & ReadEnable2 & ~load_half_instr) ? D :
-                  (ReadEnable2) ? Q : 1'bz;
+assign Bitline1 = (ReadEnable1) ? Q : 1'bz;
+assign Bitline2 = (ReadEnable2) ? Q : 1'bz;
 
 endmodule
