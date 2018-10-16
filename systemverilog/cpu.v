@@ -84,7 +84,6 @@ assign DstData =
         ALU_out
     ;
 
-// TODO: Registers are not initializing to zero.
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
   .DstData(DstData), .Z_in(Zin), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
