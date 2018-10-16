@@ -81,7 +81,7 @@ Register reg15(.clk(clk), .rst(rst), .WriteReg(WriteEnable[15]),
 
 // Flag Register
 Flag_Register flag_reg(.clk(clk), .rst(rst), .Z_in(Z_in), .Z_en(1'b1), .Z_out(Z_out),
-  .V_in(V_in), .O_en(1'b1), .V_out(V_out), .N_in(N_in), .N_en(1'b1), .N_out(N_out));
+  .V_in(V_in), .V_en(1'b1), .V_out(V_out), .N_in(N_in), .N_en(1'b1), .N_out(N_out));
 
 
 endmodule
