@@ -20,7 +20,7 @@ wire V_flag;
 assign V_flag = flags[2];
 
 wire [2:0] condition_flags; // from instruction \
-assign condition_flags = instruction[10:8];
+assign condition_flags = instruction[11:9];
 reg condition_passed;
 always @* case (condition_flags)
   3'b000 : condition_passed = ~Z_flag; // not equal
