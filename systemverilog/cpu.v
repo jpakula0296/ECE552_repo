@@ -20,6 +20,7 @@ wire Z_in, V_in, N_in, Z_out, V_out, N_out;
 wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData;
 wire load_instr; // for assigning regwrite enable
+wire imm_instr;
 wire PCS_instr; // for assiging DstData
 wire load_half_instr;
 wire ALU_instr;
