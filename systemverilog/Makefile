@@ -44,4 +44,4 @@ $(OUTDIR):
 	mkdir -p $(OUTDIR)
 
 clean:
-	-rm -rf $(OUTDIR) *.vcd
+	-rm -rf $(OUTDIR) *.vcd *.log *.trace

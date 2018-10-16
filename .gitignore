@@ -8,6 +8,10 @@ iverilog/
 *.vcd
 *.vvp
 
+# Other log and debug output
+*.log
+*.trace
+
 # Vim files
 *.swp
 *.swo
