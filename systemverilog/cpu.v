@@ -16,7 +16,7 @@ wire data_wr;
 
 // Register File wires
 wire WriteReg;
-wire Z_in, V_in, N_in, Z_out, V_out, N_out;
+wire Z_in, V_in, N_in, Z_out, V_out, N_out, Z_en, V_en, N_en;
 wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData;
 wire load_instr; // for assigning regwrite enable
@@ -24,6 +24,12 @@ wire imm_instr;
 wire PCS_instr; // for assiging DstData
 wire load_half_instr;
 wire ALU_instr;
+wire arith_instr; // indicates addition or subtraction
+wire xor_instr;
+wire sll_instr;
+wire sra_instr;
+wire ror_instr;
+wire logical_instr;
 wire reg_write_instr; // if not high 'write' to $0 since we can't anyway
 
 // ALU wires
@@ -67,12 +73,22 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
 // WriteReg on all compute and LW instrs
 // DstData is either ALU or memory depending on instruction
 // rd = 0 when not write instruction, can't write to this register
-//TODO // load_half_instr isn't going high when it should
+// set flag enable signals based on type of instruction
 assign load_instr = opcode[3] & ~opcode[2];
 assign PCS_instr = (opcode == 4'b1110);
 assign imm_instr = (~opcode[3] & opcode[2] & ~(&opcode[1:0])); // all shift instructions
 assign load_half_instr = load_instr & opcode[1];
 assign ALU_instr = ~opcode[3];
+assign arith_instr = (opcode[3:1] == 3'b000);
+assign xor_instr = (opcode == 4'b0010);
+assign sll_instr = (opcode == 4'b0100);
+assign sra_instr = (opcode == 4'b0101);
+assign ror_instr = (opcode == 4'b0110);
+assign logical_instr = xor_instr | sll_instr | sra_instr | ror_instr;
+assign Z_en = arith_instr | logical_instr; // change z flag on arithmetic or logical
+assign V_en = arith_instr; // V and N flags change on arith instr only
+assign N_en = arith_instr;
+
 assign WriteReg = ALU_instr | load_instr | PCS_instr;
 assign rd = instr[11:8];
 assign rs = (load_half_instr) ? rd : instr[7:4];
@@ -89,7 +105,7 @@ assign DstData =
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
   .DstData(DstData), .Z_in(Z_in), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
-  .N_out(N_out), .V_out(V_out));
+  .N_out(N_out), .V_out(V_out), .Z_en(Z_en), .V_en(V_en), .N_en(N_en));
 
 // ALU
 assign ALU_rt_data = load_half_instr ? {8'h0, instr[7:0]} : imm_instr? instr[3:0] : rtData;
