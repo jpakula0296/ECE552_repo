@@ -69,6 +69,7 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
 //TODO // load_half_instr isn't going high when it should
 assign load_instr = opcode[3] & ~opcode[2];
 assign PCS_instr = (opcode == 4'b1110);
+assign imm_instr = (~opcode[3] & opcode[2] & ~(&opcode[1:0])); // all shift instructions
 assign load_half_instr = load_instr & opcode[1];
 assign ALU_instr = ~opcode[3];
 assign WriteReg = ALU_instr | load_instr | PCS_instr;
@@ -90,7 +91,7 @@ RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
   .N_out(N_out), .V_out(V_out), .load_half_instr(load_half_instr));
 
 // ALU
-assign ALU_rt_data = load_half_instr ? {8'h0, instr[7:0]} : rtData;
+assign ALU_rt_data = load_half_instr ? {8'h0, instr[7:0]} : imm_instr? instr[3:0] : rtData;
 alu ALU(.rs(rsData), .rt(ALU_rt_data), .control(opcode), .rd(ALU_out), .N(N_in), .Z(Z_in), .V(V_in));
 
 // Data Memory Control - Computes Data Memory address based on instruction
