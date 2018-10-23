@@ -20,7 +20,9 @@ module ID_EX(
   output [3:0]    ex_opcode,
 
   input           id_load_half_instr,
+  input [15:0]    id_load_half_data,
   output          ex_load_half_instr,
+  output [15:0]   ex_load_half_data,
 
   input           id_imm_instr,
   output          ex_imm_instr,
@@ -29,9 +31,7 @@ module ID_EX(
   // rt data shared with EX signal id_rt_data and ex_rt_data
   // rd data comes from ALU later on, DUMMIES here
   input id_mem_write,
-
   output ex_mem_write,
-
 
   // WB_data
   // ALU_result and data_mem needed before write back stage but unavailable for now
