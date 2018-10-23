@@ -28,8 +28,8 @@ module MEM_data(
     );
 
     dff_16bit mem_write(
-        .d(mem_write),
-        .q(mem_write),
+        .d(mem_write_in),
+        .q(mem_write_out),
         .wen(wen),
         .clk(clk),
         .rst(rst)
