@@ -7,7 +7,7 @@ module cpu(
 wire [3:0] opcode; // pulled from instruction
 
 // PC Memory
-wire [15:0] pc_current, instr, pc_new;
+wire [15:0] pc_current, instr, pc_new, pc_cntrl_in;
 wire [2:0] flags;
 
 // Data Memory
@@ -19,6 +19,7 @@ wire WriteReg;
 wire Z_in, V_in, N_in, Z_out, V_out, N_out, Z_en, V_en, N_en;
 wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData;
+wire [15:0] id_instr_out;
 wire load_instr; // for assigning regwrite enable
 wire imm_instr;
 wire PCS_instr; // for assiging DstData
@@ -45,7 +46,7 @@ assign hlt = (opcode == 4'b1111);
 // branch_reg_addr acts on register RS
 assign flags = {V_out, N_out, Z_out};
 PC_control pc_cntrl(.pc_new(pc_new), .flags(flags), .instruction(instr),
-  .branch_reg_addr(rsData), .pc_current(pc_current));
+  .branch_reg_addr(rsData), .pc_current(pc_cntrl_in));
 
 // PC Address Flip-Flop
 // feeds program memory address, changes every posedge clk
@@ -60,9 +61,17 @@ dff_16bit DFF0(.q(pc_current), .d(pc_new), .wen(1'b1), .clk(clk), .rst(rst));
 // enable strapped high since we are always reading from this memory
 // write enable strapped low, always reading
 // output is instr
-assign opcode = instr[15:12];
+assign opcode = id_instr_out[15:12];
 pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
   .addr(pc_current), .enable(1'b1), .wr(1'b0));
+
+// IF-ID stage pipeline - holds current instruction and pc_plus_four
+// to pass to decode portion to determine control signals
+// Input - instr_in from pc_memory, pc_plus_four from pc_control
+// output - just flops inputs, passed to branch control logic and
+// decode signals below
+IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_current_in(pc_current),
+  .pc_current_out(pc_cntrl_in));
 
 // Register File
 // DstReg, SrcRegs from instr, WriteReg from opcode

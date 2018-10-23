@@ -5,7 +5,8 @@ module PC_control (
     input [2:0] flags,
     input [15:0] instruction, // need full instr for conditional branch
     input [15:0] branch_reg_addr, // connected to rs data
-    input [15:0] pc_current
+    input [15:0] pc_plus_two_in,
+    input [15:0] pc_plus_two_out
     );
 
 wire [15:0] plus_two, branch_imm, plus_imm;
