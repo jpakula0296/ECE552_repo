@@ -7,32 +7,32 @@ module MEM_data(
     output [15:0] rt_Data_out,
     output mem_write_out,
 
-    input wen,
     input clk,
-    input rst);
+    input stall_n,
+    input flush);
 
     dff_16bit rd_Data(
         .d(rd_Data_in),
         .q(rd_Data_out),
-        .wen(wen),
+        .wen(stall_n),
         .clk(clk),
-        .rst(rst)
+        .rst(flush)
     );
 
     dff_16bit rt_Data(
         .d(rt_Data_in),
         .q(rt_Data_out),
-        .wen(wen),
+        .wen(stall_n),
         .clk(clk),
-        .rst(rst)
+        .rst(flush)
     );
 
     dff_16bit mem_write(
         .d(mem_write),
         .q(mem_write),
-        .wen(wen),
+        .wen(stall_n),
         .clk(clk),
-        .rst(rst)
+        .rst(flush)
     );
 
 endmodule
