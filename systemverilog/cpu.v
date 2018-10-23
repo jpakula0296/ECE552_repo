@@ -71,7 +71,7 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
 // output - just flops inputs, passed to branch control logic and
 // decode signals below
 IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_current_in(pc_current),
-  .pc_current_out(pc_cntrl_in));
+  .pc_current_out(pc_cntrl_in), .clk(clk), .rst(rst));
 
 // Register File
 // DstReg, SrcRegs from instr, WriteReg from opcode
