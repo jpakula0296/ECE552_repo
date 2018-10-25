@@ -1,29 +1,29 @@
 module MEM_WB(
     input clk,
-    input flush,
+    input rst,
     input stall_n,
 
-    input WriteReg_in,
-    input [15:0] ALU_result_in,
-    input [15:0] data_mem_in,
+    input mem_WriteReg,
+    input [15:0] mem_ALU_res,
+    input [15:0] mem_data_mem,
 
-    output WriteReg_out,
-    output [15:0] ALU_result_out,
-    output [15:0] data_mem_out
+    output wb_WriteReg,
+    output [15:0] wb_ALU_res,
+    output [15:0] wb_data_mem
     );
 
     WB_data wbdata(
         .clk(clk),
-        .flush(flush),
+        .flush(rst),
         .stall_n(stall_n),
 
-        .WriteReg_in(WriteReg_in),
-        .ALU_result_in(ALU_result_in),
-        .data_mem_in(data_mem_in),
+        .WriteReg_in(mem_WriteReg),
+        .ALU_res_in(mem_ALU_res),
+        .data_mem_in(mem_data_mem),
 
-        .WriteReg_out(WriteReg_out),
-        .ALU_result_out(ALU_result_out),
-        .data_mem_out(data_mem_out)
+        .WriteReg_out(wb_WriteReg),
+        .ALU_res_out(wb_ALU_res),
+        .data_mem_out(wb_data_mem)
     );
 
 

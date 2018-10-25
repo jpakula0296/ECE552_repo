@@ -172,6 +172,13 @@ data_mem_control data_control(.rsData(rsData), .rtData(rtData),
 data_mem data_memory(.data_in(rtData), .data_out(data_out), .addr(data_addr),
   .enable(1'b1), .wr(data_wr), .clk(clk), .rst(rst));
 
+//TODO: connect signals
+MEM_WB mem_wb(
+    .clk(clk), .rst(rst), .stall_n(stall_n),
+    .mem_WriteReg(), .mem_ALU_res(), .mem_data_mem()),
+    .wb_WriteReg(), .wb_ALU_res(), .wb_data_mem()
+);
+
 // assign output pc
 assign pc = pc_current;
 endmodule
