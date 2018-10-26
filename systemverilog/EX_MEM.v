@@ -24,6 +24,10 @@ module EX_MEM(
 );
 
 MEM_data mem_data(
+    .clk(clk),
+    .stall_n(stall_n),
+    .flush(flush),
+
     .rd_Data_in(ex_data_addr_or_alu_result),
     .rd_Data_out(mem_data_addr_or_alu_result),
 
@@ -35,6 +39,10 @@ MEM_data mem_data(
 );
 
 dff memory_write_enable_ff(
+    .clk(clk),
+    .wen(stall_n),
+    .rst(flush),
+
     .d(ex_memory_write_enable),
     .q(mem_memory_write_enable),
 );

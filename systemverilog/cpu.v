@@ -19,7 +19,7 @@ wire mem_store_instr;
 wire Z_in, V_in, N_in, Z_out, V_out, N_out, Z_en, V_en, N_en;
 
 // control signals found by ID stage
-wire WriteReg;
+wire id_WriteReg;
 wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData;
 wire [15:0] id_instr_out;
@@ -48,6 +48,13 @@ wire ex_load_half_instr;
 wire ex_imm_instr;
 wire ex_mem_write;
 wire ex_WriteReg;
+
+// EX/MEM Stage pipeline wires
+wire ex_mem_stall_n, ex_mem_flush;
+wire mem_memory_write_enable;
+wire mem_register_write_enable;
+wire [15:0] mem_data_addr_or_alu_result;
+wire [15:0] mem_data_write_val;
 
 // ALU wires
 wire [15:0] ALU_out; // ALU output
@@ -95,12 +102,12 @@ assign opcode = id_instr_out[15:12];
 
 
 // Register File
-// DstReg, SrcRegs from instr, WriteReg from opcode
+// DstReg, SrcRegs from instr, id_WriteReg from opcode
 // DstData multiplexed from ALU output and data memory
 // SrcDatas fed to ALU or memory
 // SrcReg1 = RS, SrcReg2 = RT
 // rt is either instr[11:8] on store instrs and [3:0] otherwise
-// WriteReg on all compute and LW instrs
+// id_WriteReg on all compute and LW instrs
 // DstData is either ALU or memory depending on instruction
 // rd = 0 when not write instruction, can't write to this register
 // set flag enable signals based on type of instruction
@@ -122,7 +129,7 @@ assign Z_en = arith_instr | logical_instr; // change z flag on arithmetic or log
 assign V_en = arith_instr; // V and N flags change on arith instr only
 assign N_en = arith_instr;
 
-assign WriteReg = ALU_instr | load_instr | PCS_instr;
+assign id_WriteReg = ALU_instr | load_instr | PCS_instr;
 assign rd = instr[11:8];
 assign rs = (load_half_instr) ? rd : id_instr_out[7:4];
 assign rt = (opcode[3]) ? id_instr_out[11:8] : id_instr_out[3:0];
@@ -138,7 +145,7 @@ assign DstData =
         ALU_out
     ;
 
-RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(WriteReg), .SrcReg1(rs),
+RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(wb_WriteReg), .SrcReg1(rs),
   .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
   .DstData(DstData), .Z_in(Z_in), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
   .N_out(N_out), .V_out(V_out), .Z_en(Z_en), .V_en(V_en), .N_en(N_en));
@@ -152,15 +159,31 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .id_load_half_instr(load_half_instr), .ex_load_half_instr(ex_load_half_instr),
 .id_imm_instr(imm_instr), .ex_imm_instr(ex_imm_instr), .id_mem_write(id_store_instr),
 .ex_mem_write(ex_mem_write), .id_load_half_data(load_half_data),
-.ex_load_half_data(ex_load_half_data));
+.ex_load_half_data(ex_load_half_data), .ex_WriteReg(ex_WriteReg), .id_WriteReg(id_WriteReg));
 
 
 // ALU
 // TODO: PROBABLY NEED TO PIPELINE FLAG SIGNALS
-assign ALU_rt_data = load_half_instr ? ex_load_half_data : imm_instr ? ex_imm  : ex_rt_data;
+assign ALU_rt_data = load_half_instr ? ex_load_half_data : imm_instr ? ex_imm : ex_rt_data;
 alu ALU(.rs(ex_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out), .N(N_in), .Z_flag(Z_in), .V(V_in));
 
-EX_MEM ex_mem();
+EX_MEM ex_mem(
+    .clk(clk),
+    .stall_n(ex_mem_stall_n),
+    .flush(ex_mem_flush),
+
+    .ex_data_addr_or_alu_result(ALU_out),
+    .mem_data_addr_or_alu_result(mem_data_addr_or_alu_result),
+
+    .ex_data_write_val(ex_rt_data),
+    .mem_data_write_val(mem_data_write_val),
+
+    .ex_memory_write_enable(ex_mem_write),
+    .mem_memory_write_enable(mem_memory_write_enable),
+
+    .ex_register_write_enable(ex_WriteReg),
+    .mem_register_write_enable(mem_register_write_enable)
+);
 
 // Data Memory
 // data_in from register rt, data_out to DstReg multiplexer, address from ALU,
@@ -168,7 +191,7 @@ EX_MEM ex_mem();
 // write enable assigned to store opcode
 // data_out to DstData
 data_mem data_memory(.data_in(rtData), .data_out(data_out), .addr(data_addr),
-  .enable(1'b1), .wr(data_wr), .clk(clk), .rst(rst));
+  .enable(1'b1), .wr(mem_memory_write_enable), .clk(clk), .rst(rst));
 
 //TODO: connect signals
 MEM_WB mem_wb(
