@@ -27,7 +27,7 @@ module MEM_data(
         .rst(flush)
     );
 
-    dff_16bit mem_write(
+    dff mem_write(
         .d(mem_write_in),
         .q(mem_write_out),
         .wen(stall_n),
