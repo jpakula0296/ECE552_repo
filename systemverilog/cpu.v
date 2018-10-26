@@ -29,6 +29,7 @@ wire PCS_instr; // for assiging DstData
 wire load_half_instr;
 wire ALU_instr;
 wire arith_instr; // indicates addition or subtraction
+wire mem_instr; // indicates if data memory is being read from or written to
 wire xor_instr;
 wire sll_instr;
 wire sra_instr;
@@ -105,7 +106,7 @@ assign opcode = id_instr_out[15:12];
 // set flag enable signals based on type of instruction
 assign load_instr = opcode[3] & ~opcode[2];
 assign PCS_instr = (opcode == 4'b1110);
-assign imm_instr = (~opcode[3] & opcode[2] & ~(&opcode[1:0])); // all shift instructions
+assign imm_instr = (~opcode[3] & opcode[2] & ~(&opcode[1:0])) | mem_instr; // all shift and memory instructions
 assign load_half_instr = load_instr & opcode[1];
 assign ALU_instr = ~opcode[3];
 assign arith_instr = (opcode[3:1] == 3'b000);
@@ -113,6 +114,7 @@ assign xor_instr = (opcode == 4'b0010);
 assign sll_instr = (opcode == 4'b0100);
 assign sra_instr = (opcode == 4'b0101);
 assign ror_instr = (opcode == 4'b0110);
+assign mem_instr = (opcode[3:1] == 3'b100);
 assign id_store_instr = (opcode == 4'b1001); // only write on store instrs
 
 assign logical_instr = xor_instr | sll_instr | sra_instr | ror_instr;
@@ -124,7 +126,7 @@ assign WriteReg = ALU_instr | load_instr | PCS_instr;
 assign rd = instr[11:8];
 assign rs = (load_half_instr) ? rd : id_instr_out[7:4];
 assign rt = (opcode[3]) ? id_instr_out[11:8] : id_instr_out[3:0];
-assign id_imm = id_instr_out[3:0];
+assign id_imm =  mem_instr ? {11{id_instr_out[3]}, id_instr_out[3:0], 1'b0} : id_instr_out[3:0]; // If doing a mem instr, shift left 1 and sign extend, otherwise just get raw immediate
 assign load_half_data = {8'h00, id_instr_out[7:0]};
 
 assign DstData =
@@ -158,11 +160,7 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 assign ALU_rt_data = load_half_instr ? ex_load_half_data : imm_instr ? ex_imm  : ex_rt_data;
 alu ALU(.rs(ex_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out), .N(N_in), .Z_flag(Z_in), .V(V_in));
 
-// Data Memory Control - Computes Data Memory address based on instruction
-// read data registers from register file, offset from instruction
-// send target address to data memory for read or write
-data_mem_control data_control(.rsData(rsData), .rtData(rtData),
-  .offset(instr[3:0]), .target_addr(data_addr));
+EX_MEM ex_mem();
 
 // Data Memory
 // data_in from register rt, data_out to DstReg multiplexer, address from ALU,
