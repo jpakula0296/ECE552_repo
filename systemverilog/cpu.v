@@ -11,7 +11,7 @@ wire [15:0] pc_current, instr, pc_new, pc_cntrl_in;
 wire [2:0] flags;
 
 // Data Memory
-wire [15:0] data_out, data_addr;
+wire [15:0] mem_data_out, data_addr;
 wire id_store_instr;
 wire mem_store_instr;
 
@@ -55,6 +55,11 @@ wire mem_memory_write_enable;
 wire mem_register_write_enable;
 wire [15:0] mem_data_addr_or_alu_result;
 wire [15:0] mem_data_write_val;
+
+// MEM/WB Stage pipeline wires
+wire mem_wb_stall_m, mem_wb_flush;
+wire [15:0] wb_ALU_res;
+wire [15:0] wb_data_mem;
 
 // ALU wires
 wire [15:0] ALU_out; // ALU output
@@ -136,13 +141,14 @@ assign rt = (opcode[3]) ? id_instr_out[11:8] : id_instr_out[3:0];
 assign id_imm =  mem_instr ? {11{id_instr_out[3]}, id_instr_out[3:0], 1'b0} : id_instr_out[3:0]; // If doing a mem instr, shift left 1 and sign extend, otherwise just get raw immediate
 assign load_half_data = {8'h00, id_instr_out[7:0]};
 
+//TODO: pc_new needs to be piplined
 assign DstData =
     (load_instr & ~load_half_instr)?
-        data_out
+        wb_data_mem
     :(PCS_instr)?
         pc_new
     :
-        ALU_out
+        wb_ALU_res
     ;
 
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(wb_WriteReg), .SrcReg1(rs),
@@ -186,18 +192,17 @@ EX_MEM ex_mem(
 );
 
 // Data Memory
-// data_in from register rt, data_out to DstReg multiplexer, address from ALU,
+// data_in from register rt, mem_data_out to DstReg multiplexer, address from ALU,
 // overall enable strapped high, muxing read data anyway
 // write enable assigned to store opcode
-// data_out to DstData
-data_mem data_memory(.data_in(rtData), .data_out(data_out), .addr(data_addr),
+// mem_data_out to DstData
+data_mem data_memory(.data_in(rtData), .data_out(mem_data_out), .addr(data_addr),
   .enable(1'b1), .wr(mem_memory_write_enable), .clk(clk), .rst(rst));
 
-//TODO: connect signals
 MEM_WB mem_wb(
     .clk(clk), .rst(rst), .stall_n(stall_n),
-    .mem_WriteReg(), .mem_ALU_res(), .mem_data_mem()),
-    .wb_WriteReg(), .wb_ALU_res(), .wb_data_mem()
+    .mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out)),
+    .wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem)
 );
 
 // assign output pc
