@@ -98,7 +98,7 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
 // output - just flops inputs, passed to branch control logic and
 // decode signals below
 IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_current_in(pc_current),
-  .pc_current_out(pc_cntrl_in), .clk(clk), .rst(rst));
+  .pc_current_out(pc_cntrl_in), .clk(clk), .rst(rst), .wen(stall_n));
 
 // pull opcode from output of id_instruction
 // register file and later signals will be decoded based on this and passed
