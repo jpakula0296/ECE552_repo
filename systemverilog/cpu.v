@@ -138,7 +138,7 @@ assign id_WriteReg = ALU_instr | load_instr | PCS_instr;
 assign rd = instr[11:8];
 assign rs = (load_half_instr) ? rd : id_instr_out[7:4];
 assign rt = (opcode[3]) ? id_instr_out[11:8] : id_instr_out[3:0];
-assign id_imm =  mem_instr ? {11{id_instr_out[3]}, id_instr_out[3:0], 1'b0} : id_instr_out[3:0]; // If doing a mem instr, shift left 1 and sign extend, otherwise just get raw immediate
+assign id_imm =  mem_instr ? {{11{id_instr_out[3]}}, id_instr_out[3:0], 1'b0} : id_instr_out[3:0]; // If doing a mem instr, shift left 1 and sign extend, otherwise just get raw immediate
 assign load_half_data = {8'h00, id_instr_out[7:0]};
 
 //TODO: pc_new needs to be piplined
@@ -201,7 +201,7 @@ data_mem data_memory(.data_in(rtData), .data_out(mem_data_out), .addr(data_addr)
 
 MEM_WB mem_wb(
     .clk(clk), .rst(rst), .stall_n(stall_n),
-    .mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out)),
+    .mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out),
     .wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem)
 );
 
