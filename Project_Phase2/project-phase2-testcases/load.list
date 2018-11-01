@@ -1,0 +1,5 @@
+	LLB R1, 0x51
+	LHB R1, 0x51
+	LLB R2, 0xB0
+	LHB R2, 0xA0
+	HLT
