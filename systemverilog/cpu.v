@@ -36,7 +36,11 @@ wire sra_instr;
 wire ror_instr;
 wire logical_instr;
 wire reg_write_instr; // if not high 'write' to $0 since we can't anyway
+
+// TODO: Implement stalling, setting stall_n to 1 to debug basic pipeline
 wire stall_n;
+assign stall_n = 1'b1;
+
 wire [15:0] load_half_data;
 
 // ID/EX Stage pipeline outputs
