@@ -203,7 +203,7 @@ EX_MEM ex_mem(
 // overall enable strapped high, muxing read data anyway
 // write enable assigned to store opcode
 // mem_data_out to DstData
-data_mem data_memory(.data_in(mem_data_addr_or_alu_result), .data_out(mem_data_out), .addr(data_addr),
+data_mem data_memory(.data_in(mem_data_write_val), .data_out(mem_data_out), .addr(mem_data_addr_or_alu_result),
   .enable(1'b1), .wr(mem_memory_write_enable), .clk(clk), .rst(rst));
 
 MEM_WB mem_wb(
