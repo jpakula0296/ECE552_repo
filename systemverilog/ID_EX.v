@@ -19,6 +19,9 @@ module ID_EX(
   input  [3:0]    id_opcode,
   output [3:0]    ex_opcode,
 
+  input  [3:0]    id_rd,
+  output [3:0]    ex_rd,
+
   input           id_load_half_instr,
   input [15:0]    id_load_half_data,
   output          ex_load_half_instr,
@@ -58,6 +61,13 @@ ID_EX_MEM_data memdata(.clk(clk), .stall_n(stall_n), .flush(rst),
 ID_EX_WB_data wbdata(.clk(clk), .flush(rst), .stall_n(stall_n), .WriteReg_in(id_WriteReg),
 .WriteReg_out(ex_WriteReg));
 
+dff_4bit rd_ff(
+    .clk(clk),
+    .wen(stall_n),
+    .rst(rst),
+    .d(id_rd),
+    .q(ex_rd)
+);
 
 
 

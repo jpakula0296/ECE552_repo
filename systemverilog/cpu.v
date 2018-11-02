@@ -48,6 +48,7 @@ wire [15:0] ex_rt_data;
 wire [15:0] ex_rs_data;
 wire [15:0] ex_imm, id_imm, ex_load_half_data;
 wire [3:0] ex_opcode;
+wire [3:0] ex_rd;
 wire ex_load_half_instr;
 wire ex_imm_instr;
 wire ex_mem_write;
@@ -59,11 +60,13 @@ wire mem_memory_write_enable;
 wire mem_register_write_enable;
 wire [15:0] mem_data_addr_or_alu_result;
 wire [15:0] mem_data_write_val;
+wire [3:0]  mem_rd;
 
 // MEM/WB Stage pipeline wires
 wire mem_wb_stall_m, mem_wb_flush;
 wire [15:0] wb_ALU_res;
 wire [15:0] wb_data_mem;
+wire [3:0]  wb_rd;
 
 // ALU wires
 wire [15:0] ALU_out; // ALU output
@@ -156,7 +159,7 @@ assign DstData =
     ;
 
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(wb_WriteReg), .SrcReg1(rs),
-  .SrcReg2(rt), .DstReg(rd), .SrcData1(rsData), .SrcData2(rtData),
+  .SrcReg2(rt), .DstReg(wb_rd), .SrcData1(rsData), .SrcData2(rtData),
   .DstData(DstData), .Z_in(Z_in), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
   .N_out(N_out), .V_out(V_out), .Z_en(Z_en), .V_en(V_en), .N_en(N_en));
 
@@ -169,7 +172,8 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .id_load_half_instr(load_half_instr), .ex_load_half_instr(ex_load_half_instr),
 .id_imm_instr(imm_instr), .ex_imm_instr(ex_imm_instr), .id_mem_write(id_store_instr),
 .ex_mem_write(ex_mem_write), .id_load_half_data(load_half_data),
-.ex_load_half_data(ex_load_half_data), .ex_WriteReg(ex_WriteReg), .id_WriteReg(id_WriteReg));
+.ex_load_half_data(ex_load_half_data), .ex_WriteReg(ex_WriteReg), .id_WriteReg(id_WriteReg),
+.id_rd(rd), .ex_rd(ex_rd));
 
 
 // ALU
@@ -195,7 +199,10 @@ EX_MEM ex_mem(
     .mem_memory_write_enable(mem_memory_write_enable),
 
     .ex_register_write_enable(ex_WriteReg),
-    .mem_register_write_enable(mem_register_write_enable)
+    .mem_register_write_enable(mem_register_write_enable),
+
+    .ex_rd(ex_rd),
+    .mem_rd(mem_rd)
 );
 
 // Data Memory
@@ -209,7 +216,7 @@ data_mem data_memory(.data_in(mem_data_write_val), .data_out(mem_data_out), .add
 MEM_WB mem_wb(
     .clk(clk), .rst(rst), .stall_n(stall_n),
     .mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out),
-    .wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem)
+    .wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem), .mem_rd(mem_rd), .wb_rd(wb_rd)
 );
 
 // assign output pc

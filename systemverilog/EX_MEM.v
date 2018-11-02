@@ -16,6 +16,9 @@ module EX_MEM(
     input  [15:0]  ex_data_write_val,
     output [15:0]  mem_data_write_val,
 
+    input  [3:0] ex_rd,
+    output [3:0] mem_rd,
+
     input ex_memory_write_enable,
     output mem_memory_write_enable,
 
@@ -47,4 +50,11 @@ dff memory_write_enable_ff(
     .q(mem_register_write_enable)
 );
 
+dff_4bit rd_ff(
+    .clk(clk),
+    .wen(stall_n),
+    .rst(flush),
+    .d(ex_rd),
+    .q(mem_rd)
+);
 endmodule
