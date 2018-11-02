@@ -10,7 +10,7 @@ TESTBENCHES += $(wildcard $(TBDIR)/*.sv)
 TESTBENCH_OBJECTS =  $(addprefix $(OUTDIR)/,$(notdir $(TESTBENCHES:.v=.vvp)))
 TESTBENCH_OBJECTS := $(addprefix $(OUTDIR)/,$(notdir $(TESTBENCH_OBJECTS:.sv=.vvp)))
 
-CPU_TB  = ../Project_Phase1/project-phase1-testbench/project-phase1-testbench.v
+CPU_TB  = ./tb/project-phase2-testbench.v
 CPU_OBJ = $(addprefix $(OUTDIR)/,$(notdir $(CPU_TB:.v=.vvp)))
 
 MODULES =  $(wildcard ./*.v)
@@ -30,7 +30,7 @@ cpu: $(CPU_OBJ)
 
 # top level cpu testbench is named weird and in a weird directory, so we need a special rule for it
 $(CPU_OBJ): $(CPU_TB) $(MODULES) | $(OUTDIR)
-	iverilog -o $@ -s cpu_tb $^ $(FLAGS)
+	iverilog -o $@ -s cpu_ptb $^ $(FLAGS)
 
 # assumes the test bench module's name matches the file name before the file extension
 $(OUTDIR)/%.vvp: $(TBDIR)/%.v $(MODULES) | $(OUTDIR)
