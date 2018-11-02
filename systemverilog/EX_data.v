@@ -23,25 +23,25 @@ module EX_data(
     input           id_imm_instr,
     output          ex_imm_instr
 );
-dff_16bit rs_data_ff(.clk(clk), .wen(stall_n), .rst(flush), .q(id_rs_data), .d(ex_rs_data));
-dff_16bit rt_data_ff(.clk(clk), .wen(stall_n), .rst(flush), .q(id_rt_data), .d(ex_rt_data));
-dff_16bit imm_ff    (.clk(clk), .wen(stall_n), .rst(flush), .q(id_imm),     .d(ex_imm));
+dff_16bit rs_data_ff(.clk(clk), .wen(stall_n), .rst(flush), .q(ex_rs_data), .d(id_rs_data));
+dff_16bit rt_data_ff(.clk(clk), .wen(stall_n), .rst(flush), .q(ex_rt_data), .d(id_rt_data));
+dff_16bit imm_ff    (.clk(clk), .wen(stall_n), .rst(flush), .q(ex_imm),     .d(id_imm));
 dff_16bit load_half_data_dff(.clk(clk), .wen(stall_n), .rst(flush), .d(id_load_half_data),
 .q(ex_load_half_data));
 
-dff_4bit  opcode_ff (.clk(clk), .wen(stall_n), .rst(flush), .q(id_opcode),  .d(ex_opcode));
+dff_4bit  opcode_ff (.clk(clk), .wen(stall_n), .rst(flush), .q(ex_opcode),  .d(id_opcode));
 dff load_half_instr_ff(
     .clk(clk),
     .wen(stall_n),
     .rst(flush),
-    .q(id_load_half_instr),
-    .d(ex_load_half_instr)
+    .q(ex_load_half_instr),
+    .d(id_load_half_instr)
 );
 dff imm_instr_ff(
     .clk(clk),
     .wen(stall_n),
     .rst(flush),
-    .q(id_imm_instr),
-    .d(ex_imm_instr)
+    .q(ex_imm_instr),
+    .d(id_imm_instr)
 );
 endmodule
