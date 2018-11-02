@@ -43,8 +43,8 @@ dff memory_write_enable_ff(
     .wen(stall_n),
     .rst(flush),
 
-    .d(ex_memory_write_enable),
-    .q(mem_memory_write_enable)
+    .d(ex_register_write_enable),
+    .q(mem_register_write_enable)
 );
 
 endmodule
