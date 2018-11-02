@@ -177,6 +177,9 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 assign ALU_rt_data = load_half_instr ? ex_load_half_data : imm_instr ? ex_imm : ex_rt_data;
 alu ALU(.rs(ex_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out), .N(N_in), .Z_flag(Z_in), .V(V_in));
 
+// just hook up stall and flush to global stall and reset to begin with
+assign ex_mem_stall_n = stall_n;
+assign ex_mem_flush = rst;
 EX_MEM ex_mem(
     .clk(clk),
     .stall_n(ex_mem_stall_n),
