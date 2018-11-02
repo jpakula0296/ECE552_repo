@@ -8,7 +8,7 @@ module PC_control (
     input [15:0] pc_current
     );
 
-wire [15:0] plus_two, branch_imm, plus_imm;
+wire [15:0] plus_two, branch_imm;
 wire [3:0] opcode;
 assign opcode = instruction[15:12]; // used to decide final pc_addr_in
 
