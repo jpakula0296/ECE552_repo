@@ -41,10 +41,6 @@ module ID_EX(
 
   );
 
-// DUM PLACEHOLDERS
-wire [15:0] DUM_rd_Data_in, DUM_rd_Data_out, DUM_ALU_res_in, DUM_data_mem_in,
-DUM_ALU_res_out, DUM_data_mem_out;
-
 // EX_data
 EX_data exdata(.clk(clk), .stall_n(stall_n), .flush(rst), .id_rs_data(id_rs_data),
 .ex_rs_data(ex_rs_data), .id_rt_data(id_rt_data), .ex_rt_data(ex_rt_data),
@@ -54,14 +50,13 @@ EX_data exdata(.clk(clk), .stall_n(stall_n), .flush(rst), .id_rs_data(id_rs_data
 .id_load_half_data(id_load_half_data), .ex_load_half_data(ex_load_half_data));
 
 // MEM_data
-MEM_data memdata(.clk(clk), .stall_n(stall_n), .flush(rst), .rd_Data_in(DUM_rd_Data_in),
-.rt_Data_in(id_rt_data), .mem_write_in(id_mem_write), .rd_Data_out(DUM_rd_Data_out),
+ID_EX_MEM_data memdata(.clk(clk), .stall_n(stall_n), .flush(rst),
+.rt_Data_in(id_rt_data), .mem_write_in(id_mem_write),
 .rt_Data_out(ex_rt_data), .mem_write_out(ex_mem_write));
 
 // WB_data
-WB_data wbdata(.clk(clk), .flush(rst), .stall_n(stall_n), .WriteReg_in(id_WriteReg),
-.ALU_res_in(DUM_ALU_res_in), .data_mem_in(DUM_data_mem_in), .WriteReg_out(ex_WriteReg),
-.ALU_res_out(DUM_ALU_res_out), .data_mem_out(DUM_data_mem_out));
+ID_EX_WB_data wbdata(.clk(clk), .flush(rst), .stall_n(stall_n), .WriteReg_in(id_WriteReg),
+.WriteReg_out(ex_WriteReg));
 
 
 
