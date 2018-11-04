@@ -34,13 +34,28 @@ module Forwarding_Unit(
   input [15:0] mem_rs_data,
   input [15:0] mem_rt_data,
   input [15:0] ex_rs_data,
-  input [15:0] ex_rt_data
+  input [15:0] ex_rt_data,
   output [15:0] ex_forward_data,
   output [15:0] mem_forward_data
 
   );
 
-assign Forward_EX_rs = (EX_MEM_regwrite)
+// EX hazard:
+assign Forward_EX_rs = EX_MEM_regwrite & (EX_MEM_rd != 4'h0) &
+  (EX_MEM_rd == EX_MEM_rs);
+assign Forward_EX_rt = EX_MEM_regwrite & (EX_MEM_rd != 4'h0) &
+  (EX_MEM_rd == EX_MEM_rs);
+assign ex_forward_data = (Forward_EX_rs) ? ex_rs_data :
+  (Forward_EX_rt) ? ex_rt_data : 16'h0000;
+
+
+// MEM hazard:
+assign Forward_MEM_rs = MEM_WB_regwrite & (MEM_WB_rd != 4'h0) &
+  (MEM_WB_rd == MEM_WB_rs);
+assign Forward_MEM_rt = MEM_WB_regwrite & (MEM_WB_rd != 4'h0) &
+  (MEM_WB_rd == MEM_WB_rt);
+assign mem_forward_data = (Forward_MEM_rs) ? mem_rs_data :
+  (Forward_MEM_rt) ? mem_rt_data : 16'h0000;
 
 
 endmodule
