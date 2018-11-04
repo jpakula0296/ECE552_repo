@@ -11,6 +11,8 @@ iverilog/
 # Other log and debug output
 *.log
 *.trace
+*.plog
+*.ptrace
 
 # Vim files
 *.swp

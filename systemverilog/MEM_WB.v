@@ -4,11 +4,13 @@ module MEM_WB(
     input stall_n,
 
     input mem_WriteReg,
+    input mem_data_mux,
     input [3:0]  mem_rd,
     input [15:0] mem_ALU_res,
     input [15:0] mem_data_mem,
 
     output wb_WriteReg,
+    output wb_data_mux,
     output [3:0]  wb_rd,
     output [15:0] wb_ALU_res,
     output [15:0] wb_data_mem
@@ -36,4 +38,11 @@ module MEM_WB(
         .q(wb_rd)
     );
 
+    dff data_mux_ff(
+        .clk(clk),
+        .rst(rst),
+        .wen(stall_n),
+        .d(mem_data_mux),
+        .q(wb_data_mux)
+    );
 endmodule
