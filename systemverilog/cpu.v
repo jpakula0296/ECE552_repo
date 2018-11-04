@@ -7,7 +7,7 @@ module cpu(
 wire [3:0] opcode; // pulled from instruction
 
 // PC Memory
-wire [15:0] pc_current, instr, pc_new, pc_cntrl_in;
+wire [15:0] pc_current, instr, pc_new, id_pc_current;
 wire [2:0] flags;
 
 // Data Memory
@@ -86,7 +86,7 @@ assign hlt = (opcode == 4'b1111);
 // branch_reg_addr acts on register RS
 assign flags = {V_out, N_out, Z_out};
 PC_control pc_cntrl(.pc_new(pc_new), .flags(flags), .instruction(id_instr_out),
-  .branch_reg_addr(rsData), .pc_current(pc_cntrl_in));
+  .branch_reg_addr(rsData), .pc_current(pc_current));
 
 // PC Address Flip-Flop
 // feeds program memory address, changes every posedge clk
@@ -110,7 +110,7 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
 // output - just flops inputs, passed to branch control logic and
 // decode signals below
 IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_current_in(pc_current),
-  .pc_current_out(pc_cntrl_in), .clk(clk), .rst(rst), .wen(stall_n));
+  .pc_current_out(id_pc_current), .clk(clk), .rst(rst), .wen(stall_n));
 
 // pull opcode from output of id_instruction
 // register file and later signals will be decoded based on this and passed
