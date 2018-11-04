@@ -147,7 +147,7 @@ assign V_en = arith_instr; // V and N flags change on arith instr only
 assign N_en = arith_instr;
 
 assign id_WriteReg = ALU_instr | load_instr | PCS_instr;
-assign rd = instr[11:8];
+assign rd = id_instr_out[11:8];
 assign rs = (load_half_instr) ? rd : id_instr_out[7:4];
 assign rt = (opcode[3]) ? id_instr_out[11:8] : id_instr_out[3:0];
 assign id_imm =  mem_instr ? {{11{id_instr_out[3]}}, id_instr_out[3:0], 1'b0} : id_instr_out[3:0]; // If doing a mem instr, shift left 1 and sign extend, otherwise just get raw immediate
