@@ -2,6 +2,7 @@
 work
 ModelSim
 VinayTest
+Quartus
 
 # Icarus verilog files
 iverilog/

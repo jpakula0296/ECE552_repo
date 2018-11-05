@@ -7,6 +7,11 @@ module ID_EX(
   input stall_n,
 
   // EX_data
+  input [3:0] id_rs_reg,
+  output [3:0] ex_rs_reg,
+
+  input [3:0] id_rt_reg,
+  output [3:0] ex_rt_reg,
   input  [15:0]   id_rs_data,
   output [15:0]   ex_rs_data,
 
@@ -50,7 +55,8 @@ EX_data exdata(.clk(clk), .stall_n(stall_n), .flush(rst), .id_rs_data(id_rs_data
 .id_imm(id_imm), .ex_imm(ex_imm), .id_opcode(id_opcode), .ex_opcode(ex_opcode),
 .id_load_half_instr(id_load_half_instr), .ex_load_half_instr(ex_load_half_instr),
 .id_imm_instr(id_imm_instr), .ex_imm_instr(ex_imm_instr),
-.id_load_half_data(id_load_half_data), .ex_load_half_data(ex_load_half_data));
+.id_load_half_data(id_load_half_data), .ex_load_half_data(ex_load_half_data),
+.id_rs_reg(id_rs_reg), .ex_rs_reg(ex_rs_reg), .id_rt_reg(id_rt_reg), .ex_rt_reg(ex_rt_reg));
 
 // MEM_data
 ID_EX_MEM_data memdata(.clk(clk), .stall_n(stall_n), .flush(rst),

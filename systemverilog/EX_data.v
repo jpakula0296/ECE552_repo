@@ -3,6 +3,12 @@ module EX_data(
     input stall_n,
     input flush,
 
+    input [3:0] id_rs_reg,
+    output [3:0] ex_rs_reg,
+
+    input [3:0] id_rt_reg,
+    output [3:0] ex_rt_reg,
+
     input  [15:0]   id_rs_data,
     output [15:0]   ex_rs_data,
 
@@ -44,4 +50,7 @@ dff imm_instr_ff(
     .q(ex_imm_instr),
     .d(id_imm_instr)
 );
+
+dff_4bit rs_reg_ff (.clk(clk), .wen(stall_n), .rst(flush), .q(ex_rs_reg), .d(id_rs_reg));
+dff_4bit rt_reg_ff (.clk(clk), .wen(stall_n), .rst(flush), .q(ex_rt_reg), .d(id_rt_reg));
 endmodule

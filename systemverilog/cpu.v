@@ -44,6 +44,8 @@ assign stall_n = 1'b1;
 wire [15:0] load_half_data;
 
 // ID/EX Stage pipeline outputs
+wire [3:0] ex_rs_reg;
+wire [3:0] ex_rt_reg;
 wire [15:0] ex_rt_data;
 wire [15:0] ex_rs_data;
 wire [15:0] ex_imm, id_imm, ex_load_half_data;
@@ -60,13 +62,13 @@ wire mem_memory_write_enable;
 wire mem_register_write_enable;
 wire [15:0] mem_data_addr_or_alu_result;
 wire [15:0] mem_data_write_val;
-wire [3:0]  mem_rd;
+wire [3:0]  mem_rd, mem_rs, mem_rt;
 
 // MEM/WB Stage pipeline wires
 wire mem_wb_stall_m, mem_wb_flush;
 wire [15:0] wb_ALU_res;
 wire [15:0] wb_data_mem;
-wire [3:0]  wb_rd;
+wire [3:0]  wb_rd, wb_rs, wb_rt;
 
 // ALU wires
 wire [15:0] ALU_out; // ALU output
@@ -165,7 +167,6 @@ RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(wb_WriteReg), .SrcReg1(rs),
 
 // ID_EX stage pipeline
 // flops all signals necessary for later stages
-// TODO: Remove signals connected to high z by replacing with correctly sized reg
 ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .ex_rs_data(ex_rs_data), .id_rt_data(rtData), .ex_rt_data(ex_rt_data), .id_imm(id_imm),
 .ex_imm(ex_imm), .id_opcode(opcode), .ex_opcode(ex_opcode),
@@ -173,7 +174,8 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .id_imm_instr(imm_instr), .ex_imm_instr(ex_imm_instr), .id_mem_write(id_store_instr),
 .ex_mem_write(ex_mem_write), .id_load_half_data(load_half_data),
 .ex_load_half_data(ex_load_half_data), .ex_WriteReg(ex_WriteReg), .id_WriteReg(id_WriteReg),
-.id_rd(rd), .ex_rd(ex_rd));
+.id_rd(rd), .ex_rd(ex_rd), .id_rs_reg(rs), .id_rt_reg(rt), .ex_rs_reg(ex_rs_reg),
+.ex_rt_reg(ex_rt_reg));
 
 
 // ALU
@@ -202,7 +204,13 @@ EX_MEM ex_mem(
     .mem_register_write_enable(mem_register_write_enable),
 
     .ex_rd(ex_rd),
-    .mem_rd(mem_rd)
+    .mem_rd(mem_rd),
+
+    .ex_rs(ex_rs),
+    .mem_rs(mem_rs),
+    .ex_rt(ex_rt),
+    .mem_rt(mem_rt)
+
 );
 
 // Data Memory
@@ -216,8 +224,18 @@ data_mem data_memory(.data_in(mem_data_write_val), .data_out(mem_data_out), .add
 MEM_WB mem_wb(
     .clk(clk), .rst(rst), .stall_n(stall_n),
     .mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out),
-    .wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem), .mem_rd(mem_rd), .wb_rd(wb_rd)
+    .wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem), .mem_rd(mem_rd), .wb_rd(wb_rd),
+    .mem_rs(mem_rs), .wb_rs(wb_rs), .mem_rt(mem_rt), .wb_rt(wb_rt)
 );
+
+// Forwarding Unit
+// Take rs and rt data from ID_EX and EX_MEM pipeline registers
+// Outputs Forward_MEM_rs, Forward_MEM_rt, Forward_EX_rs, and Forward_EX_rt
+// as control signals. When one of these goes high, the output on the corresponding
+// data line will be the forwarded data and should be used as the input to
+// memory or ALU.
+// Forwarding_Unit forwarding_unit(.EX_MEM_regwrite(mem_register_write_enable),
+//   .EX_MEM_rd(mem_rd), .EX_MEM_rs())
 
 // assign output pc
 assign pc = pc_current;
