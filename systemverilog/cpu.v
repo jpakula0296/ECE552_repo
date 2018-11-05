@@ -83,6 +83,7 @@ wire [15:0] ex_forward_data, mem_forward_data;
 // ALU wires
 wire [15:0] ALU_out; // ALU output
 wire [15:0] ALU_rt_data; // data fed into rt of ALU
+wire [15:0] ALU_rs_data;
 
 wire rst;
 assign rst = ~rst_n; // keep active high/low resets straight
@@ -173,9 +174,9 @@ assign DstData =
     ;
 
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(wb_WriteReg), .SrcReg1(rs),
-  .SrcReg2(rt), .DstReg(wb_rd), .SrcData1(rsData), .SrcData2(rtData),
-  .DstData(DstData), .Z_in(Z_in), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
-  .N_out(N_out), .V_out(V_out), .Z_en(Z_en), .V_en(V_en), .N_en(N_en));
+.SrcReg2(rt), .DstReg(wb_rd), .SrcData1(rsData), .SrcData2(rtData),
+.DstData(DstData), .Z_in(Z_in), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
+.N_out(N_out), .V_out(V_out), .Z_en(Z_en), .V_en(V_en), .N_en(N_en));
 
 // ID_EX stage pipeline
 // flops all signals necessary for later stages
@@ -192,8 +193,11 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 
 // ALU
 // TODO: PROBABLY NEED TO PIPELINE FLAG SIGNALS
-assign ALU_rt_data = ex_load_half_instr ? ex_load_half_data : ex_imm_instr ? ex_imm : ex_rt_data;
-alu ALU(.rs(ex_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out), .N(N_in), .Z_flag(Z_in), .V(V_in));
+assign ALU_rt_data = (ex_load_half_instr) ? ex_load_half_data : ex_imm_instr ?
+ex_imm : (Forward_EX_rt) ? ex_forward_data : ex_rt_data;
+assign ALU_rs_data = (Forward_EX_rs) ? ex_forward_data : ex_rs_data;
+alu ALU(.rs(ALU_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out),
+.N(N_in), .Z_flag(Z_in), .V(V_in));
 
 // just hook up stall and flush to global stall and reset to begin with
 assign ex_mem_stall_n = stall_n;
@@ -234,14 +238,14 @@ EX_MEM ex_mem(
 // write enable assigned to store opcode
 // mem_data_out to DstData
 data_mem data_memory(.data_in(mem_data_write_val), .data_out(mem_data_out), .addr(mem_data_addr_or_alu_result),
-  .enable(1'b1), .wr(mem_memory_write_enable), .clk(clk), .rst(rst));
+.enable(1'b1), .wr(mem_memory_write_enable), .clk(clk), .rst(rst));
 
 MEM_WB mem_wb(
-    .clk(clk), .rst(rst), .stall_n(stall_n),
-    .mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out),
-    .wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem), .mem_rd(mem_rd), .wb_rd(wb_rd),
-    .mem_rs(mem_rs), .wb_rs(wb_rs), .mem_rt(mem_rt), .wb_rt(wb_rt),
-    .mem_data_mux(mem_data_mux), .wb_data_mux(wb_data_mux)
+.clk(clk), .rst(rst), .stall_n(stall_n),
+.mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out),
+.wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem), .mem_rd(mem_rd), .wb_rd(wb_rd),
+.mem_rs(mem_rs), .wb_rs(wb_rs), .mem_rt(mem_rt), .wb_rt(wb_rt),
+.mem_data_mux(mem_data_mux), .wb_data_mux(wb_data_mux)
 );
 
 // Forwarding Unit
