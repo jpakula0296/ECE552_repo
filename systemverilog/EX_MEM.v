@@ -23,7 +23,10 @@ module EX_MEM(
     output mem_memory_write_enable,
 
     input ex_register_write_enable,
-    output mem_register_write_enable
+    output mem_register_write_enable,
+
+    input ex_data_mux,
+    output mem_data_mux
 );
 
 MEM_data mem_data(
@@ -60,4 +63,11 @@ dff_4bit rd_ff(
 
 dff_4bit rs_ff(.clk(clk), .wen(stall_n), .rst(flush), .d(ex_rs), .q(mem_rs));
 dff_4bit rt_ff(.clk(clk), .wen(stall_n), .rst(flush), .d(ex_rt), .q(mem_rt));
+dff data_mux_ff(
+    .clk(clk),
+    .wen(stall_n),
+    .rst(flush),
+    .d(ex_data_mux),
+    .q(mem_data_mux)
+);
 endmodule

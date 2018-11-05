@@ -7,7 +7,7 @@ module cpu(
 wire [3:0] opcode; // pulled from instruction
 
 // PC Memory
-wire [15:0] pc_current, instr, pc_new, pc_cntrl_in;
+wire [15:0] pc_current, instr, pc_new, id_pc_current;
 wire [2:0] flags;
 
 // Data Memory
@@ -24,6 +24,7 @@ wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData;
 wire [15:0] id_instr_out;
 wire load_instr; // for assigning regwrite enable
+wire id_data_mux;
 wire imm_instr;
 wire PCS_instr; // for assiging DstData
 wire load_half_instr;
@@ -55,6 +56,7 @@ wire ex_load_half_instr;
 wire ex_imm_instr;
 wire ex_mem_write;
 wire ex_WriteReg;
+wire ex_data_mux;
 
 // EX/MEM Stage pipeline wires
 wire ex_mem_stall_n, ex_mem_flush;
@@ -63,12 +65,16 @@ wire mem_register_write_enable;
 wire [15:0] mem_data_addr_or_alu_result;
 wire [15:0] mem_data_write_val;
 wire [3:0]  mem_rd, mem_rs, mem_rt;
+wire mem_data_mux;
+
 
 // MEM/WB Stage pipeline wires
 wire mem_wb_stall_m, mem_wb_flush;
 wire [15:0] wb_ALU_res;
 wire [15:0] wb_data_mem;
 wire [3:0]  wb_rd, wb_rs, wb_rt;
+wire wb_data_mux;
+wire wb_WriteReg;
 
 // ALU wires
 wire [15:0] ALU_out; // ALU output
@@ -83,7 +89,7 @@ assign hlt = (opcode == 4'b1111);
 // branch_reg_addr acts on register RS
 assign flags = {V_out, N_out, Z_out};
 PC_control pc_cntrl(.pc_new(pc_new), .flags(flags), .instruction(id_instr_out),
-  .branch_reg_addr(rsData), .pc_current(pc_cntrl_in));
+  .branch_reg_addr(rsData), .pc_current(pc_current));
 
 // PC Address Flip-Flop
 // feeds program memory address, changes every posedge clk
@@ -107,7 +113,7 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
 // output - just flops inputs, passed to branch control logic and
 // decode signals below
 IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_current_in(pc_current),
-  .pc_current_out(pc_cntrl_in), .clk(clk), .rst(rst), .wen(stall_n));
+  .pc_current_out(id_pc_current), .clk(clk), .rst(rst), .wen(stall_n));
 
 // pull opcode from output of id_instruction
 // register file and later signals will be decoded based on this and passed
@@ -144,15 +150,17 @@ assign V_en = arith_instr; // V and N flags change on arith instr only
 assign N_en = arith_instr;
 
 assign id_WriteReg = ALU_instr | load_instr | PCS_instr;
-assign rd = instr[11:8];
+assign rd = id_instr_out[11:8];
 assign rs = (load_half_instr) ? rd : id_instr_out[7:4];
 assign rt = (opcode[3]) ? id_instr_out[11:8] : id_instr_out[3:0];
 assign id_imm =  mem_instr ? {{11{id_instr_out[3]}}, id_instr_out[3:0], 1'b0} : id_instr_out[3:0]; // If doing a mem instr, shift left 1 and sign extend, otherwise just get raw immediate
 assign load_half_data = {8'h00, id_instr_out[7:0]};
+assign id_data_mux = load_instr & ~load_half_instr;
 
 //TODO: pc_new needs to be piplined
+// TODO: properly pipeline the control signals here
 assign DstData =
-    (load_instr & ~load_half_instr)?
+    (wb_data_mux)?
         wb_data_mem
     :(PCS_instr)?
         pc_new
@@ -175,12 +183,12 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .ex_mem_write(ex_mem_write), .id_load_half_data(load_half_data),
 .ex_load_half_data(ex_load_half_data), .ex_WriteReg(ex_WriteReg), .id_WriteReg(id_WriteReg),
 .id_rd(rd), .ex_rd(ex_rd), .id_rs_reg(rs), .id_rt_reg(rt), .ex_rs_reg(ex_rs_reg),
-.ex_rt_reg(ex_rt_reg));
+.ex_rt_reg(ex_rt_reg), .id_data_mux(id_data_mux), .ex_data_mux(ex_data_mux));
 
 
 // ALU
 // TODO: PROBABLY NEED TO PIPELINE FLAG SIGNALS
-assign ALU_rt_data = load_half_instr ? ex_load_half_data : imm_instr ? ex_imm : ex_rt_data;
+assign ALU_rt_data = ex_load_half_instr ? ex_load_half_data : ex_imm_instr ? ex_imm : ex_rt_data;
 alu ALU(.rs(ex_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out), .N(N_in), .Z_flag(Z_in), .V(V_in));
 
 // just hook up stall and flush to global stall and reset to begin with
@@ -209,7 +217,10 @@ EX_MEM ex_mem(
     .ex_rs(ex_rs),
     .mem_rs(mem_rs),
     .ex_rt(ex_rt),
-    .mem_rt(mem_rt)
+    .mem_rt(mem_rt),
+
+    .ex_data_mux(ex_data_mux),
+    .mem_data_mux(mem_data_mux)
 
 );
 
@@ -225,7 +236,8 @@ MEM_WB mem_wb(
     .clk(clk), .rst(rst), .stall_n(stall_n),
     .mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out),
     .wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem), .mem_rd(mem_rd), .wb_rd(wb_rd),
-    .mem_rs(mem_rs), .wb_rs(wb_rs), .mem_rt(mem_rt), .wb_rt(wb_rt)
+    .mem_rs(mem_rs), .wb_rs(wb_rs), .mem_rt(mem_rt), .wb_rt(wb_rt),
+    .mem_data_mux(mem_data_mux), .wb_data_mux(wb_data_mux)
 );
 
 // Forwarding Unit

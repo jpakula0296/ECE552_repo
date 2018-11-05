@@ -1,15 +1,30 @@
-	LLB R1, 0x01
-	LLB R2, 0x02
-	LLB R3, 0x03
-	LLB R4, 0x04
+    # load some data
+    LLB R1, 0x01
+    LLB R2, 0x02
+    LLB R3, 0x03
+    LLB R4, 0x04
     LLB R5, 0x05
-	LHB R1, 0x10
-	LHB R2, 0x20
-	LHB R3, 0x30
-	LHB R4, 0x40
+    LHB R1, 0x10
+    LHB R2, 0x20
+    LHB R3, 0x30
+    LHB R4, 0x40
     LHB R5, 0x50
+
+    # test some ALU ops
+    PADDSB R1, R1, R1
+    PADDSB R2, R2, R2
+    PADDSB R3, R3, R3
+    PADDSB R4, R4, R4
+    PADDSB R5, R5, R5
+
+    # test the PCS instruction
+    PCS R6
+    PCS R7
+    PCS R8
+
+    # NOPs, since we haven't properly pipelined the HLT instruction yet
     SLL R0, R0, 0
     SLL R0, R0, 0
     SLL R0, R0, 0
     SLL R0, R0, 0
-	HLT
+    HLT

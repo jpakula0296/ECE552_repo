@@ -35,6 +35,9 @@ module ID_EX(
   input           id_imm_instr,
   output          ex_imm_instr,
 
+  input           id_data_mux,
+  output          ex_data_mux,
+
   // MEM_data
   // rt data shared with EX signal id_rt_data and ex_rt_data
   // rd data comes from ALU later on, DUMMIES here
@@ -75,6 +78,12 @@ dff_4bit rd_ff(
     .q(ex_rd)
 );
 
+dff data_mux_ff(
+    .clk(clk),
+    .wen(stall_n),
+    .rst(rst),
+    .d(id_data_mux),
+    .q(ex_data_mux)
+);
 
-
-  endmodule
+endmodule
