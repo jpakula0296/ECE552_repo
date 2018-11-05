@@ -24,38 +24,35 @@
 module Forwarding_Unit(
   // Deciding Logic:
   input EX_MEM_regwrite,
-  input [3:0] EX_MEM_rd, EX_MEM_rs, EX_MEM_rt,
+  input [3:0] mem_rd, ex_rs, ex_rt,
   input MEM_WB_regwrite,
-  input [3:0] MEM_WB_rd, MEM_WB_rs, MEM_WB_rt,
+  input [3:0] wb_rd, mem_rs, mem_rt,
   output Forward_EX_rs, Forward_EX_rt,
   output Forward_MEM_rs, Forward_MEM_rt,
 
-  // Forwarded Data:
-  input [15:0] mem_rs_data,
-  input [15:0] mem_rt_data,
-  input [15:0] ex_rs_data,
-  input [15:0] ex_rt_data,
-  output [15:0] ex_forward_data,
-  output [15:0] mem_forward_data
+  input [15:0] ex_forward_data_in,
+  output [15:0] ex_forward_data_out,
+  input [15:0] mem_forward_data_in,
+  output [15:0] mem_forward_data_out
 
   );
 
 // EX hazard:
-assign Forward_EX_rs = EX_MEM_regwrite & (EX_MEM_rd != 4'h0) &
-  (EX_MEM_rd == EX_MEM_rs);
-assign Forward_EX_rt = EX_MEM_regwrite & (EX_MEM_rd != 4'h0) &
-  (EX_MEM_rd == EX_MEM_rs);
-assign ex_forward_data = (Forward_EX_rs) ? ex_rs_data :
-  (Forward_EX_rt) ? ex_rt_data : 16'h0000;
+assign Forward_EX_rs = EX_MEM_regwrite & (mem_rd != 4'h0) &
+  (mem_rd == ex_rs);
+assign Forward_EX_rt = EX_MEM_regwrite & (mem_rd != 4'h0) &
+  (mem_rd == ex_rs);
+
+// can connect in top level but this is easier to look at
+assign ex_forward_data_in = ex_forward_data_out;
 
 
 // MEM hazard:
-assign Forward_MEM_rs = MEM_WB_regwrite & (MEM_WB_rd != 4'h0) &
-  (MEM_WB_rd == MEM_WB_rs);
-assign Forward_MEM_rt = MEM_WB_regwrite & (MEM_WB_rd != 4'h0) &
-  (MEM_WB_rd == MEM_WB_rt);
-assign mem_forward_data = (Forward_MEM_rs) ? mem_rs_data :
-  (Forward_MEM_rt) ? mem_rt_data : 16'h0000;
+assign Forward_MEM_rs = MEM_WB_regwrite & (wb_rd != 4'h0) &
+  (wb_rd == mem_rs);
+assign Forward_MEM_rt = MEM_WB_regwrite & (wb_rd != 4'h0) &
+  (wb_rd == mem_rt);
+assign mem_forward_data_in = mem_forward_data_out;
 
 
 endmodule
