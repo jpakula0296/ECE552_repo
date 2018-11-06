@@ -77,7 +77,8 @@ wire wb_data_mux;
 wire wb_WriteReg;
 
 // Forwarding Unit wires
-wire Forward_EX_rs, Forward_EX_rt, Forward_MEM_rs, Forward_MEM_rt;
+wire Forward_EX_rs, Forward_EX_rt, Forward_MEM_EX_rs, Forward_MEM_EX_rt,
+  Forward_MEM_MEM_rs, Forward_MEM_MEM_rt;
 wire [15:0] ex_forward_data, mem_forward_data;
 
 // ALU wires
@@ -250,17 +251,18 @@ MEM_WB mem_wb(
 
 // Forwarding Unit
 // Take rs and rt data from ID_EX and EX_MEM pipeline registers
-// Outputs Forward_MEM_rs, Forward_MEM_rt, Forward_EX_rs, and Forward_EX_rt
+// Outputs Forward_MEM_EX_rs, Forward_MEM_EX_rt, Forward_EX_rs, and Forward_EX_rt
 // as control signals. When one of these goes high, the output on the corresponding
 // data line will be the forwarded data and should be used as the input to
 // memory or ALU.
 Forwarding_Unit forwarding_unit(.EX_MEM_regwrite(mem_register_write_enable),
 .mem_rd(mem_rd), .ex_rs(ex_rs), .ex_rt(ex_rt), .MEM_WB_regwrite(wb_WriteReg),
 .wb_rd(wb_rd), .mem_rs(mem_rs), .mem_rt(mem_rt), .Forward_EX_rs(Forward_EX_rs),
-.Forward_EX_rt(Forward_EX_rt), .Forward_MEM_rs(Forward_MEM_rs),
-.Forward_MEM_rt(Forward_MEM_rt), .ex_forward_data_in(mem_data_addr_or_alu_result),
+.Forward_EX_rt(Forward_EX_rt), .Forward_MEM_EX_rs(Forward_MEM_EX_rs),
+.Forward_MEM_EX_rt(Forward_MEM_EX_rt), .ex_forward_data_in(mem_data_addr_or_alu_result),
 .ex_forward_data_out(ex_forward_data), .mem_forward_data_in(DstData),
-.mem_forward_data_out(mem_forward_data));
+.mem_forward_data_out(mem_forward_data), .EX_MEM_memwrite(mem_memory_write_enable),
+.Forward_MEM_MEM_rt(Forward_MEM_MEM_rt));
 
 // assign output pc
 assign pc = pc_current;
