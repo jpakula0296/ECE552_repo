@@ -48,7 +48,7 @@ module Forwarding_Unit(
 assign Forward_EX_rs = EX_MEM_regwrite & (mem_rd != 4'h0) &
   (mem_rd == ex_rs);
 assign Forward_EX_rt = EX_MEM_regwrite & (mem_rd != 4'h0) &
-  (mem_rd == ex_rs);
+  (mem_rd == ex_rt);
 
 // can connect in top level but this is easier to look at
 assign ex_forward_data_out = ex_forward_data_in;
@@ -56,9 +56,9 @@ assign ex_forward_data_out = ex_forward_data_in;
 
 // MEM-EX Forward:
 assign Forward_MEM_EX_rs = MEM_WB_regwrite & (wb_rd != 4'h0) &
-  (wb_rd == mem_rs);
+  (wb_rd == ex_rs);
 assign Forward_MEM_EX_rt = MEM_WB_regwrite & (wb_rd != 4'h0) &
-  (wb_rd == mem_rt);
+  (wb_rd == ex_rt);
 assign mem_forward_data_out = mem_forward_data_in;
 
 // MEM-MEM Forward:
