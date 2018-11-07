@@ -225,9 +225,9 @@ EX_MEM ex_mem(
     .ex_rd(ex_rd),
     .mem_rd(mem_rd),
 
-    .ex_rs(ex_rs),
+    .ex_rs(ex_rs_reg),
     .mem_rs(mem_rs),
-    .ex_rt(ex_rt),
+    .ex_rt(ex_rt_reg),
     .mem_rt(mem_rt),
 
     .ex_data_mux(ex_data_mux),
@@ -261,7 +261,7 @@ MEM_WB mem_wb(
 // data line will be the forwarded data and should be used as the input to
 // memory or ALU.
 Forwarding_Unit forwarding_unit(.EX_MEM_regwrite(mem_register_write_enable),
-.mem_rd(mem_rd), .ex_rs(ex_rs), .ex_rt(ex_rt), .MEM_WB_regwrite(wb_WriteReg),
+.mem_rd(mem_rd), .ex_rs(ex_rs_reg), .ex_rt(ex_rt_reg), .MEM_WB_regwrite(wb_WriteReg),
 .wb_rd(wb_rd), .mem_rs(mem_rs), .mem_rt(mem_rt), .Forward_EX_rs(Forward_EX_rs),
 .Forward_EX_rt(Forward_EX_rt), .Forward_MEM_EX_rs(Forward_MEM_EX_rs),
 .Forward_MEM_EX_rt(Forward_MEM_EX_rt), .ex_forward_data_in(mem_data_addr_or_alu_result),

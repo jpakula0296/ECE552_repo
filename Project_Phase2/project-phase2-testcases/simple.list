@@ -1,2 +1,3 @@
 LLB R1, 0x51
+LHB R1, 0x51 
 HLT

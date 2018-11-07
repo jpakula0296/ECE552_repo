@@ -3,7 +3,7 @@
 //
 // Logic:
 //
-// EX/EX hazard:
+// EX/EX forward:
 // if (EX/MEM.RegWrite
 // and (EX/MEM.RegisterRd ≠ 0)
 // and (EX/MEM.RegisterRd = ID/EX.RegisterRs)) ForwardA = 10
@@ -12,7 +12,7 @@
 // and (EX/MEM.RegisterRd ≠ 0)
 // and (EX/MEM.RegisterRd = ID/EX.RegisterRt)) ForwardB = 10
 //
-// MEM/EX hazard:
+// MEM/EX forward:
 // if (MEM/WB.RegWrite
 // and (MEM/WB.RegisterRd ≠  0)
 // and (MEM/WB.RegisterRd = ID/EX.RegisterRs)) ForwardA = 01
@@ -42,7 +42,6 @@ module Forwarding_Unit(
   output [15:0] ex_forward_data_out,
   input [15:0] mem_forward_data_in,
   output [15:0] mem_forward_data_out
-
   );
 
 // EX-MEM Forward:
@@ -52,7 +51,7 @@ assign Forward_EX_rt = EX_MEM_regwrite & (mem_rd != 4'h0) &
   (mem_rd == ex_rs);
 
 // can connect in top level but this is easier to look at
-assign ex_forward_data_in = ex_forward_data_out;
+assign ex_forward_data_out = ex_forward_data_in;
 
 
 // MEM-EX Forward:
@@ -60,13 +59,12 @@ assign Forward_MEM_EX_rs = MEM_WB_regwrite & (wb_rd != 4'h0) &
   (wb_rd == mem_rs);
 assign Forward_MEM_EX_rt = MEM_WB_regwrite & (wb_rd != 4'h0) &
   (wb_rd == mem_rt);
-assign mem_forward_data_in = mem_forward_data_out;
+assign mem_forward_data_out = mem_forward_data_in;
 
 // MEM-MEM Forward:
 assign Forward_MEM_MEM_rt = EX_MEM_memwrite & MEM_WB_regwrite &
   (wb_rd != 4'h0) & (wb_rd == mem_rt);
 // output will be mem_forward_data_out assigned above
-
 
 
 endmodule
