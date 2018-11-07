@@ -11,7 +11,7 @@ wire [15:0] pc_current, instr, pc_new, id_pc_current;
 wire [2:0] flags;
 
 // Data Memory
-wire [15:0] mem_data_out, data_addr;
+wire [15:0] mem_data_out, data_addr, mem_data_in;
 wire id_store_instr;
 wire mem_store_instr;
 
@@ -191,12 +191,14 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .id_rd(rd), .ex_rd(ex_rd), .id_rs_reg(rs), .id_rt_reg(rt), .ex_rs_reg(ex_rs_reg),
 .ex_rt_reg(ex_rt_reg), .id_data_mux(id_data_mux), .ex_data_mux(ex_data_mux));
 
-
 // ALU
 // TODO: PROBABLY NEED TO PIPELINE FLAG SIGNALS
-assign ALU_rt_data = (ex_load_half_instr) ? ex_load_half_data : ex_imm_instr ?
-ex_imm : (Forward_EX_rt) ? ex_forward_data : ex_rt_data;
-assign ALU_rs_data = (Forward_EX_rs) ? ex_forward_data : ex_rs_data;
+// assign EX forwarding data first since that would be the most recent value
+assign ALU_rt_data = (ex_load_half_instr) ? ex_load_half_data : (ex_imm_instr) ?
+ex_imm : (Forward_EX_rt) ? ex_forward_data : (Forward_MEM_EX_rt) ?
+mem_forward_data : ex_rt_data;
+assign ALU_rs_data = (Forward_EX_rs) ? ex_forward_data : (Forward_MEM_EX_rs) ?
+mem_forward_data : ex_rs_data;
 alu ALU(.rs(ALU_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out),
 .N(N_in), .Z_flag(Z_in), .V(V_in));
 
@@ -234,11 +236,14 @@ EX_MEM ex_mem(
 );
 
 // Data Memory
-// data_in from register rt, mem_data_out to DstReg multiplexer, address from ALU,
+// data_in from register rt or MEM-MEM forward
+// mem_data_out to DstReg multiplexer,
+// address from ALU (rs + imm)
 // overall enable strapped high, muxing read data anyway
 // write enable assigned to store opcode
 // mem_data_out to DstData
-data_mem data_memory(.data_in(mem_data_write_val), .data_out(mem_data_out), .addr(mem_data_addr_or_alu_result),
+assign mem_data_in = (Forward_MEM_MEM_rt) ? mem_forward_data : mem_data_write_val;
+data_mem data_memory(.data_in(mem_data_in), .data_out(mem_data_out), .addr(mem_data_addr_or_alu_result),
 .enable(1'b1), .wr(mem_memory_write_enable), .clk(clk), .rst(rst));
 
 MEM_WB mem_wb(
