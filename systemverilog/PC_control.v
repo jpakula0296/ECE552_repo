@@ -2,6 +2,7 @@
 // including necessary computations
 module PC_control (
     output [15:0] pc_new,
+    output flush_out,
     input [2:0] flags,
     input [15:0] instruction, // need full instr for conditional branch
     input [15:0] branch_reg_addr, // connected to rs data
@@ -55,5 +56,7 @@ rca_16bit plusimm ( // PC + 2 + (I << 1)
 assign pc_new = (opcode == 4'b1111) ? pc_new : // halt
   (~condition_passed) ?  plus_two : (opcode == 4'b1100) ? branch_imm :
   (opcode == 4'b1101) ? branch_reg_addr : plus_two;
+
+assign flush_out = condition_passed & ((opcode == 4'b1100) | (opcode == 4'b1101));
 
 endmodule
