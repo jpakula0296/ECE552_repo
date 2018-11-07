@@ -10,6 +10,9 @@ module EX_MEM(
     input stall_n,
     input flush,
 
+    input ex_hlt,
+    output mem_hlt,
+
     input  [15:0] ex_data_addr_or_alu_result,
     output [15:0] mem_data_addr_or_alu_result,
 
@@ -26,7 +29,11 @@ module EX_MEM(
     output mem_register_write_enable,
 
     input ex_data_mux,
-    output mem_data_mux
+    output mem_data_mux,
+
+    input ex_PCS_instr,
+    output mem_PCS_instr
+
 );
 
 MEM_data mem_data(
@@ -70,4 +77,7 @@ dff data_mux_ff(
     .d(ex_data_mux),
     .q(mem_data_mux)
 );
+
+dff hlt_dff(.clk(clk), .wen(stall_n), .rst(flush), .d(ex_hlt), .q(mem_hlt));
+dff pcs_dff(.clk(clk), .wen(stall_n), .rst(flush), .d(ex_PCS_instr), .q(mem_PCS_instr));
 endmodule
