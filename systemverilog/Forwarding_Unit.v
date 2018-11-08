@@ -27,6 +27,12 @@
 // and (MEM/WB.RegisterRd ≠0)
 // and (MEM/WB.RegisterRd = EX/MEM.RegisterRt)) enable MEM-to-MEM forwarding;
 
+// Stall Logic:
+// if ( ID/EX.MemRead and (ID/EX.RegisterRt ≠ 0)
+// and ( (ID/EX.RegisterRt = IF/ID.RegisterRs)
+// or ((ID/EX.RegisterRt = IF/ID.RegisterRt) and not IF/ID.MemWrite))
+// ) enable load-to-use stall;
+
 module Forwarding_Unit(
   // Deciding Logic:
   input EX_MEM_regwrite,
