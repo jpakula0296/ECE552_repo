@@ -50,7 +50,9 @@ module ID_EX(
   // ALU_result and data_mem needed before write back stage but unavailable for now
   // high z for now
   input id_WriteReg,
-  output ex_WriteReg
+  output ex_WriteReg,
+
+  output ex_memread
 
   );
 
@@ -90,5 +92,6 @@ dff data_mux_ff(
 
 assign ex_hlt = (ex_opcode == 4'b1111);
 assign ex_PCS_instr = (ex_opcode == 4'b1110);
+assign ex_memread = (ex_opcode == 4'b1000);
 
 endmodule

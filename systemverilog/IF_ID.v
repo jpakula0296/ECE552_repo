@@ -5,7 +5,8 @@ module IF_ID(
     input [15:0] instr_in,
     input [15:0] pc_current_in,
     output [15:0] instr_out,
-    output [15:0] pc_current_out
+    output [15:0] pc_current_out,
+    output id_memwrite
 
     );
 
@@ -14,6 +15,7 @@ dff_16bit dff0 (.d(instr_in), .q(instr_out), .wen(wen), .clk(clk), .rst(rst));
 // pc flip flop
 dff_16bit dff1 (.d(pc_current_in), .q(pc_current_out), .wen(wen), .clk(clk), .rst(rst));
 
+assign id_memwrite = (pc_current_out[15:0] == 4'b1001);
 
 
 endmodule

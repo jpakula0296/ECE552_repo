@@ -45,6 +45,10 @@ assign stall_n = 1'b1;
 
 wire [15:0] load_half_data;
 
+// IF/ID
+wire id_memwrite;
+wire if_id_stall_n;
+
 // ID/EX Stage pipeline outputs
 wire [3:0] ex_rs_reg;
 wire [3:0] ex_rt_reg;
@@ -59,6 +63,7 @@ wire ex_mem_write;
 wire ex_WriteReg;
 wire ex_data_mux;
 wire ex_PCS_instr;
+wire ex_memread;
 
 // EX/MEM Stage pipeline wires
 wire ex_mem_stall_n, ex_mem_flush;
@@ -106,7 +111,7 @@ PC_control pc_cntrl(.pc_new(pc_new), .flags(flags), .instruction(id_instr_out),
 // feeds program memory address, changes every posedge clk
 // input calculated from PC+2 or branch instruction
 // write enable not needed, keep high
-dff_16bit DFF0(.q(pc_current), .d(pc_new), .wen(1'b1), .clk(clk), .rst(rst));
+dff_16bit DFF0(.q(pc_current), .d(pc_new), .wen(if_id_stall_n), .clk(clk), .rst(rst));
 
 // PC Memory, read only
 // data_in doesn't need connection, never write data after initial loading
@@ -124,7 +129,8 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
 // output - just flops inputs, passed to branch control logic and
 // decode signals below
 IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_current_in(pc_current),
-  .pc_current_out(id_pc_current), .clk(clk), .rst(rst), .wen(stall_n));
+  .pc_current_out(id_pc_current), .clk(clk), .rst(rst), .wen(if_id_stall_n),
+  .id_memwrite(id_memwrite));
 
 // pull opcode from output of id_instruction
 // register file and later signals will be decoded based on this and passed
@@ -195,7 +201,7 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .ex_load_half_data(ex_load_half_data), .ex_WriteReg(ex_WriteReg), .id_WriteReg(id_WriteReg),
 .id_rd(rd), .ex_rd(ex_rd), .id_rs_reg(rs), .id_rt_reg(rt), .ex_rs_reg(ex_rs_reg),
 .ex_rt_reg(ex_rt_reg), .id_data_mux(id_data_mux), .ex_data_mux(ex_data_mux),
-.ex_hlt(ex_hlt), .ex_PCS_instr(ex_PCS_instr));
+.ex_hlt(ex_hlt), .ex_PCS_instr(ex_PCS_instr), .ex_memread(ex_memread));
 
 // ALU
 // TODO: PROBABLY NEED TO PIPELINE FLAG SIGNALS
@@ -280,7 +286,8 @@ Forwarding_Unit forwarding_unit(.EX_MEM_regwrite(mem_register_write_enable),
 .Forward_MEM_EX_rt(Forward_MEM_EX_rt), .ex_forward_data_in(mem_data_addr_or_alu_result),
 .ex_forward_data_out(ex_forward_data), .mem_forward_data_in(DstData),
 .mem_forward_data_out(mem_forward_data), .EX_MEM_memwrite(mem_memory_write_enable),
-.Forward_MEM_MEM_rt(Forward_MEM_MEM_rt));
+.Forward_MEM_MEM_rt(Forward_MEM_MEM_rt), .ex_memread(ex_memread), .id_rs(rs),
+.id_rt(rt), .id_memwrite(id_memwrite));
 
 // assign output pc and hlt
 assign pc = pc_current;
