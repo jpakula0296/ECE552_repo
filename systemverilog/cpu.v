@@ -94,7 +94,6 @@ wire [15:0] ALU_rs_data;
 
 wire rst;
 assign rst = ~rst_n | flush; // keep active high/low resets straight
-assign hlt = (opcode == 4'b1111);
 
 // PC Control - determines next instruction fetched from PC memory
 // flags based on output of flag register, flops ALU flag outputs
