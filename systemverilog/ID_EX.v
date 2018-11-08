@@ -1,5 +1,4 @@
-// TODO: replace high z signals with what we actually need here
-
+//
 
 module ID_EX(
   input clk,
@@ -52,9 +51,18 @@ module ID_EX(
   input id_WriteReg,
   output ex_WriteReg,
 
+  input if_id_stall_n,
+
   output ex_memread
 
   );
+
+wire id_memwrite_in;
+wire id_WriteReg_in;
+
+// When stalling we want to feed these flops no-ops, so no writes if stalled
+assign id_mem_write_in = (if_id_stall_n) ? id_mem_write : 1'b0;
+assign id_WriteReg_in = (if_id_stall_n) ? id_WriteReg : 1'b0;
 
 // EX_data
 EX_data exdata(.clk(clk), .stall_n(stall_n), .flush(rst), .id_rs_data(id_rs_data),
@@ -67,11 +75,11 @@ EX_data exdata(.clk(clk), .stall_n(stall_n), .flush(rst), .id_rs_data(id_rs_data
 
 // MEM_data
 ID_EX_MEM_data memdata(.clk(clk), .stall_n(stall_n), .flush(rst),
-.rt_Data_in(id_rt_data), .mem_write_in(id_mem_write),
+.rt_Data_in(id_rt_data), .mem_write_in(id_mem_write_in),
 .rt_Data_out(ex_rt_data), .mem_write_out(ex_mem_write));
 
 // WB_data
-ID_EX_WB_data wbdata(.clk(clk), .flush(rst), .stall_n(stall_n), .WriteReg_in(id_WriteReg),
+ID_EX_WB_data wbdata(.clk(clk), .flush(rst), .stall_n(stall_n), .WriteReg_in(id_WriteReg_in),
 .WriteReg_out(ex_WriteReg));
 
 dff_4bit rd_ff(

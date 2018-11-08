@@ -148,7 +148,7 @@ assign opcode = id_instr_out[15:12];
 // DstData is either ALU or memory depending on instruction
 // rd = 0 when not write instruction, can't write to this register
 // set flag enable signals based on type of instruction
-assign load_instr = opcode[3] & ~opcode[2];
+assign load_instr = (opcode == 4'b1000) | (opcode == 4'b1010) | (opcode == 4'b1011);
 assign PCS_instr = (opcode == 4'b1110);
 assign imm_instr = (~opcode[3] & opcode[2] & ~(&opcode[1:0])) | mem_instr; // all shift and memory instructions
 assign load_half_instr = load_instr & opcode[1];
@@ -201,7 +201,8 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .ex_load_half_data(ex_load_half_data), .ex_WriteReg(ex_WriteReg), .id_WriteReg(id_WriteReg),
 .id_rd(rd), .ex_rd(ex_rd), .id_rs_reg(rs), .id_rt_reg(rt), .ex_rs_reg(ex_rs_reg),
 .ex_rt_reg(ex_rt_reg), .id_data_mux(id_data_mux), .ex_data_mux(ex_data_mux),
-.ex_hlt(ex_hlt), .ex_PCS_instr(ex_PCS_instr), .ex_memread(ex_memread));
+.ex_hlt(ex_hlt), .ex_PCS_instr(ex_PCS_instr), .ex_memread(ex_memread),
+.if_id_stall_n(if_id_stall_n));
 
 // ALU
 // TODO: PROBABLY NEED TO PIPELINE FLAG SIGNALS
@@ -287,7 +288,7 @@ Forwarding_Unit forwarding_unit(.EX_MEM_regwrite(mem_register_write_enable),
 .ex_forward_data_out(ex_forward_data), .mem_forward_data_in(DstData),
 .mem_forward_data_out(mem_forward_data), .EX_MEM_memwrite(mem_memory_write_enable),
 .Forward_MEM_MEM_rt(Forward_MEM_MEM_rt), .ex_memread(ex_memread), .id_rs(rs),
-.id_rt(rt), .id_memwrite(id_memwrite));
+.id_rt(rt), .id_memwrite(id_memwrite), .if_id_stall_n(if_id_stall_n));
 
 // assign output pc and hlt
 assign pc = pc_current;

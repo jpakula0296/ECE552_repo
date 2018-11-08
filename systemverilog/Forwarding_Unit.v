@@ -78,7 +78,7 @@ assign Forward_MEM_MEM_rt = EX_MEM_memwrite & MEM_WB_regwrite &
 // output will be mem_forward_data_out assigned above
 
 assign if_id_stall_n = ~(ex_memread & (ex_rt != 4'h0) &
-((ex_rt == id_rs) | ((ex_rt == id_rt) & ~id_memwrite)))
+((ex_rt == id_rs) | ((ex_rt == id_rt) & ~id_memwrite)));
 
 
 endmodule
