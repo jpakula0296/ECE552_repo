@@ -14,6 +14,8 @@ reg [15:0] shift_left_o;
 reg [15:0] shift_right_o;
 reg [15:0] rotate_right;
 
+wire [15:0] shift_right_arith;
+
 // shifting left, hardcode shifts based on Shift_Val
 always @* case (Shift_Val)
   4'b0000 : shift_left_o = Shift_In << 4'b0000;
@@ -77,9 +79,10 @@ always @* case (Shift_Val)
   default $error("default case statement taken");
 endcase
 
+assign shift_right_arith = {Shift_In[15], shift_right_o[14:0]};
 
 // assign overall output based on mode, don't care for 11
 assign Shift_Out = (Mode == 2'b00) ? shift_left_o : (Mode == 2'b01) ?
-  shift_right_o : rotate_right;
+  shift_right_arith : rotate_right;
 
 endmodule
