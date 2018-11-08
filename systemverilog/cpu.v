@@ -37,6 +37,7 @@ wire sra_instr;
 wire ror_instr;
 wire logical_instr;
 wire reg_write_instr; // if not high 'write' to $0 since we can't anyway
+wire flush;
 
 // TODO: Implement stalling, setting stall_n to 1 to debug basic pipeline
 wire stall_n;
@@ -92,14 +93,15 @@ wire [15:0] ALU_rt_data; // data fed into rt of ALU
 wire [15:0] ALU_rs_data;
 
 wire rst;
-assign rst = ~rst_n; // keep active high/low resets straight
+assign rst = ~rst_n | flush; // keep active high/low resets straight
+assign hlt = (opcode == 4'b1111);
 
 // PC Control - determines next instruction fetched from PC memory
 // flags based on output of flag register, flops ALU flag outputs
 // branch_reg_addr acts on register RS
 assign flags = {V_out, N_out, Z_out};
 PC_control pc_cntrl(.pc_new(pc_new), .flags(flags), .instruction(id_instr_out),
-  .branch_reg_addr(rsData), .pc_current(pc_current));
+  .branch_reg_addr(rsData), .pc_current(pc_current), .flush_out(flush));
 
 // PC Address Flip-Flop
 // feeds program memory address, changes every posedge clk
