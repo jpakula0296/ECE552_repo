@@ -9,6 +9,9 @@ iverilog/
 *.vcd
 *.vvp
 
+# gtkwave settings
+*.gtkw
+
 # Other log and debug output
 *.log
 *.trace
