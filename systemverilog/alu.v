@@ -97,6 +97,7 @@ module alu(
         4'h9 : rd_reg = add_multifunc_out;      // SW
         4'hA : rd_reg = read_modify_low_byte;   // LLB
         4'hB : rd_reg = read_modify_high_byte;  // LHB
+        4'hE : rd_reg = rt;                     // PCS
         default : rd_reg = 16'hDEAD;
     endcase
 

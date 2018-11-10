@@ -29,11 +29,7 @@ module EX_MEM(
     output mem_register_write_enable,
 
     input ex_data_mux,
-    output mem_data_mux,
-
-    input ex_PCS_instr,
-    output mem_PCS_instr
-
+    output mem_data_mux
 );
 
 MEM_data mem_data(
@@ -79,5 +75,4 @@ dff data_mux_ff(
 );
 
 dff hlt_dff(.clk(clk), .wen(stall_n), .rst(flush), .d(ex_hlt), .q(mem_hlt));
-dff pcs_dff(.clk(clk), .wen(stall_n), .rst(flush), .d(ex_PCS_instr), .q(mem_PCS_instr));
 endmodule

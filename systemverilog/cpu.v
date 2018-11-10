@@ -7,7 +7,7 @@ module cpu(
 wire [3:0] opcode; // pulled from instruction
 
 // PC Memory
-wire [15:0] pc_current, instr, pc_new, id_pc_current;
+wire [15:0] pc_current, instr, pc_new, id_pc_new;
 wire [2:0] flags;
 
 // Data Memory
@@ -21,7 +21,7 @@ wire Z_in, V_in, N_in, Z_out, V_out, N_out, Z_en, V_en, N_en;
 // control signals found by ID stage
 wire id_WriteReg;
 wire [3:0] rs, rt, rd;
-wire [15:0] rsData, rtData, DstData;
+wire [15:0] rsData, rtData, DstData, SrcData2;
 wire [15:0] id_instr_out;
 wire load_instr; // for assigning regwrite enable
 wire id_data_mux;
@@ -62,7 +62,6 @@ wire ex_imm_instr;
 wire ex_mem_write;
 wire ex_WriteReg;
 wire ex_data_mux;
-wire ex_PCS_instr;
 wire ex_memread;
 
 // EX/MEM Stage pipeline wires
@@ -75,7 +74,6 @@ wire [3:0]  mem_rd, mem_rs, mem_rt;
 wire mem_data_mux;
 wire ex_hlt;
 wire mem_hlt;
-wire mem_PCS_instr;
 
 // MEM/WB Stage pipeline wires
 wire mem_wb_stall_m, mem_wb_flush;
@@ -85,7 +83,6 @@ wire [3:0]  wb_rd, wb_rs, wb_rt;
 wire wb_data_mux;
 wire wb_WriteReg;
 wire wb_hlt;
-wire wb_PCS_instr;
 
 // Forwarding Unit wires
 wire Forward_EX_rs, Forward_EX_rt, Forward_MEM_EX_rs, Forward_MEM_EX_rt,
@@ -128,8 +125,8 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
 // Input - instr_in from pc_memory, pc_plus_four from pc_control
 // output - just flops inputs, passed to branch control logic and
 // decode signals below
-IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_current_in(pc_current),
-  .pc_current_out(id_pc_current), .clk(clk), .rst(rst), .wen(if_id_stall_n),
+IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_new_in(pc_new),
+  .pc_new_out(id_pc_new), .clk(clk), .rst(rst), .wen(if_id_stall_n),
   .id_memwrite(id_memwrite));
 
 // pull opcode from output of id_instruction
@@ -179,16 +176,17 @@ assign id_data_mux = load_instr & ~load_half_instr;
 assign DstData =
     (wb_data_mux)?
         wb_data_mem
-    :(wb_PCS_instr)?
-        pc_new
     :
         wb_ALU_res
     ;
 
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(wb_WriteReg), .SrcReg1(rs),
-.SrcReg2(rt), .DstReg(wb_rd), .SrcData1(rsData), .SrcData2(rtData),
+.SrcReg2(rt), .DstReg(wb_rd), .SrcData1(rsData), .SrcData2(SrcData2),
 .DstData(DstData), .Z_in(Z_in), .V_in(V_in), .N_in(N_in), .Z_out(Z_out),
 .N_out(N_out), .V_out(V_out), .Z_en(Z_en), .V_en(V_en), .N_en(N_en));
+
+// on PCS instructions, the next PC value gets passed through rtData
+assign rtData = PCS_instr ? id_pc_new : SrcData2;
 
 // ID_EX stage pipeline
 // flops all signals necessary for later stages
@@ -201,15 +199,25 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .ex_load_half_data(ex_load_half_data), .ex_WriteReg(ex_WriteReg), .id_WriteReg(id_WriteReg),
 .id_rd(rd), .ex_rd(ex_rd), .id_rs_reg(rs), .id_rt_reg(rt), .ex_rs_reg(ex_rs_reg),
 .ex_rt_reg(ex_rt_reg), .id_data_mux(id_data_mux), .ex_data_mux(ex_data_mux),
-.ex_hlt(ex_hlt), .ex_PCS_instr(ex_PCS_instr), .ex_memread(ex_memread),
+.ex_hlt(ex_hlt), .ex_memread(ex_memread),
 .if_id_stall_n(if_id_stall_n));
 
 // ALU
 // TODO: PROBABLY NEED TO PIPELINE FLAG SIGNALS
 // assign EX forwarding data first since that would be the most recent value
-assign ALU_rt_data = (ex_load_half_instr) ? ex_load_half_data : (ex_imm_instr) ?
-ex_imm : (Forward_EX_rt) ? ex_forward_data : (Forward_MEM_EX_rt) ?
-mem_forward_data : ex_rt_data;
+assign ALU_rt_data =
+    (ex_load_half_instr) ?
+        ex_load_half_data
+    : (ex_imm_instr) ?
+        ex_imm
+    : (Forward_EX_rt) ?
+        ex_forward_data
+    : (Forward_MEM_EX_rt) ?
+        mem_forward_data
+    :
+        ex_rt_data
+;
+
 assign ALU_rs_data = (Forward_EX_rs) ? ex_forward_data : (Forward_MEM_EX_rs) ?
 mem_forward_data : ex_rs_data;
 alu ALU(.rs(ALU_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out),
@@ -247,11 +255,7 @@ EX_MEM ex_mem(
     .mem_data_mux(mem_data_mux),
 
     .ex_hlt(ex_hlt),
-    .mem_hlt(mem_hlt),
-
-    .ex_PCS_instr(ex_PCS_instr),
-    .mem_PCS_instr(mem_PCS_instr)
-
+    .mem_hlt(mem_hlt)
 );
 
 // Data Memory
@@ -271,7 +275,7 @@ MEM_WB mem_wb(
 .wb_WriteReg(wb_WriteReg), .wb_ALU_res(wb_ALU_res), .wb_data_mem(wb_data_mem), .mem_rd(mem_rd), .wb_rd(wb_rd),
 .mem_rs(mem_rs), .wb_rs(wb_rs), .mem_rt(mem_rt), .wb_rt(wb_rt),
 .mem_data_mux(mem_data_mux), .wb_data_mux(wb_data_mux), .mem_hlt(mem_hlt),
-.wb_hlt(wb_hlt), .mem_PCS_instr(mem_PCS_instr), .wb_PCS_instr(wb_PCS_instr)
+.wb_hlt(wb_hlt)
 );
 
 // Forwarding Unit

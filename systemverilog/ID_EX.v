@@ -23,7 +23,6 @@ module ID_EX(
   input  [3:0]    id_opcode,
   output [3:0]    ex_opcode,
   output          ex_hlt,
-  output          ex_PCS_instr,
 
   input  [3:0]    id_rd,
   output [3:0]    ex_rd,
@@ -99,7 +98,6 @@ dff data_mux_ff(
 );
 
 assign ex_hlt = (ex_opcode == 4'b1111);
-assign ex_PCS_instr = (ex_opcode == 4'b1110);
 assign ex_memread = (ex_opcode == 4'b1000);
 
 endmodule

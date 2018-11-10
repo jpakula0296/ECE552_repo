@@ -16,11 +16,8 @@ module MEM_WB(
   output [15:0] wb_data_mem,
 
   input mem_hlt,
-  output wb_hlt,
-
-  input mem_PCS_instr,
-  output wb_PCS_instr
-  );
+  output wb_hlt
+);
 
 WB_data wbdata(
     .clk(clk),
@@ -55,5 +52,4 @@ dff data_mux_ff(
 );
 
 dff hlt_dff(.clk(clk), .rst(rst), .wen(stall_n), .d(mem_hlt), .q(wb_hlt));
-dff pcs_dff(.clk(clk), .rst(rst), .wen(stall_n), .d(mem_PCS_instr), .q(wb_PCS_instr));
 endmodule
