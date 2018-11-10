@@ -96,8 +96,8 @@ module adder_multifunc_16bit(
         .cout(dummy_cout[5])
     );
     adder_cla_4bit adder6(
-        .a({3'b0,cla_cout[1]}),
-        .b({3'b0,cla_cout[3]}),
+        .a({4{cla_cout[1] ^ a[7] ^ b_flip[7]}}),   // sign bit of first 8 bit addition
+        .b({4{cla_cout[3] ^ a[15] ^ b_flip[15]}}), // sign bit of second 8 bit addition
         .cin(all_cin[6]),
         .s(s_red[11:8]),
         .ovfl(all_ovfl[6]),
@@ -160,7 +160,7 @@ module adder_multifunc_16bit(
             }
         :red?
             // In 8-bit reduction mode, sign extend the output from adders 4 and 5.
-            { {6{s_red[9]}}, s_red[9:0] }
+            { {4{s_red[11]}}, s_red[11:0] }
         :
             // In 16 bit mode, saturate based on the final overflow bit.
             all_ovfl[3]? a[15]? 16'h8000 : 16'h7FFF : s_unsat[15:0]
