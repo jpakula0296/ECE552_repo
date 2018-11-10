@@ -114,7 +114,7 @@ module cpu_ptb();
                   MemWrite,
                   MemAddress,
                   MemDataIn,
-		  MemDataOut);
+                  MemDataOut);
          if (RegWrite) begin
             $fdisplay(trace_file,"REG: %d VALUE: 0x%04x",
                       WriteRegister,
@@ -150,38 +150,32 @@ module cpu_ptb();
    // Edit the example below. You must change the signal
    // names on the right hand side
 
-//   assign PC = DUT.fetch0.pcCurrent; //You won't need this because it's part of the main cpu interface
-
-//   assign Halt = DUT.memory0.halt; //You won't need this because it's part of the main cpu interface
-   // Is processor halted (1 bit signal)
-
-
-   // assign Inst = DUT.p0.instr;
-   // //Instruction fetched in the current cycle
-   //
-   // assign RegWrite = DUT.p0.regWrite;
-   // // Is register file being written to in this cycle, one bit signal (1 means yes, 0 means no)
-   //
-   // assign WriteRegister = DUT.p0.DstwithJmout;
-   // // If above is true, this should hold the name of the register being written to. (4 bit signal)
-   //
-   // assign WriteData = DUT.p0.wData;
-   // // If above is true, this should hold the Data being written to the register. (16 bits)
-   //
-   // assign MemRead =  (DUT.p0.memRxout & ~DUT.p0.notdonem);
-   // // Is memory being read from, in this cycle. one bit signal (1 means yes, 0 means no)
-   //
-   // assign MemWrite = (DUT.p0.memWxout & ~DUT.p0.notdonem);
-   // // Is memory being written to, in this cycle (1 bit signal)
-   //
-   // assign MemAddress = DUT.p0.data1out;
-   // // If there's a memory access this cycle, this should hold the address to access memory with (for both reads and writes to memory, 16 bits)
-   //
-   // assign MemDataIn = DUT.p0.data2out;
-   // // If there's a memory write in this cycle, this is the Data being written to memory (16 bits)
-   //
-   // assign MemDataOut = DUT.p0.readData;
-   // // If there's a memory read in this cycle, this is the data being read out of memory (16 bits)
+   //Instruction fetched in the current cycle
+   assign Inst = DUT.instr;
+   
+   // Is register file being written to in this cycle, one bit signal (1 means yes, 0 means no)
+   assign RegWrite = DUT.wb_WriteReg;
+   
+   // If above is true, this should hold the name of the register being written to. (4 bit signal)
+   assign WriteRegister = DUT.wb_rd;
+   
+   // If above is true, this should hold the Data being written to the register. (16 bits)
+   assign WriteData = DUT.DstData;
+   
+   // Is memory being read from, in this cycle. one bit signal (1 means yes, 0 means no)
+   assign MemRead =  DUT.mem_data_mux;
+   
+   // Is memory being written to, in this cycle (1 bit signal)
+   assign MemWrite = DUT.mem_memory_write_enable;
+   
+   // If there's a memory access this cycle, this should hold the address to access memory with (for both reads and writes to memory, 16 bits)
+   assign MemAddress = DUT.mem_data_addr_or_alu_result;
+   
+   // If there's a memory write in this cycle, this is the Data being written to memory (16 bits)
+   assign MemDataIn = DUT.mem_data_in;
+   
+   // If there's a memory read in this cycle, this is the data being read out of memory (16 bits)
+   assign MemDataOut = DUT.mem_data_out;
 
 
 
