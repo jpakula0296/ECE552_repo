@@ -160,9 +160,6 @@ assign mem_instr = (opcode[3:1] == 3'b100);
 assign id_store_instr = (opcode == 4'b1001); // only write on store instrs
 
 assign logical_instr = xor_instr | sll_instr | sra_instr | ror_instr;
-assign Z_en = arith_instr | logical_instr; // change z flag on arithmetic or logical
-assign V_en = arith_instr; // V and N flags change on arith instr only
-assign N_en = arith_instr;
 
 assign id_WriteReg = ALU_instr | load_instr | PCS_instr;
 assign rd = id_instr_out[11:8];
@@ -172,12 +169,7 @@ assign id_imm =  mem_instr ? {{11{id_instr_out[3]}}, id_instr_out[3:0], 1'b0} : 
 assign load_half_data = {8'h00, id_instr_out[7:0]};
 assign id_data_mux = load_instr & ~load_half_instr;
 
-assign DstData =
-    (wb_data_mux)?
-        wb_data_mem
-    :
-        wb_ALU_res
-    ;
+assign DstData = wb_data_mux ? wb_data_mem : wb_ALU_res;
 
 RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(wb_WriteReg), .SrcReg1(rs),
 .SrcReg2(rt), .DstReg(wb_rd), .SrcData1(rsData), .SrcData2(SrcData2),
@@ -202,7 +194,6 @@ ID_EX id_ex(.clk(clk), .rst(rst), .stall_n(stall_n), .id_rs_data(rsData),
 .if_id_stall_n(if_id_stall_n));
 
 // ALU
-// TODO: PROBABLY NEED TO PIPELINE FLAG SIGNALS
 // assign EX forwarding data first since that would be the most recent value
 assign ALU_rt_data =
     (ex_load_half_instr) ?
@@ -220,7 +211,7 @@ assign ALU_rt_data =
 assign ALU_rs_data = (Forward_EX_rs) ? ex_forward_data : (Forward_MEM_EX_rs) ?
 mem_forward_data : ex_rs_data;
 alu ALU(.rs(ALU_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out),
-.N(N_in), .Z_flag(Z_in), .V(V_in));
+.N(N_in), .Z_flag(Z_in), .V(V_in), .N_en(N_en), .Z_en(Z_en), .V_en(V_en));
 
 // just hook up stall and flush to global stall and reset to begin with
 assign ex_mem_stall_n = stall_n;

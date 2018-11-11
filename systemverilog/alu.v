@@ -8,7 +8,10 @@ module alu(
     input [3:0]     control,
     output          N,
     output          V,
-    output          Z_flag
+    output          Z_flag,
+    output          N_en,
+    output          V_en,
+    output          Z_en
 );
 
     wire [15:0] add_multifunc_out;
@@ -31,6 +34,11 @@ module alu(
     assign N = N_reg;
     assign V = V_reg;
     assign Z_flag = Z_reg;
+
+    reg N_en_reg, V_en_reg, Z_en_reg;
+    assign N_en = N_en_reg;
+    assign V_en = V_en_reg;
+    assign Z_en = Z_en_reg;
 
     /*
      * Set up each of the output modes
@@ -107,6 +115,11 @@ module alu(
         4'h1 : N_reg = rd[15]; // SUB
         default : N_reg = 1'b0;
     endcase
+    always @(*) case(control)
+        4'h0 : N_en_reg = 1'b1; // ADD
+        4'h1 : N_en_reg = 1'b1; // SUB
+        default : N_en_reg = 1'b0;
+    endcase
 
     // Z flag
     wire z_flag;
@@ -120,12 +133,26 @@ module alu(
         4'h6 : Z_reg = z_flag; // ROR
         default : Z_reg = 1'b0;
     endcase
+    always @(*) case(control)
+        4'h0 : Z_en_reg = 1'b1; // ADD
+        4'h1 : Z_en_reg = 1'b1; // SUB
+        4'h2 : Z_en_reg = 1'b1; // XOR
+        4'h4 : Z_en_reg = 1'b1; // SLL
+        4'h5 : Z_en_reg = 1'b1; // SRA
+        4'h6 : Z_en_reg = 1'b1; // ROR
+        default : Z_en_reg = 1'b0;
+    endcase
 
     // V flag
     always @(*) case(control)
         4'h0 : V_reg = ovfl; // ADD
         4'h1 : V_reg = ovfl; // SUB
         default : V_reg = 1'b0;
+    endcase
+    always @(*) case(control)
+        4'h0 : V_en_reg = 1'b1; // ADD
+        4'h1 : V_en_reg = 1'b1; // SUB
+        default : V_en_reg = 1'b0;
     endcase
 
 endmodule
