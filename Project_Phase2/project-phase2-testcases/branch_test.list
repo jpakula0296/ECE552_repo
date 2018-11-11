@@ -1,0 +1,63 @@
+     LLB R1, 0x01
+     LHB R1, 0x00   # R1 = 1
+     LLB R2, 0xff
+     LHB R2, 0xff   # R2 = -1
+     LLB R4, 0xff
+     LHB R4, 0x7f   # R4 = 32767
+
+    #########################
+    # Branch taken tests    #
+    #########################
+
+     SUB R3, R1, R2
+     B 000, b1          # test branch not equal
+     HLT
+b1:  SUB R3, R1, R1
+     B 001, b2          # test branch equal
+     HLT
+b2:  SUB R3, R1, R2
+     B 010, b3          # test branch greater-than
+     HLT
+b3:  SUB R3, R2, R1
+     B 011, b4          # test branch less-than
+     HLT
+b4:  SUB R3, R1, R1
+     B 100, b5          # test branch greater-than or equal 1
+     HLT
+b5:  SUB R3, R1, R2
+     B 100, b6          # test branch greater-than or equal 2
+     HLT
+b6:  SUB R3, R1, R1
+     B 101, b7          # test branch less-than or equal 1
+     HLT
+b7:  SUB R3, R2, R1
+     B 101, b8          # test branch less-than or equal 2
+     HLT
+b8:  ADD R3, R4, R4
+     B 110, b9          # test branch overflow
+     HLT
+b9:  SUB R3, R3, R3
+     B 111, b10         # test branch unconditionally
+     HLT
+
+    ##########################
+    # Branch not taken tests #
+    ##########################
+
+b10: SUB R3, R1, R1
+     B 000, b11         # test branch not equal
+     SUB R3, R1, R2
+     B 001, b11         # test branch equal
+     SUB R3, R2, R1
+     B 010, b11         # test branch greater-than
+     SUB R3, R1, R2
+     B 011, b11         # test branch less-than
+     SUB R3, R2, R1
+     B 100, b11         # test branch greater-than or equal
+     SUB R3, R1, R2
+     B 101, b11         # test branch less-than or equal
+     SUB R3, R1, R2
+     B 110, b11         # test branch overflow
+     HLT
+
+b11: HLT

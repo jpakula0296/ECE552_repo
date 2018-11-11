@@ -56,7 +56,7 @@ module ID_EX(
 
   );
 
-wire id_memwrite_in;
+wire id_mem_write_in;
 wire id_WriteReg_in;
 
 // When stalling we want to feed these flops no-ops, so no writes if stalled

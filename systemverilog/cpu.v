@@ -7,8 +7,9 @@ module cpu(
 wire [3:0] opcode; // pulled from instruction
 
 // PC Memory
-wire [15:0] pc_current, instr, pc_new, id_pc_new;
+wire [15:0] if_pc_current, instr, id_pc_current, if_pc_next, if_pc_increment;
 wire [2:0] flags;
+wire branch_taken;
 
 // Data Memory
 wire [15:0] mem_data_out, data_addr, mem_data_in;
@@ -22,7 +23,7 @@ wire Z_in, V_in, N_in, Z_out, V_out, N_out, Z_en, V_en, N_en;
 wire id_WriteReg;
 wire [3:0] rs, rt, rd;
 wire [15:0] rsData, rtData, DstData, SrcData2;
-wire [15:0] id_instr_out;
+wire [15:0] id_instr_out, id_pc_new;
 wire load_instr; // for assigning regwrite enable
 wire id_data_mux;
 wire imm_instr;
@@ -37,7 +38,6 @@ wire sra_instr;
 wire ror_instr;
 wire logical_instr;
 wire reg_write_instr; // if not high 'write' to $0 since we can't anyway
-wire flush;
 
 // TODO: Implement stalling, setting stall_n to 1 to debug basic pipeline
 wire stall_n;
@@ -46,7 +46,6 @@ assign stall_n = 1'b1;
 wire [15:0] load_half_data;
 
 // IF/ID
-wire id_memwrite;
 wire if_id_stall_n;
 
 // ID/EX Stage pipeline outputs
@@ -95,20 +94,13 @@ wire [15:0] ALU_rt_data; // data fed into rt of ALU
 wire [15:0] ALU_rs_data;
 
 wire rst;
-assign rst = ~rst_n | flush; // keep active high/low resets straight
+assign rst = ~rst_n; // keep active high/low resets straight
 
-// PC Control - determines next instruction fetched from PC memory
-// flags based on output of flag register, flops ALU flag outputs
-// branch_reg_addr acts on register RS
-assign flags = {V_out, N_out, Z_out};
-PC_control pc_cntrl(.pc_new(pc_new), .flags(flags), .instruction(id_instr_out),
-  .branch_reg_addr(rsData), .pc_current(pc_current), .flush_out(flush));
-
-// PC Address Flip-Flop
-// feeds program memory address, changes every posedge clk
-// input calculated from PC+2 or branch instruction
-// write enable not needed, keep high
-dff_16bit DFF0(.q(pc_current), .d(pc_new), .wen(if_id_stall_n), .clk(clk), .rst(rst));
+// Stores the current PC address, and assigns the next one. Assume that
+// branches aren't taken, unless more info is received from the ID stage.
+assign if_pc_next = branch_taken ? id_pc_new : if_pc_increment;
+dff_16bit DFF0(.d(if_pc_next), .q(if_pc_current), .wen(if_id_stall_n), .clk(clk), .rst(rst));
+rca_16bit if_pc_next_addr(.a(if_pc_current), .b(16'h2), .cin(0'b0), .s(if_pc_increment), .cout());
 
 // PC Memory, read only
 // data_in doesn't need connection, never write data after initial loading
@@ -118,16 +110,23 @@ dff_16bit DFF0(.q(pc_current), .d(pc_new), .wen(if_id_stall_n), .clk(clk), .rst(
 // write enable strapped low, always reading
 // output is instr
 pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
-  .addr(pc_current), .enable(1'b1), .wr(1'b0));
+  .addr(if_pc_current), .enable(1'b1), .wr(1'b0));
 
 // IF-ID stage pipeline - holds current instruction and pc_plus_four
 // to pass to decode portion to determine control signals
 // Input - instr_in from pc_memory, pc_plus_four from pc_control
 // output - just flops inputs, passed to branch control logic and
 // decode signals below
-IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_new_in(pc_new),
-  .pc_new_out(id_pc_new), .clk(clk), .rst(rst), .wen(if_id_stall_n),
-  .id_memwrite(id_memwrite));
+IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_current_in(if_pc_current),
+  .pc_current_out(id_pc_current), .clk(clk), .rst(branch_taken), .wen(if_id_stall_n));
+
+// PC Control - determines next instruction fetched from PC memory
+// flags based on output of flag register, flops ALU flag outputs
+// branch_reg_addr acts on register RS
+assign flags = {V_out, N_out, Z_out};
+PC_control pc_cntrl(.pc_new(id_pc_new), .flags(flags), .instruction(id_instr_out),
+  .branch_reg_addr(rsData), .pc_current(id_pc_current), .flush_out(branch_taken));
+
 
 // pull opcode from output of id_instruction
 // register file and later signals will be decoded based on this and passed
@@ -171,8 +170,6 @@ assign id_imm =  mem_instr ? {{11{id_instr_out[3]}}, id_instr_out[3:0], 1'b0} : 
 assign load_half_data = {8'h00, id_instr_out[7:0]};
 assign id_data_mux = load_instr & ~load_half_instr;
 
-//TODO: pc_new needs to be piplined
-// TODO: properly pipeline the control signals here
 assign DstData =
     (wb_data_mux)?
         wb_data_mem
@@ -292,10 +289,10 @@ Forwarding_Unit forwarding_unit(.EX_MEM_regwrite(mem_register_write_enable),
 .ex_forward_data_out(ex_forward_data), .mem_forward_data_in(DstData),
 .mem_forward_data_out(mem_forward_data), .EX_MEM_memwrite(mem_memory_write_enable),
 .Forward_MEM_MEM_rt(Forward_MEM_MEM_rt), .ex_memread(ex_memread), .id_rs(rs),
-.id_rt(rt), .id_memwrite(id_memwrite), .if_id_stall_n(if_id_stall_n));
+.id_rt(rt), .id_memwrite(id_store_instr), .if_id_stall_n(if_id_stall_n));
 
 // assign output pc and hlt
-assign pc = pc_current;
+assign pc = if_pc_current;
 assign hlt =  wb_hlt;
 
 endmodule

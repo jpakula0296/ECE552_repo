@@ -53,10 +53,12 @@ rca_16bit plusimm ( // PC + 2 + (I << 1)
     .cout()
 );
 
-assign pc_new = (opcode == 4'b1111) ? pc_new : // halt
+wire halt_instr;
+assign halt_instr = opcode == 4'b1111;
+
+assign pc_new = halt_instr ? pc_new : // halt
   (~condition_passed) ?  plus_two : (opcode == 4'b1100) ? branch_imm :
   (opcode == 4'b1101) ? branch_reg_addr : plus_two;
 
-// assign flush_out = condition_passed & ((opcode == 4'b1100) | (opcode == 4'b1101));
-assign flush_out = 1'b0;
+assign flush_out = condition_passed | halt_instr;
 endmodule

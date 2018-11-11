@@ -10,9 +10,16 @@ module Flag_Register(
   output Z_out, V_out, N_out // FF outputs
   );
 
+wire Z_flop, V_flop, N_flop;
+
 // instantiate each FF for each bit
-dff Z_FF(.clk(clk), .rst(rst), .d(Z_in), .wen(Z_en), .q(Z_out));
-dff O_FF(.clk(clk), .rst(rst), .d(V_in), .wen(V_en), .q(V_out));
-dff S_FF(.clk(clk), .rst(rst), .d(N_in), .wen(N_en), .q(N_out));
+dff Z_FF(.clk(clk), .rst(rst), .d(Z_in), .wen(Z_en), .q(Z_flop));
+dff O_FF(.clk(clk), .rst(rst), .d(V_in), .wen(V_en), .q(V_flop));
+dff S_FF(.clk(clk), .rst(rst), .d(N_in), .wen(N_en), .q(N_flop));
+
+// Do a write-before-read if necessary
+assign Z_out = Z_en ? Z_in : Z_flop;
+assign V_out = V_en ? V_in : V_flop;
+assign N_out = N_en ? N_in : N_flop;
 
 endmodule
