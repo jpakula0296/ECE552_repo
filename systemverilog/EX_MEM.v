@@ -32,6 +32,10 @@ module EX_MEM(
     output mem_data_mux
 );
 
+wire ex_register_write_enable_in;
+
+assign ex_register_write_enable_in = (stall_n) ? ex_register_write_enable : 1'b0;
+
 MEM_data mem_data(
     .clk(clk),
     .stall_n(stall_n),
@@ -52,7 +56,7 @@ dff memory_write_enable_ff(
     .wen(stall_n),
     .rst(flush),
 
-    .d(ex_register_write_enable),
+    .d(ex_register_write_enable_in),
     .q(mem_register_write_enable)
 );
 
