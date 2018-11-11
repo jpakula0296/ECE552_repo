@@ -32,6 +32,7 @@ always @* case (condition_flags)
   3'b101 : condition_passed = N_flag | Z_flag; // less than or equal to
   3'b110 : condition_passed = V_flag; // overflow
   3'b111 : condition_passed = 1'b1; // unconditional
+  default: condition_passed = 1'b0;
 endcase
 
 wire [7:0] immediate;
@@ -53,12 +54,14 @@ rca_16bit plusimm ( // PC + 2 + (I << 1)
     .cout()
 );
 
-wire halt_instr;
+wire halt_instr, branch_instr;
 assign halt_instr = opcode == 4'b1111;
+assign branch_instr = opcode[3:1] == 3'b110;
+
 
 assign pc_new = halt_instr ? pc_new : // halt
   (~condition_passed) ?  plus_two : (opcode == 4'b1100) ? branch_imm :
   (opcode == 4'b1101) ? branch_reg_addr : plus_two;
 
-assign flush_out = condition_passed | halt_instr;
+assign flush_out = branch_instr & condition_passed;
 endmodule

@@ -10,6 +10,7 @@ wire [3:0] opcode; // pulled from instruction
 wire [15:0] if_pc_current, instr, id_pc_current, if_pc_next, if_pc_increment;
 wire [2:0] flags;
 wire branch_taken;
+wire if_hlt;
 
 // Data Memory
 wire [15:0] mem_data_out, data_addr, mem_data_in;
@@ -98,7 +99,7 @@ assign rst = ~rst_n; // keep active high/low resets straight
 
 // Stores the current PC address, and assigns the next one. Assume that
 // branches aren't taken, unless more info is received from the ID stage.
-assign if_pc_next = branch_taken ? id_pc_new : if_pc_increment;
+assign if_pc_next = branch_taken ? id_pc_new : if_hlt ? if_pc_current : if_pc_increment;
 dff_16bit DFF0(.d(if_pc_next), .q(if_pc_current), .wen(if_id_stall_n), .clk(clk), .rst(rst));
 rca_16bit if_pc_next_addr(.a(if_pc_current), .b(16'h2), .cin(0'b0), .s(if_pc_increment), .cout());
 
@@ -111,6 +112,7 @@ rca_16bit if_pc_next_addr(.a(if_pc_current), .b(16'h2), .cin(0'b0), .s(if_pc_inc
 // output is instr
 pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
   .addr(if_pc_current), .enable(1'b1), .wr(1'b0));
+assign if_hlt = instr[15:12] == 4'b1111;
 
 // IF-ID stage pipeline - holds current instruction and pc_plus_four
 // to pass to decode portion to determine control signals
