@@ -48,7 +48,7 @@ rca_16bit plus2 ( // PC + 2
 );
 rca_16bit plusimm ( // PC + 2 + (I << 1)
     .a(plus_two),
-    .b({{8{1'b0}}, (immediate << 1)}),
+    .b({{8{immediate[7]}}, (immediate << 1)}),
     .cin(1'b0),
     .s(branch_imm),
     .cout()

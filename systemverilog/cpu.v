@@ -101,7 +101,7 @@ assign rst = ~rst_n; // keep active high/low resets straight
 // branches aren't taken, unless more info is received from the ID stage.
 assign if_pc_next = branch_taken ? id_pc_new : if_hlt ? if_pc_current : if_pc_increment;
 dff_16bit DFF0(.d(if_pc_next), .q(if_pc_current), .wen(if_id_stall_n), .clk(clk), .rst(rst));
-rca_16bit if_pc_next_addr(.a(if_pc_current), .b(16'h2), .cin(0'b0), .s(if_pc_increment), .cout());
+rca_16bit if_pc_next_addr(.a(if_pc_current), .b(16'h2), .cin(1'b0), .s(if_pc_increment), .cout());
 
 // PC Memory, read only
 // data_in doesn't need connection, never write data after initial loading
