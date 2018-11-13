@@ -3,6 +3,7 @@ work
 ModelSim
 VinayTest
 Quartus
+project_phase1_20181029
 
 # Icarus verilog files
 iverilog/

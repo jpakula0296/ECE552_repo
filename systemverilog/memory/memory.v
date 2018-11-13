@@ -52,7 +52,7 @@ module pc_mem (data_out, data_in, addr, enable, wr, clk, rst);
       if (rst) begin
          //load loadfile_all.img
          if (!loaded) begin
-            $readmemh("load.txt", mem);
+            $readmemh("test1.txt", mem);
             loaded = 1;
          end
 
@@ -94,7 +94,7 @@ module data_mem (data_out, data_in, addr, enable, wr, clk, rst);
             $readmemh("data_mem.txt", mem);
             loaded = 1;
          end
-      
+
       end
       else begin
          if (enable & wr) begin
