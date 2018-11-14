@@ -14,7 +14,7 @@ reg [15:0] shift_left_o;
 reg [15:0] shift_right_o;
 reg [15:0] rotate_right;
 
-wire [15:0] shift_right_arith;
+reg [15:0] shift_right_arith;
 
 // shifting left, hardcode shifts based on Shift_Val
 always @* case (Shift_Val)
@@ -39,23 +39,43 @@ endcase
 
 // shifting right arithmetic
 always @* case (Shift_Val)
-  4'b0000 : shift_right_o = Shift_In >>> 4'b0000;
-  4'b0001 : shift_right_o = Shift_In >>> 4'b0001;
-  4'b0010 : shift_right_o = Shift_In >>> 4'b0010;
-  4'b0011 : shift_right_o = Shift_In >>> 4'b0011;
-  4'b0100 : shift_right_o = Shift_In >>> 4'b0100;
-  4'b0101 : shift_right_o = Shift_In >>> 4'b0101;
-  4'b0110 : shift_right_o = Shift_In >>> 4'b0110;
-  4'b0111 : shift_right_o = Shift_In >>> 4'b0111;
-  4'b1000 : shift_right_o = Shift_In >>> 4'b1000;
-  4'b1001 : shift_right_o = Shift_In >>> 4'b1001;
-  4'b1010 : shift_right_o = Shift_In >>> 4'b1010;
-  4'b1011 : shift_right_o = Shift_In >>> 4'b1011;
-  4'b1100 : shift_right_o = Shift_In >>> 4'b1100;
-  4'b1101 : shift_right_o = Shift_In >>> 4'b1101;
-  4'b1110 : shift_right_o = Shift_In >>> 4'b1110;
-  4'b1111 : shift_right_o = Shift_In >>> 4'b1111;
+  4'b0000 : shift_right_o = Shift_In >> 4'b0000;
+  4'b0001 : shift_right_o = Shift_In >> 4'b0001;
+  4'b0010 : shift_right_o = Shift_In >> 4'b0010;
+  4'b0011 : shift_right_o = Shift_In >> 4'b0011;
+  4'b0100 : shift_right_o = Shift_In >> 4'b0100;
+  4'b0101 : shift_right_o = Shift_In >> 4'b0101;
+  4'b0110 : shift_right_o = Shift_In >> 4'b0110;
+  4'b0111 : shift_right_o = Shift_In >> 4'b0111;
+  4'b1000 : shift_right_o = Shift_In >> 4'b1000;
+  4'b1001 : shift_right_o = Shift_In >> 4'b1001;
+  4'b1010 : shift_right_o = Shift_In >> 4'b1010;
+  4'b1011 : shift_right_o = Shift_In >> 4'b1011;
+  4'b1100 : shift_right_o = Shift_In >> 4'b1100;
+  4'b1101 : shift_right_o = Shift_In >> 4'b1101;
+  4'b1110 : shift_right_o = Shift_In >> 4'b1110;
+  4'b1111 : shift_right_o = Shift_In >> 4'b1111;
   default : $error("default case statement taken");
+endcase
+
+always @* case (Shift_Val)
+  4'b0000 : shift_right_arith = shift_right_o;
+  4'b0001 : shift_right_arith = {Shift_In[15], shift_right_o[14:0]};
+  4'b0010 : shift_right_arith = {{2{Shift_In[15]}}, shift_right_o[13:0]};
+  4'b0011 : shift_right_arith = {{3{Shift_In[15]}}, shift_right_o[12:0]};
+  4'b0100 : shift_right_arith = {{4{Shift_In[15]}}, shift_right_o[11:0]};
+  4'b0101 : shift_right_arith = {{5{Shift_In[15]}}, shift_right_o[10:0]};
+  4'b0110 : shift_right_arith = {{6{Shift_In[15]}}, shift_right_o[9:0]};
+  4'b0111 : shift_right_arith = {{7{Shift_In[15]}}, shift_right_o[8:0]};
+  4'b1000 : shift_right_arith = {{8{Shift_In[15]}}, shift_right_o[7:0]};
+  4'b1001 : shift_right_arith = {{9{Shift_In[15]}}, shift_right_o[6:0]};
+  4'b1010 : shift_right_arith = {{10{Shift_In[15]}}, shift_right_o[5:0]};
+  4'b1011 : shift_right_arith = {{11{Shift_In[15]}}, shift_right_o[4:0]};
+  4'b1100 : shift_right_arith = {{12{Shift_In[15]}}, shift_right_o[3:0]};
+  4'b1101 : shift_right_arith = {{13{Shift_In[15]}}, shift_right_o[2:0]};
+  4'b1110 : shift_right_arith = {{14{Shift_In[15]}}, shift_right_o[1:0]};
+  4'b1111 : shift_right_arith = {{15{Shift_In[15]}}, shift_right_o[0]};
+  default : $error("default case statment taken");
 endcase
 
 // Rotate right operation
@@ -79,7 +99,8 @@ always @* case (Shift_Val)
   default $error("default case statement taken");
 endcase
 
-assign shift_right_arith = {Shift_In[15], shift_right_o[14:0]};
+
+
 
 // assign overall output based on mode, don't care for 11
 assign Shift_Out = (Mode == 2'b00) ? shift_left_o : (Mode == 2'b01) ?
