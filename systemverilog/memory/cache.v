@@ -22,18 +22,18 @@ wire [5:0] set;
 wire [3:0] offset;
 wire way_select;
 wire [15:0] settimestwoplusone;
-wire [6:0] settimeswo;
+wire [6:0] settimestwo;
 
 assign tag = addr[15:10];
 assign set = addr[9:4];
 assign offset = addr[3:0];
 
-assign settimeswo = set << 1
-rca_16bit(.a({9'b0,settimeswo}), .b(1'b1), .s(settimestwoplusone), .cin(1'b0), .cout());
+assign settimestwo = set << 1;
+rca_16bit(.a({9'b0,settimestwo}), .b(1'b1), .s(settimestwoplusone), .cin(1'b0), .cout());
 
 //cache_block_decoder data_block_select(.block_num({set,way_select}), .BlockEnable(DataBlockEnable));
-cache_block_decoder mdata0_block_select(.block_num(setshiftedbyone), .BlockEnable(MetaBlockEnable0));
-cache_block_decoder mdata1_block_select(.block_num(setshiftedbyone), .BlockEnable(MetaBlockEnable1));
+cache_block_decoder mdata0_block_select(.block_num(settimestwo), .BlockEnable(MetaBlockEnable0));
+cache_block_decoder mdata1_block_select(.block_num(settimestwo), .BlockEnable(MetaBlockEnable1));
 
 DataArray dataArray(.clk(clk), .rst(rst), .DataIn(data_in), .Write(wr),
 .BlockEnable(DataBlockEnable), .WordEnable(WordEnable), .DataOut(data_out));
