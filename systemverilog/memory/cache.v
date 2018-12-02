@@ -1,4 +1,4 @@
-module cache(data_out, data_in, addr, enable, wr, clk, rst, arbiter_select);
+module cache(data_out, miss_detected, data_in, addr, enable, wr, clk, rst, arbiter_select);
 
    parameter ADDR_WIDTH = 16;
    output  [15:0] data_out;
@@ -24,12 +24,14 @@ wire [3:0] offset;
 wire [15:0] settimestwoplusone;
 wire [6:0] settimestwo;
 wire way_select;
+
 wire matchfound0;
 wire matchfound1;
 wire [63:0] LRUin;
 wire [63:0] LRUout;
 wire LRU;
-wire wr_odd_block; // only write odd block if it is being evicted 
+wire wr_odd_block; // only write odd block if it is being evicted
+
 
 assign tag = addr[15:10];
 assign set = addr[9:4];
@@ -53,10 +55,13 @@ MetaDataArray metaDataArray0(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 MetaDataArray metaDataArray1(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 .Write(wr_odd_block), .BlockEnable(MetaBlockEnable1), .DataOut(MetaData1_out));
 
-//Compares tags and checks validity
+// Compares tags and checks validity
 assign matchfound0 = MetaData0_out[6] & (tag == MetaData0_out[5:0]);
 assign matchfound1 = MetaData1_out[6] & (tag == MetaData1_out[5:0]);
 
+// miss_detected must stay high during entire data transfer, so it should be
+// high while we are writing to the cache or when no match is found
+assign miss_detected = wr | (~matchfound0 & ~matchfound1);
 
 // LRU = 0 evict even block, LRU = 1 evict odd block
 // TODO: write LRU
@@ -64,7 +69,7 @@ assign LRU = MetaData0_out[7];
 assign way_select = (matchfound0 == 1'b1) ? 1'b0 : (matchfound1 == 1'b1) ? 1'b1 : LRU;
 
 // if way_select = 1 we also need to write to MetaData0_out[7] for LRU bit
-assign MetaData0_in = (way_select) ? {way_select, MetaData0_in[6:0]} : MetaData_in;
+assign MetaData0_in = (way_select) ? {way_select, MetaData0_out[6:0]} : MetaData_in;
 
 // index block as set * 2, way_select chooses even or odd block in the set
 cache_block_decoder data_block_select(.block_num({set,way_select}), .BlockEnable(DataBlockEnable));
