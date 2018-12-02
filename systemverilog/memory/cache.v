@@ -52,12 +52,10 @@ MetaDataArray metaDataArray1(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 assign matchfound0 = MetaData0_out[6] & (tag == MetaData0_out[5:0]);
 assign matchfound1 = MetaData1_out[6] & (tag == MetaData1_out[5:0]);
 
-//MetaData0_out[7] and MetaData1_out[7] are the LRU bits and should always match
-//Alternatively we ignore that bit and store LRU separately
-//TODO: figure that out
-//dff64bit LRUarray(.d(LRUin), .q(LRUout), .wen(wr), .clk(clk), .rst(rst));
-assign way_select = (matchfound0 == 1'b1) ? 1'b0 : (matchfound1 == 1'b1) ? 1'b1 : 1'b1; //TODO: replace last "1'b1" with LRU bit
 
+// LRU = 0 evict even block, LRU = 1 evict odd block
+dff64bit LRUarray(.d(LRUin), .q(LRUout), .wen(wr), .clk(clk), .rst(rst));
+assign way_select = (matchfound0 == 1'b1) ? 1'b0 : (matchfound1 == 1'b1) ? 1'b1 : 1'b1;
 
 
 cache_block_decoder data_block_select(.block_num({set,way_select}), .BlockEnable(DataBlockEnable));

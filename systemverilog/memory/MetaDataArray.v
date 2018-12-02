@@ -4,9 +4,9 @@
 //WriteEnable is one on writes and zero on reads
 
 //Format of DataOut:
-//LRU = DataOut[7];
 //valid = DataOut[6];
 //tag = DataOut[5:0];
+//LRU kept separately in cache.v, DataOut[7] is ignored 
 
 module MetaDataArray(input clk, input rst, input [7:0] DataIn, input Write, input [127:0] BlockEnable, output [7:0] DataOut);
 	MBlock Mblk[127:0]( .clk(clk), .rst(rst), .Din(DataIn), .WriteEnable(Write), .Enable(BlockEnable), .Dout(DataOut));
