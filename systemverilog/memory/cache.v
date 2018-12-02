@@ -33,11 +33,15 @@ assign set = addr[9:4];
 assign offset = addr[3:0];
 
 assign settimestwo = set << 1;
+
+// 16-bit adder, output is settimestwoplusone
 rca_16bit(.a({9'b0,settimestwo}), .b(1'b1), .s(settimestwoplusone), .cin(1'b0), .cout());
 
+// Get enable signal for adjacent meta data blocks from decoders
 cache_block_decoder mdata0_block_select(.block_num(settimestwo), .BlockEnable(MetaBlockEnable0));
 cache_block_decoder mdata1_block_select(.block_num(settimestwoplusone), .BlockEnable(MetaBlockEnable1));
 
+// Get meta data (6-bit tag, valid, and LRU bit) from array
 MetaDataArray metaDataArray0(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 .Write(wr), .BlockEnable(MetaBlockEnable0), .DataOut(MetaData0_out));
 
