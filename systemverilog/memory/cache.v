@@ -2,6 +2,7 @@ module cache(data_out, data_in, addr, enable, wr, clk, rst, arbiter_select);
 
    parameter ADDR_WIDTH = 16;
    output  [15:0] data_out;
+   output miss_detected; // TODO, assign miss_detected to signal cache_fill_FSM
    input [15:0]   data_in;
    input [ADDR_WIDTH-1 :0]   addr;
    input          enable;
@@ -28,6 +29,7 @@ wire matchfound1;
 wire [63:0] LRUin;
 wire [63:0] LRUout;
 wire LRU;
+wire wr_odd_block; // only write odd block if it is being evicted 
 
 assign tag = addr[15:10];
 assign set = addr[9:4];
@@ -44,11 +46,12 @@ cache_block_decoder mdata1_block_select(.block_num(settimestwoplusone), .BlockEn
 
 // Get meta data (6-bit tag, valid, and LRU bit) from array
 // TODO: assign MetaData_in and write enable when a new block is written
+
 MetaDataArray metaDataArray0(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 .Write(wr), .BlockEnable(MetaBlockEnable0), .DataOut(MetaData0_out));
 
 MetaDataArray metaDataArray1(.clk(clk), .rst(rst), .DataIn(MetaData_in),
-.Write(wr), .BlockEnable(MetaBlockEnable1), .DataOut(MetaData1_out));
+.Write(wr_odd_block), .BlockEnable(MetaBlockEnable1), .DataOut(MetaData1_out));
 
 //Compares tags and checks validity
 assign matchfound0 = MetaData0_out[6] & (tag == MetaData0_out[5:0]);
@@ -56,10 +59,12 @@ assign matchfound1 = MetaData1_out[6] & (tag == MetaData1_out[5:0]);
 
 
 // LRU = 0 evict even block, LRU = 1 evict odd block
-// TODO: assign LRUin, only one bit should change at a time.
-//
+// TODO: write LRU
 assign LRU = MetaData0_out[7];
-assign way_select = (matchfound0 == 1'b1) ? 1'b0 : (matchfound1 == 1'b1) ? 1'b1 : LRU; // TODO, assign last 1'b1 to LRU
+assign way_select = (matchfound0 == 1'b1) ? 1'b0 : (matchfound1 == 1'b1) ? 1'b1 : LRU;
+
+// if way_select = 1 we also need to write to MetaData0_out[7] for LRU bit
+assign MetaData0_in = (way_select) ? {way_select, MetaData0_in[6:0]} : MetaData_in;
 
 // index block as set * 2, way_select chooses even or odd block in the set
 cache_block_decoder data_block_select(.block_num({set,way_select}), .BlockEnable(DataBlockEnable));
