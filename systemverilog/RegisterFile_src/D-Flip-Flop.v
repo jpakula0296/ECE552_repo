@@ -22,6 +22,21 @@ module dff (q, d, wen, clk, rst);
 
 endmodule
 
+module dff_64bit (q, d, wen, clk, rst);
+
+    output    [63:0]     q; //DFF output
+    input     [63:0]     d; //DFF input
+    input 	             wen; //Write Enable
+    input                clk; //Clock
+    input                rst; //Reset (used synchronously)
+
+    dff16bit dff0(.q(q[15:0 ]), .d(d[15:0 ]), .wen(wen), .clk(clk), .rst(rst));
+    dff16bit dff1(.q(q[31:16]), .d(d[31:16]), .wen(wen), .clk(clk), .rst(rst));
+    dff16bit dff2(.q(q[47:32]), .d(d[47:32]), .wen(wen), .clk(clk), .rst(rst));
+    dff16bit dff3(.q(q[63:48]), .d(d[63:48]), .wen(wen), .clk(clk), .rst(rst));
+
+endmodule
+
 module dff_16bit (q, d, wen, clk, rst);
 
     output    [15:0]     q; //DFF output
