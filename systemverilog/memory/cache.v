@@ -35,7 +35,6 @@ rca_16bit(.a({9'b0,settimeswo}), .b(1'b1), .s(settimestwoplusone), .cin(1'b0), .
 cache_block_decoder mdata0_block_select(.block_num(setshiftedbyone), .BlockEnable(MetaBlockEnable0));
 cache_block_decoder mdata1_block_select(.block_num(setshiftedbyone), .BlockEnable(MetaBlockEnable1));
 
-
 DataArray dataArray(.clk(clk), .rst(rst), .DataIn(data_in), .Write(wr),
 .BlockEnable(DataBlockEnable), .WordEnable(WordEnable), .DataOut(data_out));
 
@@ -44,13 +43,6 @@ MetaDataArray metaDataArray0(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 
 MetaDataArray metaDataArray1(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 .Write(wr), .BlockEnable(MetaBlockEnable1), .DataOut(MetaData1_out));
-
-
-
-
-
-
-
 
 
 endmodule
