@@ -27,6 +27,7 @@ wire matchfound0;
 wire matchfound1;
 wire [63:0] LRUin;
 wire [63:0] LRUout;
+wire LRU;
 
 assign tag = addr[15:10];
 assign set = addr[9:4];
@@ -42,6 +43,7 @@ cache_block_decoder mdata0_block_select(.block_num(settimestwo), .BlockEnable(Me
 cache_block_decoder mdata1_block_select(.block_num(settimestwoplusone), .BlockEnable(MetaBlockEnable1));
 
 // Get meta data (6-bit tag, valid, and LRU bit) from array
+// TODO: assign MetaData_in and write enable when a new block is written
 MetaDataArray metaDataArray0(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 .Write(wr), .BlockEnable(MetaBlockEnable0), .DataOut(MetaData0_out));
 
@@ -54,10 +56,12 @@ assign matchfound1 = MetaData1_out[6] & (tag == MetaData1_out[5:0]);
 
 
 // LRU = 0 evict even block, LRU = 1 evict odd block
-dff64bit LRUarray(.d(LRUin), .q(LRUout), .wen(wr), .clk(clk), .rst(rst));
-assign way_select = (matchfound0 == 1'b1) ? 1'b0 : (matchfound1 == 1'b1) ? 1'b1 : 1'b1;
+// TODO: assign LRUin, only one bit should change at a time.
+//
+assign LRU = MetaData0_out[7];
+assign way_select = (matchfound0 == 1'b1) ? 1'b0 : (matchfound1 == 1'b1) ? 1'b1 : LRU; // TODO, assign last 1'b1 to LRU
 
-
+// index block as set * 2, way_select chooses even or odd block in the set
 cache_block_decoder data_block_select(.block_num({set,way_select}), .BlockEnable(DataBlockEnable));
 
 DataArray dataArray(.clk(clk), .rst(rst), .DataIn(data_in), .Write(wr),
