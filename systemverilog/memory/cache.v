@@ -2,7 +2,7 @@ module cache(data_out, miss_detected, data_in, addr, enable, wr, clk, rst, arbit
 
    parameter ADDR_WIDTH = 16;
    output  [15:0] data_out;
-   output miss_detected; // TODO, assign miss_detected to signal cache_fill_FSM
+   output miss_detected;
    input [15:0]   data_in;
    input [ADDR_WIDTH-1 :0]   addr;
    input          enable;
@@ -31,6 +31,7 @@ wire [63:0] LRUin;
 wire [63:0] LRUout;
 wire LRU;
 wire wr_odd_block; // only write odd block if it is being evicted
+wire [15:0] dataArray_out;
 
 
 assign tag = addr[15:10];
@@ -46,12 +47,10 @@ rca_16bit(.a({9'b0,settimestwo}), .b(1'b1), .s(settimestwoplusone), .cin(1'b0), 
 cache_block_decoder mdata0_block_select(.block_num(settimestwo), .BlockEnable(MetaBlockEnable0));
 cache_block_decoder mdata1_block_select(.block_num(settimestwoplusone), .BlockEnable(MetaBlockEnable1));
 
-// Get meta data (6-bit tag, valid, and LRU bit) from array
-// TODO: assign MetaData_in and write enable when a new block is written
-
 // new LRU is opposite of what was just used, always write valid bit of 1, then tag
 assign MetaData_in = {~way_select, 1'b1, tag};
 
+// Get meta data (6-bit tag, valid, and LRU bit) from array
 MetaDataArray metaDataArray0(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 .Write(wr), .BlockEnable(MetaBlockEnable0), .DataOut(MetaData0_out));
 
@@ -81,7 +80,9 @@ assign MetaData0_in = (way_select) ? {way_select, MetaData0_out[6:0]} : MetaData
 cache_block_decoder data_block_select(.block_num({set,way_select}), .BlockEnable(DataBlockEnable));
 
 DataArray dataArray(.clk(clk), .rst(rst), .DataIn(data_in), .Write(wr),
-.BlockEnable(DataBlockEnable), .WordEnable(WordEnable), .DataOut(data_out));
+.BlockEnable(DataBlockEnable), .WordEnable(WordEnable), .DataOut(dataArray_out));
 
+// should'nt be reading if we are writing to the cache, high z when wr=1
+assign data_out = (wr) ? 16'hz : dataArray_out;
 
 endmodule
