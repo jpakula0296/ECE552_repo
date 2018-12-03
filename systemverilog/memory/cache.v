@@ -6,7 +6,7 @@ module cache(data_out, miss_detected, data_in, addr, enable, wr, clk, rst, arbit
    input [15:0]   data_in;
    input [ADDR_WIDTH-1 :0]   addr;
    input          enable;
-   input          wr;
+   input          wr; // will be connected to cache_fill_FSM write output
    input          clk;
    input          rst;
    input          arbiter_select;
@@ -49,6 +49,9 @@ cache_block_decoder mdata1_block_select(.block_num(settimestwoplusone), .BlockEn
 // Get meta data (6-bit tag, valid, and LRU bit) from array
 // TODO: assign MetaData_in and write enable when a new block is written
 
+// new LRU is opposite of what was just used, always write valid bit of 1, then tag
+assign MetaData_in = {~way_select, 1'b1, tag};
+
 MetaDataArray metaDataArray0(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 .Write(wr), .BlockEnable(MetaBlockEnable0), .DataOut(MetaData0_out));
 
@@ -67,6 +70,9 @@ assign miss_detected = wr | (~matchfound0 & ~matchfound1);
 // TODO: write LRU
 assign LRU = MetaData0_out[7];
 assign way_select = (matchfound0 == 1'b1) ? 1'b0 : (matchfound1 == 1'b1) ? 1'b1 : LRU;
+
+// writing to odd block if way_select = 1
+assign wr_odd_block = wr & way_select;
 
 // if way_select = 1 we also need to write to MetaData0_out[7] for LRU bit
 assign MetaData0_in = (way_select) ? {way_select, MetaData0_out[6:0]} : MetaData_in;
