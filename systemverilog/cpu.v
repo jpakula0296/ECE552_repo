@@ -94,6 +94,11 @@ wire [15:0] ALU_out; // ALU output
 wire [15:0] ALU_rt_data; // data fed into rt of ALU
 wire [15:0] ALU_rs_data;
 
+// Cache wires
+wire instr_cache_miss, data_cache_miss;
+wire arbiter_select;
+wire [15:0] instr_mem_out;
+
 wire rst;
 assign rst = ~rst_n; // keep active high/low resets straight
 
@@ -110,9 +115,14 @@ rca_16bit if_pc_next_addr(.a(if_pc_current), .b(16'h2), .cin(1'b0), .s(if_pc_inc
 // enable strapped high since we are always reading from this memory
 // write enable strapped low, always reading
 // output is instr
-pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr),
+pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr_mem_out),
   .addr(if_pc_current), .enable(1'b1), .wr(1'b0));
 assign if_hlt = instr[15:12] == 4'b1111;
+
+// I-mem cache
+cache instr_cache(.data_out(instr), .miss_detected(instr_cache_miss),
+.data_in(instr_mem_out), .addr(if_pc_current), .enable(1'b1), .wr(1'b0), .clk(clk),
+.rst(rst), .arbiter_select(arbiter_select));
 
 // IF-ID stage pipeline - holds current instruction and pc_plus_four
 // to pass to decode portion to determine control signals
