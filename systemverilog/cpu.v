@@ -121,7 +121,7 @@ assign if_hlt = instr[15:12] == 4'b1111;
 
 // I-mem cache
 cache instr_cache(.data_out(instr), .miss_detected(instr_cache_miss),
-.data_in(instr_mem_out), .addr(if_pc_current), .enable(1'b1), .wr(1'b0), .clk(clk),
+.data_in(instr_mem_out), .addr(if_pc_current), .data_wr(1'b0), .wr(1'b0), .clk(clk),
 .rst(rst), .arbiter_select(arbiter_select));
 
 // IF-ID stage pipeline - holds current instruction and pc_plus_four

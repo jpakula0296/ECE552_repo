@@ -1,11 +1,11 @@
-module cache(data_out, miss_detected, data_in, addr, enable, wr, clk, rst, arbiter_select);
+module cache(data_out, miss_detected, data_in, addr, data_wr, wr, clk, rst, arbiter_select);
 
    parameter ADDR_WIDTH = 16;
    output  [15:0] data_out;
    output miss_detected;
    input [15:0]   data_in;
    input [ADDR_WIDTH-1 :0]   addr;
-   input          enable;
+   input          data_wr;
    input          wr; // will be connected to cache_fill_FSM write output
    input          clk;
    input          rst;
