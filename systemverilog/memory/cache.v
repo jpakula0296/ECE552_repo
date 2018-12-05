@@ -41,7 +41,7 @@ assign offset = addr[3:0];
 assign settimestwo = set << 1;
 
 // 16-bit adder, output is settimestwoplusone
-rca_16bit(.a({9'b0,settimestwo}), .b(1'b1), .s(settimestwoplusone), .cin(1'b0), .cout());
+rca_16bit plusone(.a({9'b0,settimestwo}), .b(1'b1), .s(settimestwoplusone), .cin(1'b0), .cout());
 
 // Get enable signal for adjacent meta data blocks from decoders
 cache_block_decoder mdata0_block_select(.block_num(settimestwo), .BlockEnable(MetaBlockEnable0));
@@ -68,7 +68,7 @@ assign miss_detected = wr | (~matchfound0 & ~matchfound1);
 // LRU = 0 evict even block, LRU = 1 evict odd block
 // TODO: write LRU
 assign LRU = MetaData0_out[7];
-assign way_select = (matchfound0 == 1'b1) ? 1'b0 : (matchfound1 == 1'b1) ? 1'b1 : LRU;
+assign way_select = matchfound0 ? 1'b0 : matchfound1 ? 1'b1 : LRU;
 
 // writing to odd block if way_select = 1
 assign wr_odd_block = wr & way_select;

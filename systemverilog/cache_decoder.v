@@ -1,6 +1,6 @@
 module cache_block_decoder(
   input [6:0] block_num,
-  output reg [127:0] BlockEnable
+  output [127:0] BlockEnable
 );
 
 reg [127:0] BlockEnable;
@@ -8,7 +8,7 @@ wire [127:0] base;
 assign base = 127'h1; // shift this left to get values
 
 // implementing with shifts so we don't have to type out all these values
-always @* case(shift_val)
+always @* case(block_num)
 7'd0 : BlockEnable = base << 7'd0;
 7'd1 : BlockEnable = base << 7'd1;
 7'd2 : BlockEnable = base << 7'd2;
@@ -137,7 +137,7 @@ always @* case(shift_val)
 7'd125 : BlockEnable = base << 7'd125;
 7'd126 : BlockEnable = base << 7'd126;
 7'd127 : BlockEnable = base << 7'd127;
-
+endcase
 
 
 endmodule
