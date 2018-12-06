@@ -15,7 +15,7 @@ module cache(data_out, miss_detected, data_in, addr, data_wr, wr, clk, rst, arbi
 wire [127:0] DataBlockEnable, MetaBlockEnable0, MetaBlockEnable1;
 wire [7:0] WordEnable;
 
-wire [7:0] MetaData_in;
+wire [7:0] MetaData0_in, MetaData_in;
 wire [7:0] MetaData0_out, MetaData1_out;
 
 wire [5:0] tag;
@@ -45,7 +45,7 @@ rca_16bit plusone(.a({9'b0,settimestwo}), .b(1'b1), .s(settimestwoplusone), .cin
 
 // Get enable signal for adjacent meta data blocks from decoders
 cache_block_decoder mdata0_block_select(.block_num(settimestwo), .BlockEnable(MetaBlockEnable0));
-cache_block_decoder mdata1_block_select(.block_num(settimestwoplusone), .BlockEnable(MetaBlockEnable1));
+cache_block_decoder mdata1_block_select(.block_num(settimestwoplusone[6:0]), .BlockEnable(MetaBlockEnable1));
 
 // new LRU is opposite of what was just used, always write valid bit of 1, then tag
 assign MetaData_in = {~way_select, 1'b1, tag};
