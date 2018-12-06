@@ -79,7 +79,7 @@ assign MetaData0_in = (way_select) ? {way_select, MetaData0_out[6:0]} : MetaData
 // index block as set * 2, way_select chooses even or odd block in the set
 cache_block_decoder data_block_select(.block_num({set,way_select}), .BlockEnable(DataBlockEnable));
 
-DataArray dataArray(.clk(clk), .rst(rst), .DataIn(data_in), .Write(wr),
+DataArray dataArray(.clk(clk), .rst(rst), .DataIn(data_in), .Write(data_wr),
 .BlockEnable(DataBlockEnable), .WordEnable(WordEnable), .DataOut(dataArray_out));
 
 // should'nt be reading if we are writing to the cache, high z when wr=1

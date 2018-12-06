@@ -99,6 +99,9 @@ wire instr_cache_miss, data_cache_miss;
 wire arbiter_select;
 wire [15:0] instr_mem_out;
 
+wire [15:0] data_cache_out;
+wire [15:0] data_cache_in;
+
 wire rst;
 assign rst = ~rst_n; // keep active high/low resets straight
 
@@ -123,6 +126,15 @@ assign if_hlt = instr[15:12] == 4'b1111;
 cache instr_cache(.data_out(instr), .miss_detected(instr_cache_miss),
 .data_in(instr_mem_out), .addr(if_pc_current), .data_wr(1'b0), .wr(1'b0), .clk(clk),
 .rst(rst), .arbiter_select(arbiter_select));
+
+// Data cache
+// data_out always goes to memory module, miss_detected connected to miss FSM,
+// data_in can come from data memory or memory module for store ops
+
+// TODO: assign data_cache_in depending on store or load op
+// assign data_cache_in =
+cache data_cache(.data_out(data_cache_out), .miss_detected(data_cache_miss),
+.data_in(data_cache_in), .addr(mem_data_addr_or_alu_result), )
 
 // IF-ID stage pipeline - holds current instruction and pc_plus_four
 // to pass to decode portion to determine control signals
