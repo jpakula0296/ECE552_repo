@@ -40,10 +40,6 @@ wire ror_instr;
 wire logical_instr;
 wire reg_write_instr; // if not high 'write' to $0 since we can't anyway
 
-// TODO: Implement stalling, setting stall_n to 1 to debug basic pipeline
-wire stall_n;
-assign stall_n = 1'b1;
-
 wire [15:0] load_half_data;
 
 // IF/ID
@@ -88,6 +84,7 @@ wire wb_hlt;
 wire Forward_EX_rs, Forward_EX_rt, Forward_MEM_EX_rs, Forward_MEM_EX_rt,
 Forward_MEM_MEM_rt;
 wire [15:0] ex_forward_data, mem_forward_data;
+wire hazard_stall_n;
 
 // ALU wires
 wire [15:0] ALU_out; // ALU output
@@ -105,7 +102,7 @@ wire [15:0] data_cache_in;
 wire data_array_wr;
 wire [15:0] data_cache_addr;
 wire [15:0] cache_fill_addr;
-wire fsm_busy;
+wire cache_stall_n;
 wire memory_data_valid;
 
 wire rst;
@@ -156,7 +153,6 @@ cache_arbiter Cache_Arbiter(.instr_addr(if_pc_current), .data_addr(data_cache_ad
 // Cache Fill FMS - for filling cache block from memory on cache misses
 // works with both instruction and data memory, so needs to access inputs/Outputs
 // of both caches
-// TODO: make fsm busy stall the cpu
 assign miss_detected = instr_cache_miss | data_cache_miss;
 cache_fill_FSM cache_fill_fsm(.clk(clk), .rst_n(rst_n), .miss_detected(miss_detected),
 .miss_address(cache_fill_addr), .fsm_busy(fsm_busy), .write_data_array(data_wr),
@@ -227,6 +223,7 @@ RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(wb_WriteReg), .SrcReg1(rs),
 
 // on PCS instructions, the next PC value gets passed through rtData
 assign rtData = PCS_instr ? id_pc_new : SrcData2;
+assign if_id_stall_n = hazard_stall_n & cache_stall_n;
 
 // ID_EX stage pipeline
 // flops all signals necessary for later stages
@@ -331,7 +328,7 @@ Forwarding_Unit forwarding_unit(.EX_MEM_regwrite(mem_register_write_enable),
 .ex_forward_data_out(ex_forward_data), .mem_forward_data_in(DstData),
 .mem_forward_data_out(mem_forward_data), .EX_MEM_memwrite(mem_memory_write_enable),
 .Forward_MEM_MEM_rt(Forward_MEM_MEM_rt), .ex_memread(ex_memread), .id_rs(rs),
-.id_rt(rt), .id_memwrite(id_store_instr), .if_id_stall_n(if_id_stall_n));
+.id_rt(rt), .id_memwrite(id_store_instr), .hazard_stall_n(hazard_stall_n));
 
 // assign output pc and hlt
 assign pc = if_pc_current;

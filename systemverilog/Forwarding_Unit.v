@@ -52,7 +52,7 @@ module Forwarding_Unit(
   input ex_memread,
   input [3:0] id_rs, id_rt,
   input id_memwrite,
-  output if_id_stall_n
+  output hazard_stall_n
   );
 
 // EX-MEM Forward:
@@ -77,7 +77,7 @@ assign Forward_MEM_MEM_rt = EX_MEM_memwrite & MEM_WB_regwrite &
   (wb_rd != 4'h0) & (wb_rd == mem_rt);
 // output will be mem_forward_data_out assigned above
 
-assign if_id_stall_n = ~(ex_memread & (ex_rt != 4'h0) &
+assign hazard_stall_n = ~(ex_memread & (ex_rt != 4'h0) &
 ((ex_rt == id_rs) | ((ex_rt == id_rt) & ~id_memwrite)));
 
 
