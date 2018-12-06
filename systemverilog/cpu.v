@@ -95,12 +95,16 @@ wire [15:0] ALU_rt_data; // data fed into rt of ALU
 wire [15:0] ALU_rs_data;
 
 // Cache wires
-wire instr_cache_miss, data_cache_miss;
+wire instr_cache_miss, data_cache_miss, miss_detected;
 wire arbiter_select;
 wire [15:0] instr_mem_out;
+wire cache_fill_wr;
 
 wire [15:0] data_cache_out;
 wire [15:0] data_cache_in;
+wire data_array_wr;
+wire [15:0] data_cache_addr;
+wire [15:0] cache_fill_addr;
 
 wire rst;
 assign rst = ~rst_n; // keep active high/low resets straight
@@ -129,12 +133,25 @@ cache instr_cache(.data_out(instr), .miss_detected(instr_cache_miss),
 
 // Data cache
 // data_out always goes to memory module, miss_detected connected to miss FSM,
-// data_in can come from data memory or memory module for store ops
-
-// TODO: assign data_cache_in depending on store or load op
-// assign data_cache_in =
+// data_in can come from data memory or memory module for store ops, base this
+// on miss_detected since this should be high during entire fill operation.
+// addr input has similar logic
+assign data_cache_in = (data_cache_miss) ? mem_data_out : mem_data_in;
+assign data_cache_addr = (data_cache_miss) ? cache_fill_addr :
+mem_data_addr_or_alu_result;
 cache data_cache(.data_out(data_cache_out), .miss_detected(data_cache_miss),
-.data_in(data_cache_in), .addr(mem_data_addr_or_alu_result), )
+.data_in(data_cache_in), .addr(mem_data_addr_or_alu_result),
+.data_wr(data_array_wr), .wr(cache_fill_wr), .clk(clk), .rst(rst),
+.arbiter_select(arbiter_select));
+
+// TODO: figure out the arbiter bullshit so we don't mess with both caches
+
+// Cache Fill FMS - for filling cache block from memory on cache misses
+// works with both instruction and data memory, so needs to access inputs/Outputs
+// of both caches
+assign miss_detected = instr_cache_miss | data_cache_miss;
+// cache_fill_FSM cache_fill_fsm(.clk(clk), .rst_n(rst_n), .miss_detected(miss_detected),
+// .miss_address())
 
 // IF-ID stage pipeline - holds current instruction and pc_plus_four
 // to pass to decode portion to determine control signals
