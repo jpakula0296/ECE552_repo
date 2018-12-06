@@ -6,7 +6,7 @@ module cache(data_out, miss_detected, data_in, addr, data_wr, wr, clk, rst, arbi
    input [15:0]   data_in;
    input [ADDR_WIDTH-1 :0]   addr;
    input          data_wr;
-   input          wr; // will be connected to cache_fill_FSM write output
+   input          wr;
    input          clk;
    input          rst;
    input          arbiter_select;
@@ -41,7 +41,7 @@ assign offset = addr[3:0];
 assign settimestwo = set << 1;
 
 // 16-bit adder, output is settimestwoplusone
-rca_16bit plusone(.a({9'b0,settimestwo}), .b(1'b1), .s(settimestwoplusone), .cin(1'b0), .cout());
+rca_16bit plusone(.a({9'b0,settimestwo}), .b(16'h1), .s(settimestwoplusone), .cin(1'b0), .cout());
 
 // Get enable signal for adjacent meta data blocks from decoders
 cache_block_decoder mdata0_block_select(.block_num(settimestwo), .BlockEnable(MetaBlockEnable0));
@@ -66,7 +66,6 @@ assign matchfound1 = MetaData1_out[6] & (tag == MetaData1_out[5:0]);
 assign miss_detected = wr | (~matchfound0 & ~matchfound1);
 
 // LRU = 0 evict even block, LRU = 1 evict odd block
-// TODO: write LRU
 assign LRU = MetaData0_out[7];
 assign way_select = matchfound0 ? 1'b0 : matchfound1 ? 1'b1 : LRU;
 

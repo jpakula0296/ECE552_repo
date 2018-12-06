@@ -9,6 +9,5 @@ module counter_3bit(
 );
     wire [2:0] next, count;
     rca_3bit adder(.a(count), .b({2'b0,increment}), .cin(1'b0), .s(next), .cout(done));
-    dff_3bit memory(.d(next), .q(count), .clk(clk), .rst_n(~start), .wen(~done));
+    dff_3bit memory(.d(next), .q(count), .clk(clk), .rst(start), .wen(~done));
 endmodule
-

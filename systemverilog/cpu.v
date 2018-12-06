@@ -93,13 +93,14 @@ wire [15:0] ALU_rs_data;
 
 // Cache wires
 wire instr_cache_miss, data_cache_miss, miss_detected;
+wire instr_cache_data_wr, instr_cache_tag_wr, data_cache_data_wr, data_cache_tag_wr;
 wire arbiter_select;
 wire [15:0] instr_mem_out;
-wire cache_fill_wr;
+wire cache_fill_data_wr;
+wire cache_fill_tag_wr;
 
 wire [15:0] data_cache_out;
 wire [15:0] data_cache_in;
-wire data_array_wr;
 wire [15:0] data_cache_addr;
 wire [15:0] cache_fill_addr;
 wire cache_stall_n;
@@ -125,24 +126,29 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr_mem_out),
   .addr(if_pc_current), .enable(1'b1), .wr(1'b0));
 assign if_hlt = instr[15:12] == 4'b1111;
 
-// TODO: need to set write enable signals correctly still 
-
 // I-mem cache
+assign instr_cache_data_wr = cache_fill_data_wr & arbiter_select;
+assign instr_cache_tag_wr = cache_fill_tag_wr & arbiter_select;
 cache instr_cache(.data_out(instr), .miss_detected(instr_cache_miss),
-.data_in(instr_mem_out), .addr(if_pc_current), .data_wr(1'b0), .wr(1'b0), .clk(clk),
-.rst(rst), .arbiter_select(arbiter_select));
+.data_in(instr_mem_out), .addr(if_pc_current), .data_wr(instr_cache_data_wr),
+.wr(instr_cache_tag_wr), .clk(clk), .rst(rst), .arbiter_select(arbiter_select));
 
 // Data cache
 // data_out always goes to memory module, miss_detected connected to miss FSM,
 // data_in can come from data memory or memory module for store ops, base this
 // on miss_detected since this should be high during entire fill operation.
 // addr input has similar logic
+// write enabled by mem module (cache and mem written in parallel) or by cache_fill_FSM
 assign data_cache_in = (data_cache_miss) ? mem_data_out : mem_data_in;
 assign data_cache_addr = (data_cache_miss) ? cache_fill_addr :
 mem_data_addr_or_alu_result;
+// write on memory writes from cpu and when being filled by cache_fill_FSM
+assign data_cache_data_wr = mem_memory_write_enable |
+(cache_fill_data_wr & ~arbiter_select);
+assign data_cache_tag_wr = cache_fill_tag_wr & ~arbiter_select;
 cache data_cache(.data_out(data_cache_out), .miss_detected(data_cache_miss),
 .data_in(data_cache_in), .addr(data_cache_addr),
-.data_wr(data_array_wr), .wr(cache_fill_wr), .clk(clk), .rst(rst),
+.data_wr(data_cache_data_wr), .wr(data_cache_tag_wr), .clk(clk), .rst(rst),
 .arbiter_select(arbiter_select));
 
 // Cache Arbiter decides which cache is being serviced if we have multiple requests
@@ -150,15 +156,15 @@ cache data_cache(.data_out(data_cache_out), .miss_detected(data_cache_miss),
 // cache_fill_addr decoded based on miss_detected signals
 cache_arbiter Cache_Arbiter(.instr_addr(if_pc_current), .data_addr(data_cache_addr),
 .instr_miss(instr_cache_miss), .data_miss(data_cache_miss),
-.memory_address(cache_fill_addr), .cache_serviced(arbiter_select));
+.memory_address(cache_fill_addr), .arbiter_select(arbiter_select));
 
 // Cache Fill FMS - for filling cache block from memory on cache misses
 // works with both instruction and data memory, so needs to access inputs/Outputs
 // of both caches
 assign miss_detected = instr_cache_miss | data_cache_miss;
 cache_fill_FSM cache_fill_fsm(.clk(clk), .rst_n(rst_n), .miss_detected(miss_detected),
-.miss_address(cache_fill_addr), .fsm_busy(fsm_busy), .write_data_array(data_wr),
-.write_tag_array(wr), .memory_address(cache_fill_addr),
+.miss_address(cache_fill_addr), .fsm_busy(fsm_busy), .write_data_array(cache_fill_data_wr),
+.write_tag_array(cache_fill_tag_wr), .memory_address(cache_fill_addr),
 .memory_data_valid(memory_data_valid));
 
 // IF-ID stage pipeline - holds current instruction and pc_plus_four

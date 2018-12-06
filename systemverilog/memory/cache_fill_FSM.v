@@ -12,6 +12,8 @@ module cache_fill_FSM(
     input memory_data_valid         // active high indicates valid data returning on memory bus
 );
 
+    wire rst = ~rst_n;
+
     /*
      * State storage
      */
@@ -19,9 +21,9 @@ module cache_fill_FSM(
     dff state_flop(
         .d(next_state),
         .q(curr_state),
-        .en(1'b1),
+        .wen(1'b1),
         .clk(clk),
-        .rst_n(rst_n)
+        .rst(rst)
     );
 
     /*
@@ -53,7 +55,7 @@ module cache_fill_FSM(
         .q(curr_fetch_addr),
         .wen(1'b1),
         .clk(clk),
-        .rst_n(rst_n)
+        .rst(rst)
     );
     rca_16bit addr_adder(
         .a(curr_fetch_addr),
