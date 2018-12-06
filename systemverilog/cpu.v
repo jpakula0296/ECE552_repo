@@ -144,8 +144,11 @@ cache data_cache(.data_out(data_cache_out), .miss_detected(data_cache_miss),
 .data_wr(data_array_wr), .wr(cache_fill_wr), .clk(clk), .rst(rst),
 .arbiter_select(arbiter_select));
 
-// TODO: figure out the arbiter bullshit so we don't mess with both caches
+// Cache Arbiter sets
 
+// TODO: figure out the arbiter bullshit so we don't mess with both caches
+// TODO: miss detected will actually be an output of arbiter since we need to
+// keep track of both signals
 // Cache Fill FMS - for filling cache block from memory on cache misses
 // works with both instruction and data memory, so needs to access inputs/Outputs
 // of both caches
