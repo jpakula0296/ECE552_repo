@@ -105,6 +105,8 @@ wire [15:0] data_cache_in;
 wire data_array_wr;
 wire [15:0] data_cache_addr;
 wire [15:0] cache_fill_addr;
+wire fsm_busy;
+wire memory_data_valid;
 
 wire rst;
 assign rst = ~rst_n; // keep active high/low resets straight
@@ -154,9 +156,12 @@ cache_arbiter Cache_Arbiter(.instr_addr(if_pc_current), .data_addr(data_cache_ad
 // Cache Fill FMS - for filling cache block from memory on cache misses
 // works with both instruction and data memory, so needs to access inputs/Outputs
 // of both caches
+// TODO: make fsm busy stall the cpu
 assign miss_detected = instr_cache_miss | data_cache_miss;
-// cache_fill_FSM cache_fill_fsm(.clk(clk), .rst_n(rst_n), .miss_detected(miss_detected),
-// .miss_address())
+cache_fill_FSM cache_fill_fsm(.clk(clk), .rst_n(rst_n), .miss_detected(miss_detected),
+.miss_address(cache_fill_addr), .fsm_busy(fsm_busy), .write_data_array(data_wr),
+.write_tag_array(wr), .memory_address(cache_fill_addr),
+.memory_data_valid(memory_data_valid));
 
 // IF-ID stage pipeline - holds current instruction and pc_plus_four
 // to pass to decode portion to determine control signals
