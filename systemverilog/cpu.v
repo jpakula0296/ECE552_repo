@@ -125,6 +125,8 @@ pc_mem prog_mem(.clk(clk), .rst(rst), .data_in(16'b0), .data_out(instr_mem_out),
   .addr(if_pc_current), .enable(1'b1), .wr(1'b0));
 assign if_hlt = instr[15:12] == 4'b1111;
 
+// TODO: need to set write enable signals correctly still 
+
 // I-mem cache
 cache instr_cache(.data_out(instr), .miss_detected(instr_cache_miss),
 .data_in(instr_mem_out), .addr(if_pc_current), .data_wr(1'b0), .wr(1'b0), .clk(clk),
