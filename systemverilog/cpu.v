@@ -42,8 +42,6 @@ wire reg_write_instr; // if not high 'write' to $0 since we can't anyway
 
 // global stall signal
 wire stall_n;
-wire stall;
-assign stall_n = ~stall;
 
 wire [15:0] load_half_data;
 
@@ -100,8 +98,6 @@ wire [15:0] ALU_rs_data;
 wire icache_miss, dcache_miss;
 wire icache_wr_data_array, dcache_wr_data_array;
 wire icache_wr_tag_array, dcache_wr_tag_array;
-
-wire cache_stall_n;
 
 // multicycle memory wires
 wire [15:0] mainmem_data_out;
@@ -262,7 +258,7 @@ RegisterFile regfile(.clk(clk), .rst(rst), .WriteReg(wb_WriteReg), .SrcReg1(rs),
 
 // on PCS instructions, the next PC value gets passed through rtData
 assign rtData = PCS_instr ? id_pc_new : SrcData2;
-assign if_id_stall_n = hazard_stall_n & cache_stall_n;
+assign if_id_stall_n = hazard_stall_n & stall_n;
 
 // ID_EX stage pipeline
 // flops all signals necessary for later stages
