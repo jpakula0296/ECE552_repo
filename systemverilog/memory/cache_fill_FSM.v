@@ -76,7 +76,7 @@ module cache_fill_FSM(
     /*
      * State-dependent output control
      */
-    assign fsm_busy         = curr_state;
+    assign fsm_busy         = curr_state ? 1'b1 : miss_detected; // set fsm_busy high before transitioning to wait state to latch stall high quickly
     assign write_data_array = curr_state ? memory_data_valid : 1'b0 ;
     assign write_tag_array  = curr_state ? all_words_fetched : 1'b0;
     assign memory_address   = curr_state ? curr_fetch_addr : miss_address;

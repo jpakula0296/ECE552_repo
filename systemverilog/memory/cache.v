@@ -1,4 +1,4 @@
-module cache(data_out, miss_detected, data_in, addr, data_wr, wr, clk, rst, arbiter_select);
+module cache(data_out, miss_detected, data_in, addr, data_wr, wr, clk, rst);
 
    parameter ADDR_WIDTH = 16;
    output  [15:0] data_out;
@@ -9,7 +9,6 @@ module cache(data_out, miss_detected, data_in, addr, data_wr, wr, clk, rst, arbi
    input          wr;
    input          clk;
    input          rst;
-   input          arbiter_select;
 
 // set BlockEnable and WordEnable based on address
 wire [127:0] DataBlockEnable, MetaBlockEnable0, MetaBlockEnable1;
