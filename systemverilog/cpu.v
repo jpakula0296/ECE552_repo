@@ -40,6 +40,10 @@ wire ror_instr;
 wire logical_instr;
 wire reg_write_instr; // if not high 'write' to $0 since we can't anyway
 
+// global stall signal
+wire stall_n;
+assign stall_n = 1'b1;
+
 wire [15:0] load_half_data;
 
 // IF/ID
@@ -94,7 +98,7 @@ wire [15:0] ALU_rs_data;
 // Cache wires
 wire instr_cache_miss, data_cache_miss, miss_detected;
 wire instr_cache_data_wr, instr_cache_tag_wr, data_cache_data_wr, data_cache_tag_wr;
-wire arbiter_select;
+wire arbiter_select, fsm_busy;
 wire [15:0] instr_mem_out;
 wire cache_fill_data_wr;
 wire cache_fill_tag_wr;

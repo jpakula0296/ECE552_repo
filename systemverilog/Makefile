@@ -10,7 +10,7 @@ TESTBENCHES += $(wildcard $(TBDIR)/*.sv)
 TESTBENCH_OBJECTS =  $(addprefix $(OUTDIR)/,$(notdir $(TESTBENCHES:.v=.vvp)))
 TESTBENCH_OBJECTS := $(addprefix $(OUTDIR)/,$(notdir $(TESTBENCH_OBJECTS:.sv=.vvp)))
 
-CPU_TB  = ./tb/project-phase2-testbench.v
+CPU_TB  = ./tb/project-phase3-testbench.v
 CPU_OBJ = $(addprefix $(OUTDIR)/,$(notdir $(CPU_TB:.v=.vvp)))
 
 MODULES =  $(wildcard ./*.v)

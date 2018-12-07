@@ -57,14 +57,15 @@ module cache_tb();
          * Check that basic cache misses and hits are correctly calculated
          */
         for (i = 0; i < 15; i = i + 1) begin
-        tag = 0;
-        set = $random;
-        index = 0;
-        data_in = 0;
-        @(posedge clk);
-        if (miss_detecetd == 1'b0) begin
-            $error("miss was not detected @ %0d", $time)
-            num_errors = num_errors + 1;
+            tag = 0;
+            set = $random;
+            index = 0;
+            data_in = 0;
+            @(posedge clk);
+            if (miss_detecetd == 1'b0) begin
+                $error("miss was not detected @ %0d", $time)
+                num_errors = num_errors + 1;
+            end
         end
 
 
