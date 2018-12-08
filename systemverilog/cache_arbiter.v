@@ -13,7 +13,7 @@ module cache_arbiter(
     output        icache_write_data_array,  // Goes high if the icache data array should be written to
     output        icache_write_tag_array,   // Goes high if the icache tag array should be updated
     output        icache_fsm_busy,          // High while waiting for an icache fill to finish
-    input  [15:0] icache_miss_addr,         // The address that the cache missed on
+    input  [15:0] icache_addr,              // icache address for latching miss_addr
     input         icache_miss_detected,     // Goes high if the icache detects a miss
 
     output [15:0] dcache_fill_data,         // The data the cache fill module is currently writing to the dcache
@@ -21,8 +21,8 @@ module cache_arbiter(
     output        dcache_write_data_array,  // Goes high if the dcache data array should be written to
     output        dcache_write_tag_array,   // Goes high if the dcache tag array should be updated
     output        dcache_fsm_busy,          // High while waiting for an dcache fill to finish
-    input  [15:0] dcache_miss_addr,         // The address that the cache missed on
     input         dcache_miss_detected,     // Goes high if the dcache detects a miss
+    input         dcache_addr,              // used to determine miss addr
 
     input  [15:0] dcache_write_addr,        // The address the dcache is trying to write to
     input  [15:0] dcache_write_data,        // The word the dcache is trying to write
@@ -36,9 +36,24 @@ module cache_arbiter(
 
 );
 
+wire [15:0] dcache_miss_addr, icache_miss_addr; // miss addrs latched on miss
+wire dcache_miss_latch, icache_miss_latch;
+
 wire icache_data_valid, dcache_data_valid;
 wire cache_pick;
 wire stall;
+wire rst;
+assign rst = ~rst_n;
+
+
+
+// latch miss addresses when a miss is detected in IDLE state
+assign dcache_miss_latch = dcache_miss_detected & ~dcache_fsm_busy;
+assign icache_miss_latch = icache_miss_detected & ~icache_fsm_busy;
+dff_16bit data_miss_addr(.q(dcache_miss_addr), .d(dcache_addr),
+.wen(dcache_miss_latch), .clk(clk), .rst(rst));
+dff_16bit instr_miss_addr(.q(icache_miss_addr), .d(icache_addr),
+.wen(icache_miss_latch), .clk(clk), .rst(rst));
 
 assign stall_n = ~stall;
 assign stall = icache_fsm_busy|dcache_fsm_busy; // They CPU can't do anything while we're filling a cache, so stall the whole thing
