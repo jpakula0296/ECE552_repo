@@ -129,7 +129,7 @@ cache instr_cache(
     .rst(rst),
     .data_out(instr),
     .data_in(icache_fill_data),
-    .addr(if_pc_current),
+    .addr(icache_addr),
     .data_wr(1'b0), // TODO: assign this correctly
     .wr(1'b0),      // TODO: assign this correctly
     .miss_detected(icache_miss)
@@ -144,8 +144,8 @@ cache data_cache(
     .clk(clk),
     .rst(rst),
     .data_out(mem_data_out),
-    .data_in(mem_data_in),
-    .addr(mem_data_addr_or_alu_result),
+    .data_in(dcache_data_in),
+    .addr(dcache_addr),
     .data_wr(mem_memory_write_enable),
     .wr(1'b0), // TODO: assign this correctly
     .miss_detected(dcache_miss)
@@ -164,18 +164,18 @@ cache_arbiter Cache_Arbiter(
     .rst_n(rst_n),
     .stall_n(stall_n),
 
-    .icache_fill_data(icache_fill_data), // TODO: find out how to attach this to icache
-    .icache_fill_addr(icache_fill_addr), // TODO: find out how to attach this to icache
+    .icache_fill_data(icache_fill_data),
+    .icache_fill_addr(icache_fill_addr),
     .icache_write_data_array(icache_wr_data_array),
     .icache_write_tag_array(icache_wr_tag_array),
-    .icache_miss_addr(icache_miss_addr), // TODO: find out how to attach this to icache
+    .icache_addr(icache_addr), 
     .icache_miss_detected(icache_miss),
 
     .dcache_fill_data(dcache_fill_data),
     .dcache_fill_addr(dcache_fill_addr),
     .dcache_write_data_array(dcache_wr_data_array),
     .dcache_write_tag_array(dcache_wr_tag_array),
-    .dcache_miss_addr(dcache_miss_addr), // TODO: find out how to attach this to dcache
+    .dcache_addr(dcache_addr),
     .dcache_miss_detected(dcache_miss),
 
     .dcache_write_addr(mem_data_addr_or_alu_result),
