@@ -51,10 +51,10 @@ assign MetaData_in = {~way_select, 1'b1, tag};
 
 // Get meta data (6-bit tag, valid, and LRU bit) from array
 MetaDataArray metaDataArray0(.clk(clk), .rst(rst), .DataIn(MetaData_in),
-.Write(wr & ~clk), .BlockEnable(MetaBlockEnable0), .DataOut(MetaData0_out));
+.Write(wr), .BlockEnable(MetaBlockEnable0), .DataOut(MetaData0_out));
 
 MetaDataArray metaDataArray1(.clk(clk), .rst(rst), .DataIn(MetaData_in),
-.Write(wr_odd_block & ~clk), .BlockEnable(MetaBlockEnable1), .DataOut(MetaData1_out));
+.Write(wr_odd_block), .BlockEnable(MetaBlockEnable1), .DataOut(MetaData1_out));
 
 // Compares tags and checks validity
 assign matchfound0 = MetaData0_out[6] & (tag == MetaData0_out[5:0]);
