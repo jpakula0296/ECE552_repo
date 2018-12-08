@@ -7,7 +7,7 @@ module cache_tb();
     reg [5:0] set, tag;
     reg [3:0] index;
     wire miss_detected;
-    reg data_wr, wr, clk, rst, arbiter_select;
+    reg data_wr, wr, clk, rst;
     assign addr = {tag,set,index};
     cache DUT(
         .data_out(data_out),
@@ -17,8 +17,7 @@ module cache_tb();
         .data_wr(data_wr),
         .wr(wr),
         .clk(clk),
-        .rst(rst),
-        .arbiter_select(arbiter_select)
+        .rst(rst)
     );
 
     /*
@@ -49,7 +48,6 @@ module cache_tb();
         index = 0;
         data_wr = 0;
         wr = 0;
-        arbiter_select = 1;
         repeat(4) @(posedge clk);
         rst = 0;
 
