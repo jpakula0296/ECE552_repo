@@ -106,6 +106,7 @@ wire memstage_mem_instr;
 wire icache_fsm_busy;
 wire [15:0] pc_minus_two;
 wire pc_write;
+wire dcache_fsm_busy;
 
 rca_16bit pc_minus2(.a(if_pc_current), .b(16'hFFFE), .cin(1'b0), .s(pc_minus_two),
 .cout());
@@ -132,7 +133,7 @@ assign if_hlt = instr[15:12] == 4'b1111;
 
 
 assign icache_addr = (stall_n) ? if_pc_current : icache_fill_addr;
-assign memstage_mem_instr = (mem_opcode[3:1] == 3'b100);
+assign memstage_mem_instr = (mem_opcode == 4'b1000) | (mem_opcode == 4'b1001);
 // TODO: add interfaces here to hook up to the arbiter
 cache instr_cache(
     .clk(clk),
@@ -149,7 +150,7 @@ cache instr_cache(
 // not sure if dcache_fill_data/icache_fill_data are redundant since always
 // pulling from same memory output
 assign dcache_data_in = (stall_n) ? mem_data_in : dcache_fill_data;
-assign dcache_addr = mem_data_addr_or_alu_result;
+assign dcache_addr = (stall_n) ? dcache_fill_addr : mem_data_addr_or_alu_result;
 assign dcache_wr_data = dcache_wr_data_array;
 cache data_cache(
     .clk(clk),
@@ -191,10 +192,9 @@ cache_arbiter Cache_Arbiter(
     .dcache_addr(dcache_addr),
     .dcache_miss_detected(dcache_miss),
 
-    .dcache_write_addr(mem_data_addr_or_alu_result),
     .dcache_write_data(mem_data_in),
     .dcache_write_enable(mem_memory_write_enable),
-    .dcache_fsm_busy(),
+    .dcache_fsm_busy(dcache_fsm_busy),
 
     .mainmem_addr(mainmem_addr),
     .mainmem_write_data(mainmem_data_in),

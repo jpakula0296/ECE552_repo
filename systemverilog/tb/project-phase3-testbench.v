@@ -98,7 +98,7 @@ module cpu_ptb();
    wire [15:0] set1block1word6;
    wire [15:0] set1block1word7;
 
-   wire [15:0] test2storelocation_metadata;
+   wire [15:0] test2storelocation_meta;
    wire [15:0] test2storelocation_way0_word0;
    wire [15:0] test2storelocation_way0_word1;
    wire [15:0] test2storelocation_way0_word2;

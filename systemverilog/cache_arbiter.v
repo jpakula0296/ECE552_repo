@@ -24,7 +24,6 @@ module cache_arbiter(
     input         dcache_miss_detected,     // Goes high if the dcache detects a miss
     input  [15:0] dcache_addr,              // used to determine miss addr
 
-    input  [15:0] dcache_write_addr,        // The address the dcache is trying to write to
     input  [15:0] dcache_write_data,        // The word the dcache is trying to write
     input         dcache_write_enable,      // The write enable signal gotten from the dcache
 
@@ -117,7 +116,7 @@ assign mainmem_addr =
     stall ?
         (cache_pick ? dcache_fill_addr : icache_fill_addr)
     :
-        dcache_write_addr;
+        dcache_addr;
 
 assign mainmem_write_data = dcache_write_data;
 
