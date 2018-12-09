@@ -132,7 +132,8 @@ cache instr_cache(
     .addr(icache_addr),
     .data_wr(1'b0), // TODO: assign this correctly
     .wr(1'b0),      // TODO: assign this correctly
-    .miss_detected(icache_miss)
+    .miss_detected(icache_miss),
+    .write_tag_array(icache_wr_tag_array)
 );
 
 // not sure if dcache_fill_data/icache_fill_data are redundant since always
@@ -148,7 +149,8 @@ cache data_cache(
     .addr(dcache_addr),
     .data_wr(mem_memory_write_enable),
     .wr(1'b0), // TODO: assign this correctly
-    .miss_detected(dcache_miss)
+    .miss_detected(dcache_miss),
+    .write_tag_array(dcache_wr_tag_array)
 );
 
 /*
@@ -168,7 +170,7 @@ cache_arbiter Cache_Arbiter(
     .icache_fill_addr(icache_fill_addr),
     .icache_write_data_array(icache_wr_data_array),
     .icache_write_tag_array(icache_wr_tag_array),
-    .icache_addr(icache_addr), 
+    .icache_addr(icache_addr),
     .icache_miss_detected(icache_miss),
 
     .dcache_fill_data(dcache_fill_data),

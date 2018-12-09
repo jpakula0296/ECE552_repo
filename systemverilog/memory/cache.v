@@ -1,4 +1,4 @@
-module cache(data_out, miss_detected, data_in, addr, data_wr, wr, clk, rst);
+module cache(data_out, miss_detected, data_in, addr, data_wr, wr, write_tag_array, clk, rst);
 
    parameter ADDR_WIDTH = 16;
    output  [15:0] data_out;
@@ -7,6 +7,7 @@ module cache(data_out, miss_detected, data_in, addr, data_wr, wr, clk, rst);
    input [ADDR_WIDTH-1 :0]   addr;
    input          data_wr;
    input          wr;
+   input          write_tag_array;
    input          clk;
    input          rst;
 
@@ -24,6 +25,7 @@ wire [15:0] settimestwoplusone;
 wire [6:0] settimestwo;
 wire way_select;
 
+wire match_overall;
 wire matchfound0;
 wire matchfound1;
 wire [63:0] LRUin;
@@ -31,6 +33,8 @@ wire [63:0] LRUout;
 wire LRU;
 wire wr_odd_block; // only write odd block if it is being evicted
 wire [15:0] dataArray_out;
+
+wire miss_latch_reset;
 
 
 assign tag = addr[15:10];
@@ -60,9 +64,12 @@ MetaDataArray metaDataArray1(.clk(clk), .rst(rst), .DataIn(MetaData_in),
 assign matchfound0 = MetaData0_out[6] & (tag == MetaData0_out[5:0]);
 assign matchfound1 = MetaData1_out[6] & (tag == MetaData1_out[5:0]);
 
-// miss_detected must stay high during entire data transfer, so it should be
-// high while we are writing to the cache or when no match is found
-assign miss_detected = wr | (~matchfound0 & ~matchfound1);
+// SR latch for miss detected, set when no match is found, reset when
+// we go back to idle.
+assign match_overall = (~matchfound0 & ~matchfound1);
+assign miss_latch_reset = rst | write_tag_array;
+dff miss_SRlatch(.q(miss_detected), .d(1'b1), .wen(match_overall), .clk(clk),
+.rst(miss_latch_reset));
 
 // LRU = 0 evict even block, LRU = 1 evict odd block
 assign LRU = MetaData0_out[7];

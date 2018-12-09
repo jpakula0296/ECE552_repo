@@ -4,7 +4,7 @@
 //WriteEnable is one on writes and zero on reads
 
 //Format of DataOut:
-//LRU = DataOut[7] on EVEN blocks, 0 = even block is LRU, 1 = odd block is LRU 
+//LRU = DataOut[7] on EVEN blocks, 0 = even block is LRU, 1 = odd block is LRU
 //valid = DataOut[6];
 //tag = DataOut[5:0];
 
@@ -18,6 +18,6 @@ endmodule
 
 module MCell( input clk,  input rst, input Din, input WriteEnable, input Enable, output Dout);
 	wire q;
-	assign Dout = (Enable & ~WriteEnable) ? q:'bz;
+	assign Dout = (Enable) ? q:'bz;
 	dff dffm(.q(q), .d(Din), .wen(Enable & WriteEnable), .clk(clk), .rst(rst));
 endmodule
