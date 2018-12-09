@@ -3,6 +3,7 @@
  */
 module counter_4bit(
     output done,
+    output [3:0] count,
     input [3:0] limit,
     input increment,
     input start,
