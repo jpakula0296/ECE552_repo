@@ -12,11 +12,13 @@ module cache_fill_FSM(
 );
 
     wire memory_data_valid;
-    wire rst = ~rst_n;
+    wire rst;
     wire start_counter, all_words_fetched;
     wire [3:0] latent_count, word_count;
-    wire meta_addr_sel;
+    wire meta_addr;
     wire [15:0] hold_addr;
+
+    assign rst = ~rst_n;
 
     /*
      * State storage

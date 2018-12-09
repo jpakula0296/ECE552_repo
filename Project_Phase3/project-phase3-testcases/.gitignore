@@ -1,0 +1,2 @@
+# ignore compiled assembly in this directory
+*.txt
