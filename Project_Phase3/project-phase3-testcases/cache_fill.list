@@ -1,0 +1,82 @@
+    # Program to fill all cache entries
+
+    # First setup some constants that the program can use
+
+    # Fill R1 with 1 (used for incrementing/decrementing)
+    LLB R1, 0x01
+    LHB R1, 0x00
+
+    # Fill R2 with 2 (used for PCS addition)
+    LLB R2, 0x02
+    LHB R2, 0x00
+
+    # Fill R4 with 0x10 (used to increment the set index)
+    LLB R4, 0x10
+    LHB R4, 0x00
+
+    # Fill R8 with an easily recognizable word
+    LLB R8, 0xEF
+    LHB R8, 0xBE
+
+    # call init function
+    PCS R3
+    B 111, INIT
+
+    # Write the value in R8 to a place in every data cache block. Every
+    # store should be a miss.
+WRITE_LOOP:
+    SW R8, R6, 0
+    SW R8, R7, 0
+    ADD R6, R6, R4
+    ADD R7, R7, R4
+    SUB R5, R5, R1
+    B 000, WRITE_LOOP
+
+    # reinitialize registers
+    PCS R3
+    B 111, INIT
+
+    # Read from every single data cache block. Every load should be a hit.
+    # Also verify that what we read is equal to what we wrote.
+READ_LOOP:
+    LW R9, R6, 0
+    SUB R0, R8, R9
+    B 001, EQ0
+    HLT
+EQ0:
+    LW R9, R7, 0
+    SUB R0, R8, R9
+    B 001, EQ1
+    HLT
+EQ1:
+    ADD R6, R6, R4
+    ADD R7, R7, R4
+    SUB R5, R5, R1
+    B 000, READ_LOOP
+
+
+    # We're done
+    HLT
+
+
+    # Function that initializes loop and array variables. Return address -2
+    # assumed to be stored in R3
+INIT:
+    # Fill R5 with the number of sets there are
+    LLB R5, 0x40
+    LHB R5, 0x00
+
+    # Fill R6 with an address corresponding to set 0, with a tag of 0
+    LLB R6, 0x00
+    LHB R6, 0x00
+
+    # Fill R7 with an address corresponding to set 0, with a tag of 1
+    LLB R7, 0x00
+    LHB R7, 0x04
+
+    # return
+    ADD R3, R3, R2
+    BR 111, R3
+
+    # Halt, in case we get here I guess?
+    HLT
