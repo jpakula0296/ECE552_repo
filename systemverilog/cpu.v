@@ -130,8 +130,8 @@ cache instr_cache(
     .data_out(instr),
     .data_in(icache_fill_data),
     .addr(icache_addr),
-    .data_wr(1'b0), // TODO: assign this correctly
-    .wr(1'b0),      // TODO: assign this correctly
+    .data_wr(icache_wr_data_array), 
+    .wr(icache_wr_tag_array),
     .miss_detected(icache_miss),
     .write_tag_array(icache_wr_tag_array)
 );
@@ -147,8 +147,8 @@ cache data_cache(
     .data_out(mem_data_out),
     .data_in(dcache_data_in),
     .addr(dcache_addr),
-    .data_wr(mem_memory_write_enable),
-    .wr(1'b0), // TODO: assign this correctly
+    .data_wr(mem_memory_write_enable), // TODO: assign this correctly to store from cpu and mem
+    .wr(dcache_wr_tag_array),
     .miss_detected(dcache_miss),
     .write_tag_array(dcache_wr_tag_array)
 );
