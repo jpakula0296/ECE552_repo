@@ -103,6 +103,7 @@ wire [15:0] dcache_fill_data, dcache_fill_addr, dcache_miss_addr,
 icache_fill_data, icache_fill_addr, icache_miss_addr;
 wire [15:0] icache_addr, dcache_data_in, dcache_addr;
 wire memstage_mem_instr;
+wire icache_fsm_busy;
 
 // multicycle memory wires
 wire [15:0] mainmem_data_out;
@@ -124,7 +125,7 @@ assign if_hlt = instr[15:12] == 4'b1111;
 
 
 assign icache_addr = (stall_n) ? if_pc_current : icache_fill_addr;
-assign memstage_mem_instr = (mem_opcode[3:1] == 3'b100) | ~stall_n;
+assign memstage_mem_instr = (mem_opcode[3:1] == 3'b100) & ~icache_fsm_busy;
 // TODO: add interfaces here to hook up to the arbiter
 cache instr_cache(
     .clk(clk),
@@ -174,7 +175,7 @@ cache_arbiter Cache_Arbiter(
     .icache_write_tag_array(icache_wr_tag_array),
     .icache_addr(icache_addr),
     .icache_miss_detected(icache_miss),
-    .icache_fsm_busy(),
+    .icache_fsm_busy(icache_fsm_busy),
 
     .dcache_fill_data(dcache_fill_data),
     .dcache_fill_addr(dcache_fill_addr),
