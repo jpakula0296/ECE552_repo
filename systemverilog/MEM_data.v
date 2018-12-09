@@ -30,9 +30,9 @@ module MEM_data(
     dff mem_write(
         .d(mem_write_in),
         .q(mem_write_out),
-        .wen(stall_n),
+        .wen(1'b1),
         .clk(clk),
-        .rst(flush)
+        .rst(flush | ~stall_n)
     );
 
 endmodule

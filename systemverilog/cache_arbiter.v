@@ -31,8 +31,7 @@ module cache_arbiter(
     output [15:0] mainmem_addr,             // The current read or write address to main memory
     output [15:0] mainmem_write_data,       // The data to write to main memory
     input  [15:0] mainmem_read_data,        // The data read from main memory
-    input         mainmem_data_valid,       // Goes high if mainmem_read_data is valid
-    output        mainmem_wr                // The write enable signal to main memory
+    input         mainmem_data_valid       // Goes high if mainmem_read_data is valid
 
 );
 
@@ -45,17 +44,25 @@ wire icache_fill_rst_n, dcache_fill_rst_n;
 wire stall;
 wire rst;
 wire dcache_miss_out;
-wire dcache_miss_addr_latch;
+wire icache_miss_out;
+wire dcache_miss_posedge, dcache_miss_negedge, icache_miss_posedge, icache_miss_negedge;
+wire icache_on, dcache_on;
 assign rst = ~rst_n;
-
-
 
 dff dcache_miss_ff(.q(dcache_miss_out), .d(dcache_miss_detected), .wen(1'b1),
 .clk(clk), .rst(rst));
-assign dcache_miss_addr_latch = (~dcache_miss_out) & (dcache_miss_detected);
+dff icache_miss_ff(.q(icache_miss_out), .d(icache_miss_detected),  .wen(1'b1),
+.clk(clk), .rst(rst));
+
+assign dcache_miss_posedge = (~dcache_miss_out) & (dcache_miss_detected);
+assign dcache_miss_negedge = (dcache_miss_out) & (~dcache_miss_detected);
+assign icache_miss_posedge = (~icache_miss_out) & (icache_miss_detected);
+assign icache_miss_negedge = (icache_miss_out) & (~icache_miss_detected);
+
+
 
 dff_16bit data_miss_addr(.q(dcache_miss_addr), .d(dcache_addr),
-.wen(dcache_miss_addr_latch), .clk(clk), .rst(rst));
+.wen(dcache_miss_posedge), .clk(clk), .rst(rst));
 dff_16bit instr_miss_addr(.q(icache_miss_addr), .d(icache_addr),
 .wen(~icache_miss_detected), .clk(clk), .rst(rst));
 
@@ -97,11 +104,14 @@ cache_fill_FSM dcache_fill_fsm(
  *  expression for it, in case anyone wants to see it.
  */
 
-// assign cache_pick =
-//     (~icache_miss_detected & dcache_miss_detected)
-//     | (icache_miss_detected & dcache_miss_detected & ~icache_fsm_busy & dcache_fsm_busy);
+dff SR_icache_on(.q(icache_on), .d(1'b1), .wen(icache_miss_posedge),
+.clk(clk), .rst(rst|icache_miss_negedge));
+dff SR_dcache_on(.q(dcache_on), .d(1'b1), .wen(dcache_miss_posedge),
+.clk(clk), .rst(rst|dcache_miss_negedge));
 
-assign cache_pick = ~icache_miss_detected;
+assign cache_pick = (icache_on) ? 1'b0 : dcache_on;
+
+
 
 assign mainmem_addr =
     stall ?
@@ -110,7 +120,6 @@ assign mainmem_addr =
         dcache_write_addr;
 
 assign mainmem_write_data = dcache_write_data;
-assign mainmem_wr         = dcache_write_enable;
 
 assign icache_data_valid  = ~cache_pick & mainmem_data_valid;
 assign icache_fill_data   = mainmem_read_data;

@@ -149,9 +149,8 @@ cache instr_cache(
 // not sure if dcache_fill_data/icache_fill_data are redundant since always
 // pulling from same memory output
 assign dcache_data_in = (stall_n) ? mem_data_in : dcache_fill_data;
-// assign dcache_addr = (stall_n) ? mem_data_addr_or_alu_result : dcache_fill_addr;
 assign dcache_addr = mem_data_addr_or_alu_result;
-assign dcache_wr_data = mem_memory_write_enable | dcache_wr_data_array;
+assign dcache_wr_data = dcache_wr_data_array;
 cache data_cache(
     .clk(clk),
     .rst(rst),
@@ -200,8 +199,7 @@ cache_arbiter Cache_Arbiter(
     .mainmem_addr(mainmem_addr),
     .mainmem_write_data(mainmem_data_in),
     .mainmem_read_data(mainmem_data_out),
-    .mainmem_data_valid(mainmem_data_valid),
-    .mainmem_wr(mainmem_wr)
+    .mainmem_data_valid(mainmem_data_valid)
 );
 
 
