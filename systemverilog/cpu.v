@@ -106,7 +106,6 @@ wire [15:0] icache_addr, dcache_data_in, dcache_addr;
 wire [15:0] mainmem_data_out;
 wire [15:0] mainmem_data_in;
 wire [15:0] mainmem_addr;
-wire        mainmem_enable;
 wire        mainmem_wr;
 wire        mainmem_data_valid;
 
@@ -198,8 +197,8 @@ memory4c main_memory(
     .data_out(mainmem_data_out),
     .data_in(mainmem_data_in),
     .addr(mainmem_addr),
-    .enable(mainmem_enable),
-    .wr(mainmem_wr),
+    .enable(1'b1),
+    .wr(mem_memory_write_enable),
     .data_valid(mainmem_data_valid),
     .clk(clk),
     .rst(rst)
