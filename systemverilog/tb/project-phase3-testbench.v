@@ -80,6 +80,24 @@ module cpu_ptb();
    wire [15:0] set0block1word6;
    wire [15:0] set0block1word7;
 
+   wire [15:0] set1block0word0;
+   wire [15:0] set1block0word1;
+   wire [15:0] set1block0word2;
+   wire [15:0] set1block0word3;
+   wire [15:0] set1block0word4;
+   wire [15:0] set1block0word5;
+   wire [15:0] set1block0word6;
+   wire [15:0] set1block0word7;
+
+   wire [15:0] set1block1word0;
+   wire [15:0] set1block1word1;
+   wire [15:0] set1block1word2;
+   wire [15:0] set1block1word3;
+   wire [15:0] set1block1word4;
+   wire [15:0] set1block1word5;
+   wire [15:0] set1block1word6;
+   wire [15:0] set1block1word7;
+
 
 
    cpu DUT(.clk(clk), .rst_n(rst_n), .pc(PC), .hlt(Halt)); /* Instantiate your processor */
