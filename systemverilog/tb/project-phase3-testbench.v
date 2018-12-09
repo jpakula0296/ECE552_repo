@@ -38,6 +38,32 @@ module cpu_ptb();
    reg clk; /* Clock input */
    reg rst_n; /* (Active low) Reset input */
 
+   //Register Q signals
+   wire [15:0] reg1;
+   wire [15:0] reg2;
+   wire [15:0] reg3;
+   wire [15:0] reg4;
+   wire [15:0] reg5;
+   wire [15:0] reg6;
+   wire [15:0] reg7;
+   wire [15:0] reg8;
+   wire [15:0] reg9;
+   wire [15:0] reg10;
+   wire [15:0] reg11;
+   wire [15:0] reg12;
+   wire [15:0] reg13;
+   wire [15:0] reg14;
+   wire [15:0] reg15;
+
+   wire [7:0] set0way0;
+   wire [7:0] set0way1;
+   wire [7:0] set1way0;
+   wire [7:0] set1way1;
+   wire [7:0] set2way0;
+   wire [7:0] set2way1;
+   wire [7:0] set3way0;
+   wire [7:0] set3way1;
+
 
 
    cpu DUT(.clk(clk), .rst_n(rst_n), .pc(PC), .hlt(Halt)); /* Instantiate your processor */
@@ -469,5 +495,23 @@ module cpu_ptb();
    assign reg15[13] = DUT.regfile.reg15.bitcell13.Q;
    assign reg15[14] = DUT.regfile.reg15.bitcell14.Q;
    assign reg15[15] = DUT.regfile.reg15.bitcell15.Q;
+
+   assign set0way0[0] = DUT.instr_cache.metaDataArray0.Mblk[0].mc[0].q;
+   assign set0way0[1] = DUT.instr_cache.metaDataArray0.Mblk[0].mc[1].q;
+   assign set0way0[2] = DUT.instr_cache.metaDataArray0.Mblk[0].mc[2].q;
+   assign set0way0[3] = DUT.instr_cache.metaDataArray0.Mblk[0].mc[3].q;
+   assign set0way0[4] = DUT.instr_cache.metaDataArray0.Mblk[0].mc[4].q;
+   assign set0way0[5] = DUT.instr_cache.metaDataArray0.Mblk[0].mc[5].q;
+   assign set0way0[6] = DUT.instr_cache.metaDataArray0.Mblk[0].mc[6].q;
+   assign set0way0[7] = DUT.instr_cache.metaDataArray0.Mblk[0].mc[7].q;
+
+   assign set0way1[0] = DUT.instr_cache.metaDataArray1.Mblk[1].mc[0].q;
+   assign set0way1[1] = DUT.instr_cache.metaDataArray1.Mblk[1].mc[1].q;
+   assign set0way1[2] = DUT.instr_cache.metaDataArray1.Mblk[1].mc[2].q;
+   assign set0way1[3] = DUT.instr_cache.metaDataArray1.Mblk[1].mc[3].q;
+   assign set0way1[4] = DUT.instr_cache.metaDataArray1.Mblk[1].mc[4].q;
+   assign set0way1[5] = DUT.instr_cache.metaDataArray1.Mblk[1].mc[5].q;
+   assign set0way1[6] = DUT.instr_cache.metaDataArray1.Mblk[1].mc[6].q;
+   assign set0way1[7] = DUT.instr_cache.metaDataArray1.Mblk[1].mc[7].q;
 
 endmodule
