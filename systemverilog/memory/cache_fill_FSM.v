@@ -45,7 +45,7 @@ module cache_fill_FSM(
         .start(start_counter | ~rst_n),
         .increment(memory_data_valid),
         .done(all_words_fetched),
-        .limit(4'h7)
+        .limit(4'h8)
     );
 
     /*
@@ -89,5 +89,5 @@ module cache_fill_FSM(
     assign fsm_busy         = curr_state ? 1'b1 : miss_detected; // set fsm_busy high before transitioning to wait state to latch stall high quickly
     assign write_data_array = curr_state ? memory_data_valid : 1'b0 ;
     assign write_tag_array  = curr_state ? all_words_fetched : 1'b0;
-    assign memory_address   = curr_state ? curr_fetch_addr : miss_address;
+    assign memory_address   = curr_state|all_words_fetched ? curr_fetch_addr : miss_address;
 endmodule
