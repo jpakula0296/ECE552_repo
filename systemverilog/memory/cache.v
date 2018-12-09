@@ -91,6 +91,6 @@ DataArray dataArray(.clk(clk), .rst(rst), .DataIn(data_in), .Write(data_wr),
 .BlockEnable(DataBlockEnable), .WordEnable(WordEnable), .DataOut(dataArray_out));
 
 // should'nt be reading if we are writing to the cache, high z when data_wr=1
-assign data_out = (data_wr) ? 16'hz : dataArray_out;
+assign data_out = (data_wr) ? 16'hBEEF : dataArray_out;
 
 endmodule

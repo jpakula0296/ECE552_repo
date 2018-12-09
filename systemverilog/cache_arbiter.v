@@ -60,26 +60,24 @@ assign stall = icache_fsm_busy|dcache_fsm_busy; // They CPU can't do anything wh
 
 cache_fill_FSM icache_fill_fsm(
     .clk(clk),
-    .rst_n(rst_n),
+    .rst_n(cache_pick|rst_n),
     .fsm_busy(icache_fsm_busy),
     .miss_detected(icache_miss_detected),
     .miss_address(icache_miss_addr),
     .write_data_array(icache_write_data_array),
     .write_tag_array(icache_write_tag_array),
-    .memory_address(icache_fill_addr),
-    .memory_data_valid(icache_data_valid)
+    .memory_address(icache_fill_addr)
 );
 
 cache_fill_FSM dcache_fill_fsm(
     .clk(clk),
-    .rst_n(rst_n),
+    .rst_n(~cache_pick|rst_n),
     .fsm_busy(dcache_fsm_busy),
     .miss_detected(dcache_miss_detected),
     .miss_address(dcache_miss_addr),
     .write_data_array(dcache_write_data_array),
     .write_tag_array(dcache_write_tag_array),
-    .memory_address(dcache_fill_addr),
-    .memory_data_valid(dcache_data_valid)
+    .memory_address(dcache_fill_addr)
 );
 
 /*

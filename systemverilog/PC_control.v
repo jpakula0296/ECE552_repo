@@ -59,7 +59,7 @@ assign halt_instr = opcode == 4'b1111;
 assign branch_instr = opcode[3:1] == 3'b110;
 
 
-assign pc_new = halt_instr ? pc_new : // halt
+assign pc_new = halt_instr ? pc_current : // halt
   (~condition_passed) ?  plus_two : (opcode == 4'b1100) ? branch_imm :
   (opcode == 4'b1101) ? branch_reg_addr : plus_two;
 

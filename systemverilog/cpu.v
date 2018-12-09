@@ -210,7 +210,7 @@ memory4c main_memory(
 // output - just flops inputs, passed to branch control logic and
 // decode signals below
 IF_ID if_id(.instr_in(instr), .instr_out(id_instr_out), .pc_current_in(if_pc_current),
-  .pc_current_out(id_pc_current), .clk(clk), .rst(branch_taken), .wen(if_id_stall_n));
+  .pc_current_out(id_pc_current), .clk(clk), .rst(branch_taken | rst), .wen(if_id_stall_n));
 
 // PC Control - determines next instruction fetched from PC memory
 // flags based on output of flag register, flops ALU flag outputs

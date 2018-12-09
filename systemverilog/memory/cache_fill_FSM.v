@@ -8,10 +8,10 @@ module cache_fill_FSM(
     output fsm_busy,                // asserted while FSM is busy handling the miss (can be used as pipeline stall signal)
     output write_data_array,        // write enable to cache data array to signal when filling with memory_data
     output write_tag_array,         // write enable to cache tag array to signal when all words are filled in to data array
-    output [15:0] memory_address,   // address to read from memory
-    input memory_data_valid         // active high indicates valid data returning on memory bus
+    output [15:0] memory_address    // address to read from memory
 );
 
+    wire memory_data_valid;
     wire rst = ~rst_n;
 
     /*
@@ -26,16 +26,25 @@ module cache_fill_FSM(
         .rst(rst)
     );
 
+    counter_4bit latency_counter(
+        .clk(clk),
+        .start(start_counter | memory_data_valid),
+        .limit(4'h4),
+        .done(memory_data_valid),
+        .increment(1'b1)
+    );
+
     /*
      * Counts the number of words fetched from memory
      */
     wire start_counter, all_words_fetched;
     assign start_counter = curr_state ? 1'b0 : next_state; // only start on entering WAIT state
-    counter_3bit word_counter(
+    counter_4bit word_counter(
         .clk(clk),
         .start(start_counter | ~rst_n),
         .increment(memory_data_valid),
-        .done(all_words_fetched)
+        .done(all_words_fetched),
+        .limit(4'h7)
     );
 
     /*
