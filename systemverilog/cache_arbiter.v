@@ -44,13 +44,19 @@ wire cache_pick;
 wire icache_fill_rst_n, dcache_fill_rst_n;
 wire stall;
 wire rst;
+wire icache_miss_out;
+wire dcache_miss_out;
 assign rst = ~rst_n;
 
+dff icache_miss(.q(icache_miss_out), .d(icache_miss_detected), .wen(1'b1),
+.clk(clk), .rst(rst));
+dff dcache_miss(.q(dcache_miss_out), .d(dcache_miss_detected), .wen(1'b1),
+.clk(clk), .rst(rst));
 
 
 // latch miss addresses when a miss is detected in IDLE state
-assign dcache_miss_latch = dcache_miss_detected & ~dcache_fsm_busy;
-assign icache_miss_latch = icache_miss_detected & ~icache_fsm_busy;
+assign dcache_miss_latch = dcache_miss_detected & ~dcache_miss_out;
+assign icache_miss_latch = icache_miss_detected & ~icache_miss_out;
 dff_16bit data_miss_addr(.q(dcache_miss_addr), .d(dcache_addr),
 .wen(dcache_miss_latch), .clk(clk), .rst(rst));
 dff_16bit instr_miss_addr(.q(icache_miss_addr), .d(icache_addr),

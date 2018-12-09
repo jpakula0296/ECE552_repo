@@ -104,6 +104,11 @@ icache_fill_data, icache_fill_addr, icache_miss_addr;
 wire [15:0] icache_addr, dcache_data_in, dcache_addr;
 wire memstage_mem_instr;
 wire icache_fsm_busy;
+wire [15:0] pc_minus_two;
+wire pc_write;
+
+rca_16bit pc_minus2(.a(if_pc_current), .b(16'hFFFE), .cin(1'b0), .s(pc_minus_two),
+.cout());
 
 // multicycle memory wires
 wire [15:0] mainmem_data_out;
@@ -117,15 +122,17 @@ assign rst = ~rst_n; // keep active high/low resets straight
 
 // Stores the current PC address, and assigns the next one. Assume that
 // branches aren't taken, unless more info is received from the ID stage.
-assign if_pc_next = branch_taken ? id_pc_new : if_hlt ? if_pc_current : if_pc_increment;
-dff_16bit DFF0(.d(if_pc_next), .q(if_pc_current), .wen(if_id_stall_n), .clk(clk), .rst(rst));
+assign if_pc_next = (icache_wr_tag_array | dcache_wr_tag_array) ? pc_minus_two :
+branch_taken ? id_pc_new : if_hlt ? if_pc_current : if_pc_increment;
+assign pc_write = (icache_wr_tag_array | dcache_wr_tag_array) ? 1'b1 : if_id_stall_n;
+dff_16bit DFF0(.d(if_pc_next), .q(if_pc_current), .wen(pc_write), .clk(clk), .rst(rst));
 rca_16bit if_pc_next_addr(.a(if_pc_current), .b(16'h2), .cin(1'b0), .s(if_pc_increment), .cout());
 
 assign if_hlt = instr[15:12] == 4'b1111;
 
 
 assign icache_addr = (stall_n) ? if_pc_current : icache_fill_addr;
-assign memstage_mem_instr = (mem_opcode[3:1] == 3'b100) & ~icache_fsm_busy;
+assign memstage_mem_instr = (mem_opcode[3:1] == 3'b100);
 // TODO: add interfaces here to hook up to the arbiter
 cache instr_cache(
     .clk(clk),
