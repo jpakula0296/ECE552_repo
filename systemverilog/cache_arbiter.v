@@ -44,12 +44,18 @@ wire cache_pick;
 wire icache_fill_rst_n, dcache_fill_rst_n;
 wire stall;
 wire rst;
+wire dcache_miss_out;
+wire dcache_miss_addr_latch;
 assign rst = ~rst_n;
 
 
 
+dff dcache_miss_ff(.q(dcache_miss_out), .d(dcache_miss_detected), .wen(1'b1),
+.clk(clk), .rst(rst));
+assign dcache_miss_addr_latch = (~dcache_miss_out) & (dcache_miss_detected);
+
 dff_16bit data_miss_addr(.q(dcache_miss_addr), .d(dcache_addr),
-.wen(~dcache_miss_detected), .clk(clk), .rst(rst));
+.wen(dcache_miss_addr_latch), .clk(clk), .rst(rst));
 dff_16bit instr_miss_addr(.q(icache_miss_addr), .d(icache_addr),
 .wen(~icache_miss_detected), .clk(clk), .rst(rst));
 
@@ -91,9 +97,11 @@ cache_fill_FSM dcache_fill_fsm(
  *  expression for it, in case anyone wants to see it.
  */
 
-assign cache_pick =
-    (~icache_miss_detected & dcache_miss_detected)
-    | (icache_miss_detected & dcache_miss_detected & ~icache_fsm_busy & dcache_fsm_busy);
+// assign cache_pick =
+//     (~icache_miss_detected & dcache_miss_detected)
+//     | (icache_miss_detected & dcache_miss_detected & ~icache_fsm_busy & dcache_fsm_busy);
+
+assign cache_pick = ~icache_miss_detected;
 
 assign mainmem_addr =
     stall ?
