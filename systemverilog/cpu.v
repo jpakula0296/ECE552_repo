@@ -104,12 +104,16 @@ icache_fill_data, icache_fill_addr, icache_miss_addr;
 wire [15:0] icache_addr, dcache_data_in, dcache_addr;
 wire memstage_mem_instr;
 wire icache_fsm_busy;
-wire [15:0] pc_minus_two;
+wire [15:0] pc_minus_two, pc_minus_four;
 wire pc_write;
 wire dcache_fsm_busy;
 
+
 rca_16bit pc_minus2(.a(if_pc_current), .b(16'hFFFE), .cin(1'b0), .s(pc_minus_two),
 .cout());
+rca_16bit pc_minus4(.a(if_pc_current), .b(16'hFFFC), .cin(1'b0), .s(pc_minus_four),
+.cout());
+
 
 // multicycle memory wires
 wire [15:0] mainmem_data_out;
@@ -123,7 +127,7 @@ assign rst = ~rst_n; // keep active high/low resets straight
 
 // Stores the current PC address, and assigns the next one. Assume that
 // branches aren't taken, unless more info is received from the ID stage.
-assign if_pc_next = (icache_wr_tag_array | dcache_wr_tag_array) ? pc_minus_two :
+assign if_pc_next = (icache_wr_tag_array) ? pc_minus_two : (dcache_wr_tag_array) ? pc_minus_four :
 branch_taken ? id_pc_new : if_hlt ? if_pc_current : if_pc_increment;
 assign pc_write = (icache_wr_tag_array | dcache_wr_tag_array) ? 1'b1 : if_id_stall_n;
 dff_16bit DFF0(.d(if_pc_next), .q(if_pc_current), .wen(pc_write), .clk(clk), .rst(rst));
@@ -149,9 +153,9 @@ cache instr_cache(
 
 // not sure if dcache_fill_data/icache_fill_data are redundant since always
 // pulling from same memory output
-assign dcache_data_in = (stall_n) ? mem_data_in : dcache_fill_data;
+assign dcache_data_in = (stall_n | dcache_wr_tag_array) ? mem_data_in : dcache_fill_data;
 assign dcache_addr = (stall_n) ? dcache_fill_addr : mem_data_addr_or_alu_result;
-assign dcache_wr_data = dcache_wr_data_array;
+assign dcache_wr_data = dcache_wr_data_array | mem_memory_write_enable;
 cache data_cache(
     .clk(clk),
     .rst(rst),
@@ -207,7 +211,7 @@ cache_arbiter Cache_Arbiter(
 // the arbiter module.
 memory4c main_memory(
     .data_out(mainmem_data_out),
-    .data_in(mainmem_data_in),
+    .data_in(mem_data_in),
     .addr(mainmem_addr),
     .enable(1'b1),
     .wr(mem_memory_write_enable),
