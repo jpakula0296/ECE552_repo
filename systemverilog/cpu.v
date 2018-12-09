@@ -96,7 +96,7 @@ wire [15:0] ALU_rs_data;
 
 // Cache wires
 wire icache_miss, dcache_miss;
-wire icache_wr_data_array, dcache_wr_data_array;
+wire icache_wr_data_array, dcache_wr_data_array, dcache_wr_data;
 wire icache_wr_tag_array, dcache_wr_tag_array;
 wire [15:0] dcache_fill_data, dcache_fill_addr, dcache_miss_addr,
 icache_fill_data, icache_fill_addr, icache_miss_addr;
@@ -140,14 +140,14 @@ cache instr_cache(
 // pulling from same memory output
 assign dcache_data_in = (stall_n) ? mem_data_in : dcache_fill_data;
 assign dcache_addr = (stall_n) ? mem_data_addr_or_alu_result : dcache_fill_addr;
-// TODO: add interfaces here to hook up to the arbiter
+assign dcache_wr_data = mem_memory_write_enable | dcache_wr_data_array;
 cache data_cache(
     .clk(clk),
     .rst(rst),
     .data_out(mem_data_out),
     .data_in(dcache_data_in),
     .addr(dcache_addr),
-    .data_wr(mem_memory_write_enable), // TODO: assign this correctly to store from cpu and mem
+    .data_wr(dcache_wr_data), 
     .wr(dcache_wr_tag_array),
     .miss_detected(dcache_miss),
     .write_tag_array(dcache_wr_tag_array)
