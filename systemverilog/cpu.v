@@ -147,7 +147,7 @@ cache data_cache(
     .data_out(mem_data_out),
     .data_in(dcache_data_in),
     .addr(dcache_addr),
-    .data_wr(dcache_wr_data), 
+    .data_wr(dcache_wr_data),
     .wr(dcache_wr_tag_array),
     .miss_detected(dcache_miss),
     .write_tag_array(dcache_wr_tag_array)
@@ -172,6 +172,7 @@ cache_arbiter Cache_Arbiter(
     .icache_write_tag_array(icache_wr_tag_array),
     .icache_addr(icache_addr),
     .icache_miss_detected(icache_miss),
+    .icache_fsm_busy(),
 
     .dcache_fill_data(dcache_fill_data),
     .dcache_fill_addr(dcache_fill_addr),
@@ -183,6 +184,7 @@ cache_arbiter Cache_Arbiter(
     .dcache_write_addr(mem_data_addr_or_alu_result),
     .dcache_write_data(mem_data_in),
     .dcache_write_enable(mem_memory_write_enable),
+    .dcache_fsm_busy();
 
     .mainmem_addr(mainmem_addr),
     .mainmem_write_data(mainmem_data_in),
