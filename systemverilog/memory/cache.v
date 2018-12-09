@@ -55,10 +55,10 @@ assign MetaData_in = {~way_select, 1'b1, tag};
 
 // Get meta data (6-bit tag, valid, and LRU bit) from array
 MetaDataArray metaDataArray0(.clk(clk), .rst(rst), .DataIn(MetaData_in),
-.Write(wr & ~clk), .BlockEnable(MetaBlockEnable0), .DataOut(MetaData0_out));
+.Write(wr), .BlockEnable(MetaBlockEnable0), .DataOut(MetaData0_out));
 
 MetaDataArray metaDataArray1(.clk(clk), .rst(rst), .DataIn(MetaData_in),
-.Write(wr_odd_block & ~clk), .BlockEnable(MetaBlockEnable1), .DataOut(MetaData1_out));
+.Write(wr_odd_block), .BlockEnable(MetaBlockEnable1), .DataOut(MetaData1_out));
 
 // Compares tags and checks validity
 assign matchfound0 = MetaData0_out[6] & (tag == MetaData0_out[5:0]);
@@ -89,6 +89,6 @@ DataArray dataArray(.clk(clk), .rst(rst), .DataIn(data_in), .Write(data_wr),
 .BlockEnable(DataBlockEnable), .WordEnable(WordEnable), .DataOut(dataArray_out));
 
 // should'nt be reading if we are writing to the cache, high z when wr=1
-assign data_out = (wr) ? 16'hz : dataArray_out;
+assign data_out = (data_wr) ? 16'hz : dataArray_out;
 
 endmodule
