@@ -29,7 +29,10 @@ module EX_MEM(
     output mem_register_write_enable,
 
     input ex_data_mux,
-    output mem_data_mux
+    output mem_data_mux,
+
+    input [3:0] ex_opcode,
+    output [3:0] mem_opcode
 );
 
 wire ex_register_write_enable_in;
@@ -77,6 +80,8 @@ dff data_mux_ff(
     .d(ex_data_mux),
     .q(mem_data_mux)
 );
+
+dff_4bit op_ff(.clk(clk), .wen(stall_n), .rst(flush), .d(ex_opcode), .q(mem_opcode));
 
 dff hlt_dff(.clk(clk), .wen(stall_n), .rst(flush), .d(ex_hlt), .q(mem_hlt));
 endmodule

@@ -1,4 +1,5 @@
-module cache(data_out, miss_detected, data_in, addr, data_wr, write_tag_array, clk, rst);
+module cache(data_out, miss_detected, data_in, addr, data_wr, write_tag_array,
+  memstage_mem_instr, clk, rst);
 
    parameter ADDR_WIDTH = 16;
    output  [15:0] data_out;
@@ -7,6 +8,7 @@ module cache(data_out, miss_detected, data_in, addr, data_wr, write_tag_array, c
    input [ADDR_WIDTH-1 :0]   addr;
    input          data_wr;
    input          write_tag_array;
+   input          memstage_mem_instr;
    input          clk;
    input          rst;
 
@@ -71,7 +73,7 @@ assign miss_latch_reset = rst | write_tag_array;
 dff miss_SRlatch(.q(sr_miss_detected), .d(1'b1), .wen(match_overall), .clk(clk),
 .rst(miss_latch_reset));
 
-assign miss_detected = match_overall | sr_miss_detected;
+assign miss_detected = (match_overall | sr_miss_detected) & memstage_mem_instr;
 
 // LRU = 0 evict even block, LRU = 1 evict odd block
 assign LRU = MetaData0_out[7];

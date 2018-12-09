@@ -73,6 +73,7 @@ wire [3:0]  mem_rd, mem_rs, mem_rt;
 wire mem_data_mux;
 wire ex_hlt;
 wire mem_hlt;
+wire [3:0] mem_opcode;
 
 // MEM/WB Stage pipeline wires
 wire mem_wb_stall_m, mem_wb_flush;
@@ -101,6 +102,7 @@ wire icache_wr_tag_array, dcache_wr_tag_array;
 wire [15:0] dcache_fill_data, dcache_fill_addr, dcache_miss_addr,
 icache_fill_data, icache_fill_addr, icache_miss_addr;
 wire [15:0] icache_addr, dcache_data_in, dcache_addr;
+wire memstage_mem_instr;
 
 // multicycle memory wires
 wire [15:0] mainmem_data_out;
@@ -122,6 +124,7 @@ assign if_hlt = instr[15:12] == 4'b1111;
 
 
 assign icache_addr = (stall_n) ? if_pc_current : icache_fill_addr;
+assign memstage_mem_instr = (mem_opcode[3:1] == 3'b100) | ~stall_n;
 // TODO: add interfaces here to hook up to the arbiter
 cache instr_cache(
     .clk(clk),
@@ -131,7 +134,8 @@ cache instr_cache(
     .addr(icache_addr),
     .data_wr(icache_wr_data_array),
     .miss_detected(icache_miss),
-    .write_tag_array(icache_wr_tag_array)
+    .write_tag_array(icache_wr_tag_array),
+    .memstage_mem_instr(1'b1)
 );
 
 // not sure if dcache_fill_data/icache_fill_data are redundant since always
@@ -147,7 +151,8 @@ cache data_cache(
     .addr(dcache_addr),
     .data_wr(dcache_wr_data),
     .miss_detected(dcache_miss),
-    .write_tag_array(dcache_wr_tag_array)
+    .write_tag_array(dcache_wr_tag_array),
+    .memstage_mem_instr(memstage_mem_instr)
 );
 
 /*
@@ -335,7 +340,11 @@ EX_MEM ex_mem(
     .mem_data_mux(mem_data_mux),
 
     .ex_hlt(ex_hlt),
-    .mem_hlt(mem_hlt)
+    .mem_hlt(mem_hlt),
+
+    .ex_opcode(ex_opcode),
+    .mem_opcode(mem_opcode)
+
 );
 
 // Data Memory
