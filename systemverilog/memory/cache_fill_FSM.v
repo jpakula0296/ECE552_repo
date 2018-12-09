@@ -13,6 +13,7 @@ module cache_fill_FSM(
 
     wire memory_data_valid;
     wire rst = ~rst_n;
+    wire start_counter, all_words_fetched;
 
     /*
      * State storage
@@ -37,7 +38,7 @@ module cache_fill_FSM(
     /*
      * Counts the number of words fetched from memory
      */
-    wire start_counter, all_words_fetched;
+
     assign start_counter = curr_state ? 1'b0 : next_state; // only start on entering WAIT state
     counter_4bit word_counter(
         .clk(clk),
