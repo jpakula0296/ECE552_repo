@@ -36,6 +36,23 @@ module cpu_ptb();
    reg clk; /* Clock input */
    reg rst_n; /* (Active low) Reset input */
 
+   //Register Q signals
+   wire [15:0] reg1;
+   wire [15:0] reg2;
+   wire [15:0] reg3;
+   wire [15:0] reg4;
+   wire [15:0] reg5;
+   wire [15:0] reg6;
+   wire [15:0] reg7;
+   wire [15:0] reg8;
+   wire [15:0] reg9;
+   wire [15:0] reg10;
+   wire [15:0] reg11;
+   wire [15:0] reg12;
+   wire [15:0] reg13;
+   wire [15:0] reg14;
+   wire [15:0] reg15;
+
 
 
    cpu DUT(.clk(clk), .rst_n(rst_n), .pc(PC), .hlt(Halt)); /* Instantiate your processor */
