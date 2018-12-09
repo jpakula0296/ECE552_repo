@@ -64,7 +64,7 @@ wire ex_data_mux;
 wire ex_memread;
 
 // EX/MEM Stage pipeline wires
-wire ex_mem_stall_n, ex_mem_flush;
+wire ex_mem_flush;
 wire mem_memory_write_enable;
 wire mem_register_write_enable;
 wire [15:0] mem_data_addr_or_alu_result;
@@ -306,11 +306,10 @@ alu ALU(.rs(ALU_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out),
 .N(N_in), .Z_flag(Z_in), .V(V_in), .N_en(N_en), .Z_en(Z_en), .V_en(V_en));
 
 // just hook up stall and flush to global stall and reset to begin with
-assign ex_mem_stall_n = stall_n;
 assign ex_mem_flush = rst;
 EX_MEM ex_mem(
     .clk(clk),
-    .stall_n(ex_mem_stall_n),
+    .stall_n(stall_n),
     .flush(ex_mem_flush),
 
     .ex_data_addr_or_alu_result(ALU_out),
