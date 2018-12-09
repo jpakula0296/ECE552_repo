@@ -41,6 +41,7 @@ wire dcache_miss_latch, icache_miss_latch;
 
 wire icache_data_valid, dcache_data_valid;
 wire cache_pick;
+wire icache_fill_rst_n, dcache_fill_rst_n;
 wire stall;
 wire rst;
 assign rst = ~rst_n;
@@ -58,9 +59,11 @@ dff_16bit instr_miss_addr(.q(icache_miss_addr), .d(icache_addr),
 assign stall_n = ~stall;
 assign stall = icache_fsm_busy|dcache_fsm_busy; // They CPU can't do anything while we're filling a cache, so stall the whole thing
 
+assign icache_fill_rst_n = (~rst_n) ? 1'b0 : ~cache_pick;
+assign dcache_fill_rst_n = (~rst_n) ? 1'b0 : cache_pick;
 cache_fill_FSM icache_fill_fsm(
     .clk(clk),
-    .rst_n(cache_pick|rst_n),
+    .rst_n(icache_fill_rst_n),
     .fsm_busy(icache_fsm_busy),
     .miss_detected(icache_miss_detected),
     .miss_address(icache_miss_addr),
@@ -71,7 +74,7 @@ cache_fill_FSM icache_fill_fsm(
 
 cache_fill_FSM dcache_fill_fsm(
     .clk(clk),
-    .rst_n(~cache_pick|rst_n),
+    .rst_n(dcache_fill_rst_n),
     .fsm_busy(dcache_fsm_busy),
     .miss_detected(dcache_miss_detected),
     .miss_address(dcache_miss_addr),
