@@ -64,7 +64,7 @@ wire ex_data_mux;
 wire ex_memread;
 
 // EX/MEM Stage pipeline wires
-wire ex_mem_stall_n, ex_mem_flush;
+wire ex_mem_flush;
 wire mem_memory_write_enable;
 wire mem_register_write_enable;
 wire [15:0] mem_data_addr_or_alu_result;
@@ -96,7 +96,7 @@ wire [15:0] ALU_rs_data;
 
 // Cache wires
 wire icache_miss, dcache_miss;
-wire icache_wr_data_array, dcache_wr_data_array;
+wire icache_wr_data_array, dcache_wr_data_array, dcache_wr_data;
 wire icache_wr_tag_array, dcache_wr_tag_array;
 wire [15:0] dcache_fill_data, dcache_fill_addr, dcache_miss_addr,
 icache_fill_data, icache_fill_addr, icache_miss_addr;
@@ -130,8 +130,8 @@ cache instr_cache(
     .data_out(instr),
     .data_in(icache_fill_data),
     .addr(icache_addr),
-    .data_wr(1'b0), // TODO: assign this correctly
-    .wr(1'b0),      // TODO: assign this correctly
+    .data_wr(icache_wr_data_array),
+    .wr(icache_wr_tag_array),
     .miss_detected(icache_miss),
     .write_tag_array(icache_wr_tag_array)
 );
@@ -140,15 +140,15 @@ cache instr_cache(
 // pulling from same memory output
 assign dcache_data_in = (stall_n) ? mem_data_in : dcache_fill_data;
 assign dcache_addr = (stall_n) ? mem_data_addr_or_alu_result : dcache_fill_addr;
-// TODO: add interfaces here to hook up to the arbiter
+assign dcache_wr_data = mem_memory_write_enable | dcache_wr_data_array;
 cache data_cache(
     .clk(clk),
     .rst(rst),
     .data_out(mem_data_out),
     .data_in(dcache_data_in),
     .addr(dcache_addr),
-    .data_wr(mem_memory_write_enable),
-    .wr(1'b0), // TODO: assign this correctly
+    .data_wr(dcache_wr_data), 
+    .wr(dcache_wr_tag_array),
     .miss_detected(dcache_miss),
     .write_tag_array(dcache_wr_tag_array)
 );
@@ -306,11 +306,10 @@ alu ALU(.rs(ALU_rs_data), .rt(ALU_rt_data), .control(ex_opcode), .rd(ALU_out),
 .N(N_in), .Z_flag(Z_in), .V(V_in), .N_en(N_en), .Z_en(Z_en), .V_en(V_en));
 
 // just hook up stall and flush to global stall and reset to begin with
-assign ex_mem_stall_n = stall_n;
 assign ex_mem_flush = rst;
 EX_MEM ex_mem(
     .clk(clk),
-    .stall_n(ex_mem_stall_n),
+    .stall_n(stall_n),
     .flush(ex_mem_flush),
 
     .ex_data_addr_or_alu_result(ALU_out),
@@ -350,7 +349,6 @@ EX_MEM ex_mem(
 assign mem_data_in = (Forward_MEM_MEM_rt) ? mem_forward_data : mem_data_write_val;
 // see "cache data_cache(...);" declaration for more memory details
 
-// TODO: stall_n here might be problematic?
 MEM_WB mem_wb(
 .clk(clk), .rst(rst), .stall_n(stall_n),
 .mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out),

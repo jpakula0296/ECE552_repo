@@ -22,7 +22,7 @@ module cache_arbiter(
     output        dcache_write_tag_array,   // Goes high if the dcache tag array should be updated
     output        dcache_fsm_busy,          // High while waiting for an dcache fill to finish
     input         dcache_miss_detected,     // Goes high if the dcache detects a miss
-    input         dcache_addr,              // used to determine miss addr
+    input  [15:0] dcache_addr,              // used to determine miss addr
 
     input  [15:0] dcache_write_addr,        // The address the dcache is trying to write to
     input  [15:0] dcache_write_data,        // The word the dcache is trying to write
