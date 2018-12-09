@@ -14,6 +14,8 @@ module cache_fill_FSM(
     wire memory_data_valid;
     wire rst = ~rst_n;
     wire start_counter, all_words_fetched;
+    wire [3:0] latent_count, word_count;
+    wire meta_addr;
 
     /*
      * State storage
@@ -32,7 +34,8 @@ module cache_fill_FSM(
         .start(start_counter | memory_data_valid),
         .limit(4'h4),
         .done(memory_data_valid),
-        .increment(1'b1)
+        .increment(1'b1),
+        .count(latent_count)
     );
 
     /*
@@ -45,7 +48,8 @@ module cache_fill_FSM(
         .start(start_counter | ~rst_n),
         .increment(memory_data_valid),
         .done(all_words_fetched),
-        .limit(4'h8)
+        .limit(4'h8),
+        .count(word_count)
     );
 
     /*
@@ -86,8 +90,10 @@ module cache_fill_FSM(
     /*
      * State-dependent output control
      */
+    assign meta_addr = (latent_count == 4'h4 & word_count == 4'h7) |
+    (latent_count == 4'h0 & word_count == 4'h8);
     assign fsm_busy         = curr_state ? 1'b1 : miss_detected; // set fsm_busy high before transitioning to wait state to latch stall high quickly
     assign write_data_array = curr_state ? memory_data_valid : 1'b0 ;
     assign write_tag_array  = curr_state ? all_words_fetched : 1'b0;
-    assign memory_address   = curr_state|all_words_fetched ? curr_fetch_addr : miss_address;
+    assign memory_address   = (curr_state & ~meta_addr) ? curr_fetch_addr : miss_address;
 endmodule

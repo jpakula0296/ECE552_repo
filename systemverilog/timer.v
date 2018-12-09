@@ -9,7 +9,7 @@ module counter_4bit(
     input start,
     input clk
 );
-    wire [3:0] next, count;
+    wire [3:0] next;
     assign done = limit == count;
     rca_4bit adder(.a(count), .b({3'b0,increment}), .cin(1'b0), .s(next), .cout());
     dff_4bit memory(.d(next), .q(count), .clk(clk), .rst(start), .wen(~done));
