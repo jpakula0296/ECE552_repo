@@ -130,7 +130,7 @@ cache instr_cache(
     .data_out(instr),
     .data_in(icache_fill_data),
     .addr(icache_addr),
-    .data_wr(icache_wr_data_array), 
+    .data_wr(icache_wr_data_array),
     .wr(icache_wr_tag_array),
     .miss_detected(icache_miss),
     .write_tag_array(icache_wr_tag_array)
@@ -350,7 +350,6 @@ EX_MEM ex_mem(
 assign mem_data_in = (Forward_MEM_MEM_rt) ? mem_forward_data : mem_data_write_val;
 // see "cache data_cache(...);" declaration for more memory details
 
-// TODO: stall_n here might be problematic?
 MEM_WB mem_wb(
 .clk(clk), .rst(rst), .stall_n(stall_n),
 .mem_WriteReg(mem_register_write_enable), .mem_ALU_res(mem_data_addr_or_alu_result), .mem_data_mem(mem_data_out),
