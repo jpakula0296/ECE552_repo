@@ -108,5 +108,4 @@ module cache_fill_FSM(
     assign memory_address = (meta_addr) ? hold_addr :
     curr_state ? curr_fetch_addr : miss_address;
 
-    assign memory_address   = (curr_state & ~meta_addr) ? curr_fetch_addr : miss_address;
 endmodule
