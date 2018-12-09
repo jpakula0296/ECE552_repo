@@ -76,6 +76,7 @@ dff miss_SRlatch(.q(sr_miss_detected), .d(1'b1), .wen(match_overall), .clk(clk),
 assign miss_detected = (memstage_mem_instr) ? sr_miss_detected : 1'b0;
 // LRU = 0 evict even block, LRU = 1 evict odd block
 assign LRU = MetaData0_out[7];
+
 assign way_select = matchfound0 ? 1'b0 : matchfound1 ? 1'b1 : LRU;
 
 // writing to odd block if way_select = 1
